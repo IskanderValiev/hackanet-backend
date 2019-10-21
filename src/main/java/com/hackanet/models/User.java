@@ -44,4 +44,7 @@ public class User extends AbstractEntity {
     private String country;
     @Column(nullable = false)
     private String city;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_skill_table", joinColumns = @JoinColumn(name = "user_id"))
+    private List<Skill> skills;
 }
