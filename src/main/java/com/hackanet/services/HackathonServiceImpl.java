@@ -80,20 +80,22 @@ public class HackathonServiceImpl implements HackathonService {
         checkHackathonAccess(hackathon, user);
 
         Date start = form.getStart();
-        if (start.before(new Date(System.currentTimeMillis()))) {
-            throw new BadRequestException("Start date is in the past");
-        }
         Date end = form.getEnd();
         if (start != null && end != null) {
-            if (start.after(end))
+            if (start.after(end)) {
                 throw new BadRequestException("Start date is after end date");
+            }
         }
         if (form.getLogo() != null) {
             FileInfo file = fileInfoService.get(form.getLogo());
             hackathon.setLogo(file);
         }
-        if (start != null)
+        if (start != null) {
+            if (start.before(new Date(System.currentTimeMillis()))) {
+                throw new BadRequestException("Start date is in the past");
+            }
             hackathon.setStartDate(start);
+        }
         if (end != null)
             hackathon.setEndDate(end);
 
