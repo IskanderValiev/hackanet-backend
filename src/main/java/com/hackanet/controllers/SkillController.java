@@ -38,7 +38,7 @@ public class SkillController {
     @Autowired
     private SkillService skillService;
 
-    @GetMapping(ADD)
+    @PostMapping(ADD)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
                     required = true, dataType = "string", paramType = "header")
