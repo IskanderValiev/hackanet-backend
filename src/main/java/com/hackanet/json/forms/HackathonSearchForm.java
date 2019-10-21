@@ -1,33 +1,30 @@
-package com.hackanet.json.dto;
+package com.hackanet.json.forms;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.sql.Date;
 import java.util.List;
 
 /**
  * @author Iskander Valiev
  * created by isko
- * on 10/20/19
+ * on 10/21/19
  */
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Getter
+@Setter
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class UserDto {
-    private Long id;
-    private String email;
-    private String phone;
-    private String about;
+public class HackathonSearchForm {
     private String name;
-    private String lastname;
     private String country;
     private String city;
-    private FileInfoDto image;
-    private List<SkillDto> skills;
+    private Date from;
+    private Date to;
+    private List<Long> skills;
+    private Integer limit;
+    private Integer page;
 }

@@ -34,6 +34,9 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
 
+    // FIXME: 10/21/19 change the value
+    private static final Integer DEFAULT_LIMIT = 10;
+
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -44,9 +47,9 @@ public class UserServiceImpl implements UserService {
     private EntityManager entityManager;
     @Autowired
     private SkillService skillService;
+    @Autowired
+    private HackathonService hackathonService;
 
-    // FIXME: 10/21/19 change the value
-    private static final Integer DEFAULT_LIMIT = 10;
 
     @Override
     public TokenDto register(UserRegistrationForm form) {
@@ -61,6 +64,9 @@ public class UserServiceImpl implements UserService {
                 .name(form.getName())
                 .skills(skillService.getByIdsIn(form.getSkills()))
                 .lastname(form.getLastname())
+                .city(form.getCity())
+                .country(form.getCountry())
+                .about(form.getAbout())
                 .role(Role.USER)
                 .build();
         user = userRepository.save(user);
@@ -125,6 +131,15 @@ public class UserServiceImpl implements UserService {
         }
         query.setMaxResults(form.getLimit());
         return query.getResultList();
+    }
+
+    @Override
+    public void updateUsersHackathonList(User user, Hackathon hackathon, boolean add) {
+        if (Boolean.TRUE.equals(add))
+            user.getAttendedHackathons().add(hackathon);
+        else user.getAttendedHackathons().remove(hackathon);
+
+        userRepository.save(user);
     }
 
     private CriteriaQuery<User> getUsersListQuery(CriteriaBuilder criteriaBuilder, UserSearchForm form) {

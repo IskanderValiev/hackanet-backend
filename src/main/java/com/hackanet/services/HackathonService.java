@@ -1,6 +1,7 @@
 package com.hackanet.services;
 
 import com.hackanet.json.forms.HackathonCreateForm;
+import com.hackanet.json.forms.HackathonSearchForm;
 import com.hackanet.json.forms.HackathonUpdateForm;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.User;
@@ -13,4 +14,5 @@ public interface HackathonService {
     Hackathon get(Long id);
     Hackathon update(Long id, User user, HackathonUpdateForm form);
     void delete(Long id, User user);
+    List<Hackathon> hackathonList(HackathonSearchForm form);
 }

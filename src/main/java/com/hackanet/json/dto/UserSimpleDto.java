@@ -2,32 +2,22 @@ package com.hackanet.json.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.List;
+import lombok.*;
 
 /**
  * @author Iskander Valiev
  * created by isko
- * on 10/20/19
+ * on 10/21/19
  */
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 @Builder
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class UserDto {
+public class UserSimpleDto {
     private Long id;
-    private String email;
-    private String phone;
-    private String about;
     private String name;
     private String lastname;
-    private String country;
-    private String city;
     private FileInfoDto image;
-    private List<SkillDto> skills;
 }

@@ -50,4 +50,5 @@ public class UserRegistrationForm {
     @NotEmpty
     private String city;
     private List<Long> skills;
+    private String about;
 }

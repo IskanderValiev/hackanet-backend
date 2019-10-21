@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.util.Currency;
 import java.util.List;
 
 
@@ -30,4 +31,6 @@ public class HackathonUpdateForm {
     private String country;
     private String city;
     private List<Long> requiredSkills;
+    private Integer prizeFund;
+    private Currency currency;
 }

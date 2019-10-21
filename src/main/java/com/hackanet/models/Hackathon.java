@@ -1,6 +1,6 @@
 package com.hackanet.models;
 
-import com.neovisionaries.i18n.CountryCode;
+import com.hackanet.models.enums.Currency;
 import lombok.*;
 
 import javax.persistence.*;
@@ -32,6 +32,10 @@ public class Hackathon extends AbstractEntity {
     private Date startDate;
     @Column(name = "end_date", nullable = false)
     private Date endDate;
+//    @Column(nullable = false)
+    private Integer prize;
+    @Enumerated(EnumType.STRING)
+    private Currency currency;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "hackathon")
     private List<FileInfo> fileInfo;
     @OneToOne(fetch = FetchType.LAZY)
@@ -46,6 +50,8 @@ public class Hackathon extends AbstractEntity {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "hackathon_skills_table", joinColumns = @JoinColumn(name = "hackathon_id"))
     private List<Skill> requiredSkills;
+    @ManyToMany(mappedBy = "attendedHackathons")
+    private List<User> participants;
 
     public List<FileInfo> getFileInfo() {
         if (fileInfo == null)

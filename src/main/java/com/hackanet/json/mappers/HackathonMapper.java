@@ -1,9 +1,6 @@
 package com.hackanet.json.mappers;
 
-import com.hackanet.json.dto.FileInfoDto;
-import com.hackanet.json.dto.HackathonDto;
-import com.hackanet.json.dto.SkillDto;
-import com.hackanet.json.dto.UserDto;
+import com.hackanet.json.dto.*;
 import com.hackanet.models.FileInfo;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.Skill;
@@ -32,6 +29,10 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
     private Mapper<User, UserDto> userMapper;
 
     @Autowired
+    @Qualifier("userSimpleMapper")
+    private Mapper<User, UserSimpleDto> userSimpleMapper;
+
+    @Autowired
     @Qualifier("skillMapper")
     private Mapper<Skill, SkillDto> skillMapper;
 
@@ -45,6 +46,9 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
                 .end(from.getEndDate())
                 .owner(userMapper.map(from.getOwner()))
                 .country(from.getCountry())
+                .currency(from.getCurrency().toString())
+                .prizeFund(from.getPrize())
+                .participants(userSimpleMapper.map(from.getParticipants()))
                 .city(from.getCity())
                 .build();
         if (hackathon.getLogo() != null)

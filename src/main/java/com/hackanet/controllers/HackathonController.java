@@ -2,7 +2,9 @@ package com.hackanet.controllers;
 
 import com.hackanet.json.dto.HackathonDto;
 import com.hackanet.json.forms.HackathonCreateForm;
+import com.hackanet.json.forms.HackathonSearchForm;
 import com.hackanet.json.forms.HackathonUpdateForm;
+import com.hackanet.json.forms.JoinToHackathonRequestCreateForm;
 import com.hackanet.json.mappers.Mapper;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.User;
@@ -31,7 +33,8 @@ import java.util.List;
 @Api(tags = "Hackathon Controller")
 public class HackathonController {
 
-    private static final String HACKATHON = "/{id}";
+    static final String HACKATHON = "/{id}";
+    private static final String LIST = "/list";
 
     @Autowired
     private HackathonService hackathonService;
@@ -90,5 +93,12 @@ public class HackathonController {
                                          @AuthenticationPrincipal User user) {
         hackathonService.delete(id, user);
         return ResponseEntity.ok("OK");
+    }
+
+    @PostMapping(LIST)
+    @ApiOperation(value = "Search users")
+    public ResponseEntity<List<HackathonDto>> list(@RequestBody HackathonSearchForm form) {
+        List<Hackathon> hackathons = hackathonService.hackathonList(form);
+        return ResponseEntity.ok(mapper.map(hackathons));
     }
 }

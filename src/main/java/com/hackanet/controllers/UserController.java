@@ -6,7 +6,6 @@ import com.hackanet.json.forms.UserLoginForm;
 import com.hackanet.json.forms.UserRegistrationForm;
 import com.hackanet.json.forms.UserSearchForm;
 import com.hackanet.json.mappers.Mapper;
-import com.hackanet.json.mappers.UserMapper;
 import com.hackanet.models.User;
 import com.hackanet.services.UserService;
 import io.swagger.annotations.Api;
@@ -32,7 +31,7 @@ public class UserController {
     private static final String REGISTER = "/register";
     private static final String LOGIN = "/login";
     private static final String USER_PROFILE = "/{id}";
-    private static final String SEARCH = "/search";
+    private static final String LIST = "/list";
 
     @Autowired
     private UserService userService;
@@ -61,7 +60,7 @@ public class UserController {
         return ResponseEntity.ok(userMapper.map(user));
     }
 
-    @PostMapping(SEARCH)
+    @PostMapping(LIST)
     @ApiOperation("Search users")
     public ResponseEntity<List<UserDto>> search(@RequestBody UserSearchForm form) {
         List<User> users = userService.userList(form);

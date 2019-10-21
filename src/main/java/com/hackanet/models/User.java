@@ -50,6 +50,8 @@ public class User extends AbstractEntity {
     @JoinTable(name = "user_skill_table", joinColumns = @JoinColumn(name = "user_id"))
     private List<Skill> skills;
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "hackathon_participants_table", joinColumns = @JoinColumn(name = "user_id"))
-    private List<Hackathon> participantOfHackathons;
+    @JoinTable(name = "hackathon_participants_table",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "hackathon_id"))
+    private List<Hackathon> attendedHackathons;
 }
