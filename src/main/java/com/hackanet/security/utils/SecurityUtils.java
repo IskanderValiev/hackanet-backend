@@ -4,6 +4,7 @@ import com.hackanet.exceptions.ForbiddenException;
 import com.hackanet.models.FileInfo;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.User;
+import com.hackanet.security.role.Role;
 
 /**
  * @author Iskander Valiev
@@ -20,6 +21,10 @@ public class SecurityUtils {
     public static void checkHackathonAccess(Hackathon hackathon, User user) {
         if (!user.getId().equals(hackathon.getOwner().getId()))
             throw new ForbiddenException("You have no access this hackathon");
+    }
+
+    public static boolean isSuperAdmin(User user) {
+        return Role.SUPER_ADMIN.equals(user.getRole());
     }
 
 }
