@@ -62,4 +62,9 @@ public class SkillServiceImpl implements SkillService {
     public List<Skill> getByNameLike(String name) {
         return skillRepository.findAllByNameLcIgnoreCaseContaining(name.trim().toLowerCase());
     }
+
+    @Override
+    public List<Skill> getByIdsIn(List<Long> ids) {
+        return skillRepository.findAllByIdIn(ids);
+    }
 }

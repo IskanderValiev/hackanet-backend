@@ -31,4 +31,5 @@ public class HackathonDto {
     private FileInfoDto logo;
     private String country;
     private String city;
+    private List<SkillDto> requiredSkills;
 }

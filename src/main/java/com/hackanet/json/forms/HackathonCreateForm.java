@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Transient;
 import java.sql.Date;
+import java.util.List;
 
 /**
  * @author Iskander Valiev
@@ -25,4 +26,5 @@ public class HackathonCreateForm {
     private String description;
     private String country;
     private String city;
+    private List<Long> requiredSkills;
 }

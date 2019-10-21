@@ -31,6 +31,9 @@ public class HackathonServiceImpl implements HackathonService {
     @Autowired
     private FileInfoService fileInfoService;
 
+    @Autowired
+    private SkillService skillService;
+
     @Override
     public List<Hackathon> getAll() {
         return hackathonRepository.findAll();
@@ -52,6 +55,7 @@ public class HackathonServiceImpl implements HackathonService {
                 .description(form.getDescription().trim())
                 .country(StringUtils.capitalize(form.getCountry()))
                 .city(StringUtils.capitalize(form.getCity()))
+                .requiredSkills(skillService.getByIdsIn(form.getRequiredSkills()))
                 .build();
         hackathon = hackathonRepository.save(hackathon);
         return hackathon;
@@ -75,16 +79,18 @@ public class HackathonServiceImpl implements HackathonService {
         Hackathon hackathon = get(id);
         checkHackathonAccess(hackathon, user);
 
-        if (form.getLogo() != null) {
-            FileInfo file = fileInfoService.get(form.getLogo());
-            hackathon.setLogo(file);
-        }
-
         Date start = form.getStart();
+        if (start.before(new Date(System.currentTimeMillis()))) {
+            throw new BadRequestException("Start date is in the past");
+        }
         Date end = form.getEnd();
         if (start != null && end != null) {
             if (start.after(end))
                 throw new BadRequestException("Start date is after end date");
+        }
+        if (form.getLogo() != null) {
+            FileInfo file = fileInfoService.get(form.getLogo());
+            hackathon.setLogo(file);
         }
         if (start != null)
             hackathon.setStartDate(start);
@@ -97,9 +103,9 @@ public class HackathonServiceImpl implements HackathonService {
             hackathon.setNameLc(form.getName().trim().toLowerCase());
         }
 
-        String description = form.getDescription().trim();
+        String description = form.getDescription();
         if (!StringUtils.isBlank(description))
-            hackathon.setDescription(description);
+            hackathon.setDescription(description.trim());
 
         String country = StringUtils.capitalize(form.getCountry());
         if (!StringUtils.isBlank(country))
@@ -109,6 +115,10 @@ public class HackathonServiceImpl implements HackathonService {
         if (!StringUtils.isBlank(city))
             hackathon.setCity(city);
 
+        List<Long> requiredSkills = form.getRequiredSkills();
+        if (requiredSkills != null && !requiredSkills.isEmpty()) {
+            hackathon.setRequiredSkills(skillService.getByIdsIn(requiredSkills));
+        }
         hackathon = hackathonRepository.save(hackathon);
         return hackathon;
     }

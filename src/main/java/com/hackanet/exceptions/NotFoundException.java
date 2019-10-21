@@ -40,4 +40,8 @@ public class NotFoundException extends RuntimeException {
     public static NotFoundException forUser(String email) {
         return new NotFoundException("User with email=" + email + " not found");
     }
+
+    public static NotFoundException forUser(Long id) {
+        return new NotFoundException("User with id=" + id + " not found");
+    }
 }
