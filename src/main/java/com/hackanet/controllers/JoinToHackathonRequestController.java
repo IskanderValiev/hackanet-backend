@@ -62,7 +62,7 @@ public class JoinToHackathonRequestController {
                     required = true, dataType = "string", paramType = "header")
     })
     @ApiOperation(value = "Get all requests by hackathon id")
-    @PreAuthorize("hasAnyAuthority('USER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<List<JoinToHackathonRequestDto>> getAllByHackathonId(@PathVariable Long id,
                                                                                @AuthenticationPrincipal User user) {
         List<JoinToHackathonRequest> requests = service.getAllByHackathonId(id, user);
@@ -75,7 +75,7 @@ public class JoinToHackathonRequestController {
                     required = true, dataType = "string", paramType = "header")
     })
     @ApiOperation(value = "Get all requests by hackathon id")
-    @PreAuthorize("hasAnyAuthority('USER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<JoinToHackathonRequestDto> changeStatus(@RequestParam RequestStatus status,
                                                                   @PathVariable Long id,
                                                                   @AuthenticationPrincipal User user) {

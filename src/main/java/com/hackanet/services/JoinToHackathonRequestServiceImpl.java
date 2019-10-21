@@ -1,6 +1,7 @@
 package com.hackanet.services;
 
 import com.hackanet.exceptions.BadRequestException;
+import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.JoinToHackathonRequestCreateForm;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.JoinToHackathonRequest;
@@ -10,6 +11,7 @@ import com.hackanet.repositories.JoinToHackathonRequestRepository;
 import com.hackanet.security.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.util.List;
@@ -42,6 +44,7 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
                 .message(form.getMessage())
                 .date(now)
                 .user(user)
+                .status(RequestStatus.WAITING)
                 .build();
         request = requestRepository.save(request);
         return request;
@@ -49,7 +52,7 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
 
     @Override
     public JoinToHackathonRequest get(Long id) {
-        return null;
+        return requestRepository.findById(id).orElseThrow(() -> new NotFoundException("Request with id=" + id + " not found"));
     }
 
     @Override
@@ -60,11 +63,21 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
     }
 
     @Override
+    @Transactional
     public JoinToHackathonRequest changeStatus(Long id, User user, RequestStatus status) {
         JoinToHackathonRequest request = get(id);
         Hackathon hackathon = request.getHackathon();
         SecurityUtils.checkHackathonAccess(hackathon, user);
         request.setStatus(status);
+        switch (status) {
+            case APPROVED:
+                User participant = request.getUser();
+                userService.updateUsersHackathonList(participant, hackathon, true);
+                break;
+            case REJECTED:
+            case WAITING:
+                break;
+        }
         request = requestRepository.save(request);
         return request;
     }

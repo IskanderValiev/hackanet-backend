@@ -23,9 +23,11 @@ public class UserDto {
     private Long id;
     private String email;
     private String phone;
+    private String about;
     private String name;
     private String lastname;
     private String country;
     private String city;
     private FileInfoDto image;
+    private List<SkillDto> skills;
 }

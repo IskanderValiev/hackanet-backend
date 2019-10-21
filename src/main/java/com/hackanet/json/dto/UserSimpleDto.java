@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.*;
 
-import java.sql.Date;
-
 /**
  * @author Iskander Valiev
  * created by isko
@@ -13,14 +11,13 @@ import java.sql.Date;
  */
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Getter
 @Setter
+@Builder
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class JoinToHackathonRequestDto {
+public class UserSimpleDto {
     private Long id;
-    private String message;
-    private UserSimpleDto user;
-    private HackathonDto hackathon;
-    private Date date;
+    private String name;
+    private String lastname;
+    private FileInfoDto image;
 }

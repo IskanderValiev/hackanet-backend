@@ -35,5 +35,5 @@ public class HackathonDto {
     private List<SkillDto> requiredSkills;
     private Integer prizeFund;
     private String currency;
-    private List<UserDto> participants;
+    private List<UserSimpleDto> participants;
 }

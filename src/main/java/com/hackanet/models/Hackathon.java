@@ -50,7 +50,7 @@ public class Hackathon extends AbstractEntity {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "hackathon_skills_table", joinColumns = @JoinColumn(name = "hackathon_id"))
     private List<Skill> requiredSkills;
-    @ManyToMany(mappedBy = "participantOfHackathons")
+    @ManyToMany(mappedBy = "attendedHackathons")
     private List<User> participants;
 
     public List<FileInfo> getFileInfo() {
