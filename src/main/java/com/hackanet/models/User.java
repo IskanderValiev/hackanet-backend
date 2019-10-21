@@ -28,6 +28,8 @@ public class User extends AbstractEntity {
     private String lastname;
     @Column(nullable = false)
     private String email;
+    @Column(nullable = false)
+    private String phone;
     @Column(nullable = false, name = "hashed_password")
     private String hashedPassword;
     @Enumerated(EnumType.STRING)
@@ -47,4 +49,7 @@ public class User extends AbstractEntity {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_skill_table", joinColumns = @JoinColumn(name = "user_id"))
     private List<Skill> skills;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "hackathon_participants_table", joinColumns = @JoinColumn(name = "user_id"))
+    private List<Hackathon> participantOfHackathons;
 }

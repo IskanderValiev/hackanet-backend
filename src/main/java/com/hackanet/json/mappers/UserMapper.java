@@ -25,6 +25,7 @@ public class UserMapper implements Mapper<User, UserDto> {
         UserDto user = UserDto.builder()
                 .id(from.getId())
                 .email(from.getEmail())
+                .phone(from.getPhone())
                 .name(from.getName())
                 .lastname(from.getLastname())
                 .country(from.getCountry())

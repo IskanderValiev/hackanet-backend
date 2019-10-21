@@ -43,6 +43,9 @@ public class Hackathon extends AbstractEntity {
     private String country;
     @Column(nullable = false)
     private String city;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "hackathon_skills_table", joinColumns = @JoinColumn(name = "hackathon_id"))
+    private List<Skill> requiredSkills;
 
     public List<FileInfo> getFileInfo() {
         if (fileInfo == null)

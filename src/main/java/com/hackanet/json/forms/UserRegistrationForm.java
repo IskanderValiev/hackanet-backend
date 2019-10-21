@@ -35,6 +35,10 @@ public class UserRegistrationForm {
     private String password;
     @NotNull
     @NotEmpty
+    @Pattern(regexp = Patterns.VALID_PHONE_REGEX, message = HttpResponse.BAD_PHONE)
+    private String phone;
+    @NotNull
+    @NotEmpty
     private String name;
     @NotNull
     @NotEmpty

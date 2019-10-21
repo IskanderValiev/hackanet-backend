@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface SkillRepository extends JpaRepository<Skill, Long> {
     List<Skill> findAllByNameLcIgnoreCaseContaining(String name);
+    List<Skill> findAllByIdIn(List<Long> ids);
 }
