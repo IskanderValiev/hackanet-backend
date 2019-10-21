@@ -45,6 +45,9 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
                 .end(from.getEndDate())
                 .owner(userMapper.map(from.getOwner()))
                 .country(from.getCountry())
+                .currency(from.getCurrency().toString())
+                .prizeFund(from.getPrize())
+                .participants(userMapper.map(from.getParticipants()))
                 .city(from.getCity())
                 .build();
         if (hackathon.getLogo() != null)

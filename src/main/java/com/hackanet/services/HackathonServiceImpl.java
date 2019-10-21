@@ -3,16 +3,22 @@ package com.hackanet.services;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.HackathonCreateForm;
+import com.hackanet.json.forms.HackathonSearchForm;
 import com.hackanet.json.forms.HackathonUpdateForm;
 import com.hackanet.models.FileInfo;
 import com.hackanet.models.Hackathon;
+import com.hackanet.models.Skill;
 import com.hackanet.models.User;
 import com.hackanet.repositories.HackathonRepository;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
@@ -25,6 +31,8 @@ import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
 @Service
 public class HackathonServiceImpl implements HackathonService {
 
+    private static final Integer DEFAULT_LIMIT = 10;
+
     @Autowired
     private HackathonRepository hackathonRepository;
 
@@ -33,6 +41,9 @@ public class HackathonServiceImpl implements HackathonService {
 
     @Autowired
     private SkillService skillService;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Override
     public List<Hackathon> getAll() {
@@ -55,6 +66,8 @@ public class HackathonServiceImpl implements HackathonService {
                 .description(form.getDescription().trim())
                 .country(StringUtils.capitalize(form.getCountry()))
                 .city(StringUtils.capitalize(form.getCity()))
+                .currency(form.getCurrency())
+                .prize(form.getPrizeFund())
                 .requiredSkills(skillService.getByIdsIn(form.getRequiredSkills()))
                 .build();
         hackathon = hackathonRepository.save(hackathon);
@@ -131,4 +144,57 @@ public class HackathonServiceImpl implements HackathonService {
         checkHackathonAccess(hackathon, user);
         hackathonRepository.delete(hackathon);
     }
+
+    @Override
+    public List<Hackathon> hackathonList(HackathonSearchForm form) {
+        if (form.getLimit() == null)
+            form.setLimit(DEFAULT_LIMIT);
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Hackathon> hackathonListQuery = getHackathonsListQuery(criteriaBuilder, form);
+        TypedQuery<Hackathon> query = entityManager.createQuery(hackathonListQuery);
+        if (form.getPage() != null) {
+            query.setFirstResult((form.getPage() - 1) * form.getLimit());
+        } else {
+            form.setPage(1);
+        }
+        query.setMaxResults(form.getLimit());
+        return query.getResultList();
+    }
+
+    private CriteriaQuery<Hackathon> getHackathonsListQuery(CriteriaBuilder criteriaBuilder, HackathonSearchForm form) {
+        CriteriaQuery<Hackathon> query = criteriaBuilder.createQuery(Hackathon.class);
+        Root<Hackathon> root = query.from(Hackathon.class);
+        query.select(root);
+        List<Predicate> predicates = new ArrayList<>();
+        String name = form.getName();
+        if (!StringUtils.isBlank(name)) {
+            name = name.toLowerCase();
+            predicates.add(criteriaBuilder.like(root.get("nameLc"), name));
+        }
+        if (!StringUtils.isBlank(form.getCity())) {
+            String city = form.getCity().trim().toLowerCase();
+            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("city")), "%" + StringUtils.lowerCase(city) + "%"));
+        }
+        if (!StringUtils.isBlank(form.getCountry())) {
+            String country = form.getCountry().trim().toLowerCase();
+            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("country")), "%" + StringUtils.lowerCase(country) + "%"));
+        }
+        if (form.getSkills() != null && !form.getSkills().isEmpty()) {
+            Join<Hackathon, Skill> join = root.join("requiredSkills", JoinType.INNER);
+            join.on(join.get("id").in(form.getSkills()));
+            predicates.add(join.getOn());
+        }
+        Date from = form.getFrom();
+        if (from == null)
+            from = new Date(System.currentTimeMillis());
+        predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("startDate"), from));
+        Date to = form.getTo();
+        if (to != null) {
+            predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("endDate"), to));
+        }
+        query.distinct(true);
+        query.where(criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()])));
+        return query;
+    }
+
 }

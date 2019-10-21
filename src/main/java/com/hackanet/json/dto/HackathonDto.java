@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.util.Currency;
 import java.util.List;
 
 /**
@@ -32,4 +33,7 @@ public class HackathonDto {
     private String country;
     private String city;
     private List<SkillDto> requiredSkills;
+    private Integer prizeFund;
+    private String currency;
+    private List<UserDto> participants;
 }

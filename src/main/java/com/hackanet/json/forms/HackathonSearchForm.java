@@ -2,35 +2,29 @@ package com.hackanet.json.forms;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.sql.Date;
-import java.util.Currency;
 import java.util.List;
-
 
 /**
  * @author Iskander Valiev
  * created by isko
- * on 10/20/19
+ * on 10/21/19
  */
-@Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
+@Getter
+@Setter
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class HackathonUpdateForm {
+public class HackathonSearchForm {
     private String name;
-    private Date start;
-    private Date end;
-    private String description;
-    private Long logo;
     private String country;
     private String city;
-    private List<Long> requiredSkills;
-    private Integer prizeFund;
-    private Currency currency;
+    private Date from;
+    private Date to;
+    private List<Long> skills;
+    private Integer limit;
+    private Integer page;
 }

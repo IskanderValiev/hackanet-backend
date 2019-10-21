@@ -14,12 +14,12 @@ import com.hackanet.security.role.Role;
 public class SecurityUtils {
 
     public static void checkFileAccess(FileInfo fileInfo, User user) {
-        if (!user.equals(fileInfo.getUser()))
+        if (!user.equals(fileInfo.getUser()) && !Role.SUPER_ADMIN.equals(user.getRole()))
             throw new ForbiddenException("You have no access this file");
     }
 
     public static void checkHackathonAccess(Hackathon hackathon, User user) {
-        if (!user.getId().equals(hackathon.getOwner().getId()))
+        if (!user.getId().equals(hackathon.getOwner().getId()) && !Role.SUPER_ADMIN.equals(user.getRole()))
             throw new ForbiddenException("You have no access this hackathon");
     }
 

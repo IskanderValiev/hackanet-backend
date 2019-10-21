@@ -34,6 +34,9 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
 
+    // FIXME: 10/21/19 change the value
+    private static final Integer DEFAULT_LIMIT = 10;
+
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -45,8 +48,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private SkillService skillService;
 
-    // FIXME: 10/21/19 change the value
-    private static final Integer DEFAULT_LIMIT = 10;
 
     @Override
     public TokenDto register(UserRegistrationForm form) {
