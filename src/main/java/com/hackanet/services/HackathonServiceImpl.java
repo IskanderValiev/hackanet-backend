@@ -39,6 +39,16 @@ public class HackathonServiceImpl implements HackathonService {
         return hackathonRepository.findAll();
     }
 
+    /**
+     *
+     * The method is used to add new hackathon.
+     *
+     * Before the request reaches the controller, ability of creating a new hackathon is checked by
+     * @PreAuthorize
+     *
+     * @throws BadRequestException
+     *      if start date is after end date
+     * */
     @Override
     public Hackathon save(User user, HackathonCreateForm form) {
         Date start = form.getStart();
