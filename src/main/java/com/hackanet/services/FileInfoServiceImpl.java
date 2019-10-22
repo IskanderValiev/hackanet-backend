@@ -6,6 +6,8 @@ import com.hackanet.repositories.FileInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * @author Iskander Valiev
  * created by isko
@@ -35,5 +37,10 @@ public class FileInfoServiceImpl implements FileInfoService {
     @Override
     public FileInfo save(FileInfo fileInfo) {
         return fileInfoRepository.save(fileInfo);
+    }
+
+    @Override
+    public List<FileInfo> getByIdsIn(List<Long> ids) {
+        return fileInfoRepository.findAllByIdIn(ids);
     }
 }

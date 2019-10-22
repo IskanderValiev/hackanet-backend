@@ -40,7 +40,7 @@ public class User extends AbstractEntity {
     private List<Hackathon> hackathons;
     @OneToOne(fetch = FetchType.LAZY)
     private FileInfo image;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1024)
     private String about;
     @Column(nullable = false)
     private String country;

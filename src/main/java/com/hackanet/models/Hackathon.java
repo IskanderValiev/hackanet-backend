@@ -26,7 +26,7 @@ public class Hackathon extends AbstractEntity {
     private String name;
     @Column(name = "name_lc")
     private String nameLc;
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, length = 1024)
     private String description;
     @Column(name = "start_date", nullable = false)
     private Date startDate;

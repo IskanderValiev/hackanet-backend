@@ -21,6 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -57,7 +58,7 @@ public class HackathonController {
     })
     @ApiOperation(value = "Add new hackathon")
     @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN')")
-    public ResponseEntity<HackathonDto> add(@RequestBody HackathonCreateForm form,
+    public ResponseEntity<HackathonDto> add(@Valid @RequestBody HackathonCreateForm form,
                                             @AuthenticationPrincipal User user) {
         Hackathon hackathon = hackathonService.save(user, form);
         return new ResponseEntity<>(mapper.map(hackathon), HttpStatus.CREATED);
@@ -77,7 +78,7 @@ public class HackathonController {
     })
     @ApiOperation(value = "Update the hackathon information")
     public ResponseEntity<HackathonDto> update(@PathVariable Long id,
-                                               @RequestBody HackathonUpdateForm form,
+                                               @Valid @RequestBody HackathonUpdateForm form,
                                                @AuthenticationPrincipal User user) {
         Hackathon hackathon = hackathonService.update(id, user, form);
         return ResponseEntity.ok(mapper.map(hackathon));

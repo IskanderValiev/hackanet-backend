@@ -169,7 +169,7 @@ public class HackathonServiceImpl implements HackathonService {
         String name = form.getName();
         if (!StringUtils.isBlank(name)) {
             name = name.toLowerCase();
-            predicates.add(criteriaBuilder.like(root.get("nameLc"), name));
+            predicates.add(criteriaBuilder.like(root.get("nameLc"), "%" + name + "%"));
         }
         if (!StringUtils.isBlank(form.getCity())) {
             String city = form.getCity().trim().toLowerCase();
