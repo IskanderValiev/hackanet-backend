@@ -6,6 +6,7 @@ import com.hackanet.models.FileInfo;
 import lombok.*;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -26,5 +27,5 @@ public class PostDto {
     private UserSimpleDto author;
     private HackathonDto hackathonDto;
     private List<FileInfoDto> images;
-    private Date date;
+    private Timestamp date;
 }

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -37,7 +38,7 @@ public class PostServiceImpl implements PostService {
                 .title(form.getTitle())
                 .content(form.getContent())
                 .owner(user)
-                .date(new Date(System.currentTimeMillis()))
+                .date(new Timestamp(System.currentTimeMillis()))
                 .build();
         if (form.getHackathon() != null) {
             Hackathon hackathon = hackathonService.get(form.getHackathon());
