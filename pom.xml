@@ -117,6 +117,15 @@
             <artifactId>aws-java-sdk</artifactId>
             <version>1.11.133</version>
         </dependency>
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>transport</artifactId>
+            <version>5.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>

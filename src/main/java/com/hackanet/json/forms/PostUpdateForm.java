@@ -35,5 +35,6 @@ public class PostUpdateForm {
     private String content;
     private Long hackathon;
     private List<Long> images;
+    private Boolean important;
 }
 

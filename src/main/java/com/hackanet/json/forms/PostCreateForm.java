@@ -31,4 +31,5 @@ public class PostCreateForm {
     private String content;
     private List<Long> images;
     private Long hackathon;
+    private Boolean sendImportanceRequest;
 }

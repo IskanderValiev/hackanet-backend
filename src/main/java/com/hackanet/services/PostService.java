@@ -1,9 +1,11 @@
 package com.hackanet.services;
 
 import com.hackanet.json.forms.PostCreateForm;
+import com.hackanet.json.forms.PostSearchForm;
 import com.hackanet.json.forms.PostUpdateForm;
 import com.hackanet.models.Post;
 import com.hackanet.models.User;
+import com.hackanet.models.enums.PostImportance;
 
 import java.util.List;
 
@@ -19,4 +21,7 @@ public interface PostService {
     List<Post> getByUser(Long user);
     Post get(Long id);
     void delete(Long id, User user);
+    Post changePostImportance(Long id, PostImportance importance);
+    List<Post> getByImportance(PostImportance importance);
+    List<Post> postList(PostSearchForm form);
 }

@@ -2,16 +2,17 @@ package com.hackanet.services;
 
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.PostCreateForm;
+import com.hackanet.json.forms.PostSearchForm;
 import com.hackanet.json.forms.PostUpdateForm;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.Post;
 import com.hackanet.models.User;
+import com.hackanet.models.enums.PostImportance;
 import com.hackanet.repositories.PostRepository;
 import com.hackanet.security.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -47,7 +48,9 @@ public class PostServiceImpl implements PostService {
         }
         if (form.getImages() != null && !form.getImages().isEmpty())
             post.setImages(fileInfoService.getByIdsIn(form.getImages()));
-
+        if (Boolean.TRUE.equals(form.getSendImportanceRequest()))
+            post.setImportance(PostImportance.WAITING);
+        else post.setImportance(PostImportance.NOT_IMPORTANT);
         post = postRepository.save(post);
         return post;
     }
@@ -91,4 +94,23 @@ public class PostServiceImpl implements PostService {
         SecurityUtils.checkPostAccess(post, user);
         postRepository.delete(post);
     }
+
+    @Override
+    public Post changePostImportance(Long id, PostImportance importance) {
+        Post post = get(id);
+        post.setImportance(importance);
+        post = postRepository.save(post);
+        return post;
+    }
+
+    @Override
+    public List<Post> getByImportance(PostImportance importance) {
+        return postRepository.findAllByImportance(importance);
+    }
+
+    @Override
+    public List<Post> postList(PostSearchForm form) {
+        return null;
+    }
+
 }

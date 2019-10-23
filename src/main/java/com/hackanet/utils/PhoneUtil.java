@@ -8,6 +8,7 @@ package com.hackanet.utils;
 public class PhoneUtil {
 
     public static String formatPhone(String phone) {
+        phone = phone.trim();
         if (phone.startsWith("8"))
             return phone.replaceFirst("8", "+7");
         return phone;
