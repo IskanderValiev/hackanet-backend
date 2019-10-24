@@ -48,7 +48,6 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
                 .country(from.getCountry())
                 .currency(from.getCurrency().toString())
                 .prizeFund(from.getPrize())
-                .participants(userSimpleMapper.map(from.getParticipants()))
                 .city(from.getCity())
                 .build();
         if (hackathon.getLogo() != null)
@@ -56,6 +55,9 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
         List<Skill> requiredSkills = from.getRequiredSkills();
         if (requiredSkills != null)
             hackathon.setRequiredSkills(skillMapper.map(requiredSkills));
+        if (from.getParticipants() != null) {
+            hackathon.setParticipants(userSimpleMapper.map(from.getParticipants()));
+        }
         return hackathon;
     }
 
