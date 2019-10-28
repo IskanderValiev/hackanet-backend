@@ -5,6 +5,7 @@ import com.hackanet.models.FileInfo;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.Post;
 import com.hackanet.models.User;
+import com.hackanet.models.chat.Chat;
 import com.hackanet.security.role.Role;
 
 /**
@@ -27,6 +28,12 @@ public class SecurityUtils {
     public static void checkPostAccess(Post post, User user) {
         if (!user.getId().equals(post.getOwner().getId()) && !isSuperAdmin(user))
             throw new ForbiddenException("You have no access to this post");
+    }
+
+    public static void checkChatAccess(Chat chat, User user) {
+//        if (!chat.getParticipants().contains(user))
+        if (!chat.getAdmin().getId().equals(user.getId()))
+            throw new ForbiddenException("You have no access to this chat");
     }
 
     public static boolean isSuperAdmin(User user) {

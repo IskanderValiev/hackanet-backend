@@ -1,5 +1,6 @@
 package com.hackanet.models;
 
+import com.hackanet.models.chat.Chat;
 import com.hackanet.security.role.Role;
 import com.neovisionaries.i18n.CountryCode;
 import lombok.*;
@@ -12,7 +13,7 @@ import java.util.List;
  * created by isko
  * on 10/20/19
  */
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(of = "email", callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -54,4 +55,6 @@ public class User extends AbstractEntity {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "hackathon_id"))
     private List<Hackathon> attendedHackathons;
+    @OneToMany(mappedBy = "admin")
+    private List<Chat> chatsOwner;
 }

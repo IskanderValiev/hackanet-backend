@@ -118,6 +118,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<User> getByIds(List<Long> ids) {
+        return userRepository.findAllByIdIn(ids);
+    }
+
+    @Override
     public List<User> userList(UserSearchForm form) {
         if (form.getLimit() == null)
             form.setLimit(DEFAULT_LIMIT);

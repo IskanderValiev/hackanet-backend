@@ -15,6 +15,7 @@ public interface UserService {
     Boolean exists(String email);
     User get(String email);
     User get(Long id);
+    List<User> getByIds(List<Long> ids);
     List<User> userList(UserSearchForm form);
     void updateUsersHackathonList(User user, Hackathon hackathon, boolean add);
 }
