@@ -77,6 +77,7 @@ public class HackathonController {
                     required = true, dataType = "string", paramType = "header")
     })
     @ApiOperation(value = "Update the hackathon information")
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<HackathonDto> update(@PathVariable Long id,
                                                @Valid @RequestBody HackathonUpdateForm form,
                                                @AuthenticationPrincipal User user) {
@@ -90,6 +91,7 @@ public class HackathonController {
                     required = true, dataType = "string", paramType = "header")
     })
     @ApiOperation(value = "Delete the hackathon")
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<String> delete(@PathVariable Long id,
                                          @AuthenticationPrincipal User user) {
         hackathonService.delete(id, user);

@@ -15,6 +15,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"files","hackathons", "skills", "attendedHackathons", "image"})
 @Getter
 @Setter
 @Builder
