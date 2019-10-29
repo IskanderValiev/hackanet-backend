@@ -7,6 +7,7 @@ import com.hackanet.json.dto.TokenDto;
 import com.hackanet.json.forms.UserLoginForm;
 import com.hackanet.json.forms.UserRegistrationForm;
 import com.hackanet.json.forms.UserSearchForm;
+import com.hackanet.models.FileInfo;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.Skill;
 import com.hackanet.models.User;
@@ -19,12 +20,14 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Iskander Valiev
@@ -49,6 +52,8 @@ public class UserServiceImpl implements UserService {
     private SkillService skillService;
     @Autowired
     private HackathonService hackathonService;
+    @Autowired
+    private FileInfoService fileInfoService;
 
 
     @Override
@@ -140,6 +145,32 @@ public class UserServiceImpl implements UserService {
         else user.getAttendedHackathons().remove(hackathon);
 
         userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public User saveFromGoogle(Map<String, Object> userDetails) {
+        String email = (String) userDetails.get("email");
+        boolean userExists = exists(email);
+        if (userExists)
+            return get(email);
+
+//            map.get("email_verified"); in case we need to change user status
+        FileInfo fileInfo = FileInfo.builder()
+                .previewLink((String) userDetails.get("picture"))
+                .build();
+
+        fileInfoService.save(fileInfo);
+
+        User user = User.builder()
+                .email(email)
+                .name((String) userDetails.get("given_name"))
+                .lastname((String) userDetails.get("family_name"))
+                .image(fileInfo)
+                .role(Role.USER)
+                .build();
+        user = userRepository.save(user);
+        return user;
     }
 
     private CriteriaQuery<User> getUsersListQuery(CriteriaBuilder criteriaBuilder, UserSearchForm form) {

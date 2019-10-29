@@ -15,6 +15,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"files","hackathons", "skills", "attendedHackathons", "image"})
 @Getter
 @Setter
 @Builder
@@ -28,9 +29,8 @@ public class User extends AbstractEntity {
     private String lastname;
     @Column(nullable = false)
     private String email;
-    @Column(nullable = false)
     private String phone;
-    @Column(nullable = false, name = "hashed_password")
+    @Column(name = "hashed_password")
     private String hashedPassword;
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -40,11 +40,9 @@ public class User extends AbstractEntity {
     private List<Hackathon> hackathons;
     @OneToOne(fetch = FetchType.LAZY)
     private FileInfo image;
-    @Column(nullable = false, length = 1024)
+    @Column(length = 1024)
     private String about;
-    @Column(nullable = false)
     private String country;
-    @Column(nullable = false)
     private String city;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_skill_table", joinColumns = @JoinColumn(name = "user_id"))

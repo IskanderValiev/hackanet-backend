@@ -47,7 +47,7 @@ public class PostController {
             @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
                     required = true, dataType = "string", paramType = "header")
     })
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("isAuthenticated() || hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<PostDto> add(@Valid @RequestBody PostCreateForm form,
                                        @AuthenticationPrincipal User user) {
         Post post = postService.add(form, user);
@@ -74,7 +74,7 @@ public class PostController {
             @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
                     required = true, dataType = "string", paramType = "header")
     })
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("isAuthenticated() || hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<String> delete(@PathVariable Long id,
                                          @AuthenticationPrincipal User user) {
         postService.delete(id, user);
@@ -94,7 +94,7 @@ public class PostController {
             @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
                     required = true, dataType = "string", paramType = "header")
     })
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("isAuthenticated() || hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<PostDto> update(@PathVariable Long id,
                                           @Valid @RequestBody PostUpdateForm form,
                                           @AuthenticationPrincipal User user) {
