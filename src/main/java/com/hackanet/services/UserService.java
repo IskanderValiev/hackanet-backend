@@ -8,6 +8,7 @@ import com.hackanet.models.Hackathon;
 import com.hackanet.models.User;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserService {
     TokenDto register(UserRegistrationForm form);
@@ -18,4 +19,5 @@ public interface UserService {
     List<User> getByIds(List<Long> ids);
     List<User> userList(UserSearchForm form);
     void updateUsersHackathonList(User user, Hackathon hackathon, boolean add);
+    User saveFromGoogle(Map<String, Object> userDetails);
 }
