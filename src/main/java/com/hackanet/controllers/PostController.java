@@ -2,6 +2,7 @@ package com.hackanet.controllers;
 
 import com.hackanet.json.dto.PostDto;
 import com.hackanet.json.forms.PostCreateForm;
+import com.hackanet.json.forms.PostSearchForm;
 import com.hackanet.json.forms.PostUpdateForm;
 import com.hackanet.json.mappers.PostMapper;
 import com.hackanet.models.Post;
@@ -128,5 +129,12 @@ public class PostController {
                                                     @RequestParam PostImportance postImportance) {
         Post post = postService.changePostImportance(id, postImportance);
         return ResponseEntity.ok(postMapper.map(post));
+    }
+
+    @PostMapping
+    @ApiOperation("Search posts")
+    public ResponseEntity<List<PostDto>> search(@RequestBody PostSearchForm form) {
+        List<Post> posts = postService.postList(form);
+        return ResponseEntity.ok(postMapper.map(posts));
     }
 }

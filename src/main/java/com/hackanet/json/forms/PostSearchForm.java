@@ -17,4 +17,7 @@ import lombok.*;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class PostSearchForm {
     private String title;
+    private Long hackathonId;
+    private Integer limit;
+    private Integer page;
 }
