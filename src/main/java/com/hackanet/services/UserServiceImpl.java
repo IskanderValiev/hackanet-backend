@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.hackanet.utils.StringUtils.generateRandomString;
+
 /**
  * @author Iskander Valiev
  * created by isko
@@ -123,6 +125,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<User> getByIds(List<Long> ids) {
+        return userRepository.findAllByIdIn(ids);
+    }
+
+    @Override
     public List<User> userList(UserSearchForm form) {
         if (form.getLimit() == null)
             form.setLimit(DEFAULT_LIMIT);
@@ -157,6 +164,7 @@ public class UserServiceImpl implements UserService {
 
 //            map.get("email_verified"); in case we need to change user status
         FileInfo fileInfo = FileInfo.builder()
+                .name(generateRandomString())
                 .previewLink((String) userDetails.get("picture"))
                 .build();
 

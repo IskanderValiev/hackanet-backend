@@ -1,6 +1,8 @@
 package com.hackanet.config;
 
+import com.hackanet.security.filters.CORSFilter;
 import freemarker.template.TemplateException;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -37,5 +39,22 @@ public class CoreConfig {
     @Bean(name = "mailFreemarkerConfig")
     public freemarker.template.Configuration freeMarkerConfiguration() throws IOException, TemplateException {
         return freemarkerConfig().createConfiguration();
+    }
+
+    /*
+    *
+    * The bean registers custom filter
+    *
+    * */
+    @Bean
+    public FilterRegistrationBean<CORSFilter> someFilterRegistration() {
+
+        FilterRegistrationBean<CORSFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(new CORSFilter());
+        registration.addUrlPatterns("/hackanet/**");
+//        registration.addInitParameter("paramName", "paramValue");
+        registration.setName("corsFilter");
+        registration.setOrder(1);
+        return registration;
     }
 }
