@@ -2,6 +2,7 @@ package com.hackanet.json.forms;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.hackanet.models.enums.ChatType;
 import lombok.*;
 
 import java.util.List;
@@ -19,4 +20,5 @@ import java.util.List;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class ChatCreateForm {
     private List<Long> participantsIds;
+    private ChatType chatType;
 }

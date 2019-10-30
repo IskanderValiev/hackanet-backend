@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @author Iskander Valiev
@@ -33,4 +34,5 @@ public class ChatMessageSaveForm {
     @ApiModelProperty(required = true)
     private String text;
     // TODO: 10/24/19 attachments
+    private List<Long> attachments;
 }

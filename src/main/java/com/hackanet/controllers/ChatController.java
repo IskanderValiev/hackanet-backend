@@ -5,6 +5,8 @@ import com.hackanet.json.forms.ChatCreateForm;
 import com.hackanet.json.mappers.Mapper;
 import com.hackanet.models.User;
 import com.hackanet.models.chat.Chat;
+import com.hackanet.models.chat.Message;
+import com.hackanet.services.chat.ChatMessageServiceElasticsearchImpl;
 import com.hackanet.services.chat.ChatService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -36,6 +38,8 @@ public class ChatController {
     private ChatService chatService;
     @Autowired
     private Mapper<Chat, ChatDto> chatMapper;
+    @Autowired
+    private ChatMessageServiceElasticsearchImpl chatMessageServiceElasticsearch;
 
     @PostMapping
     @ApiImplicitParams({
@@ -88,5 +92,10 @@ public class ChatController {
                                               @AuthenticationPrincipal User user) {
         Chat chat = chatService.addOrRemoveUser(chatId, userId, user, false);
         return ResponseEntity.ok(chatMapper.map(chat));
+    }
+
+    @GetMapping("/all")
+    public List<Message> getMessages() {
+        return chatMessageServiceElasticsearch.getAll();
     }
 }

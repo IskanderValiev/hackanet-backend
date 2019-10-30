@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.hackanet.utils.StringUtils.generateRandomString;
+
 /**
  * @author Iskander Valiev
  * created by isko
@@ -162,6 +164,7 @@ public class UserServiceImpl implements UserService {
 
 //            map.get("email_verified"); in case we need to change user status
         FileInfo fileInfo = FileInfo.builder()
+                .name(generateRandomString())
                 .previewLink((String) userDetails.get("picture"))
                 .build();
 

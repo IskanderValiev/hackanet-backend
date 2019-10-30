@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.hackanet.security.utils.SecurityUtils.*;
+
 /**
  * @author Iskander Valiev
  * created by isko
@@ -41,6 +43,7 @@ public class ChatServiceImpl implements ChatService {
         Chat chat = Chat.builder()
                 .participants(participants)
                 .admin(currentUser)
+                .type(form.getChatType())
                 .build();
         chat = chatRepository.save(chat);
         return chat;
@@ -60,7 +63,7 @@ public class ChatServiceImpl implements ChatService {
     public Chat addOrRemoveUser(Long chatId, Long userId, User currentUser, Boolean add) {
         Chat chat = get(chatId);
         // any participant can add and remove user from chat
-        SecurityUtils.checkChatAccess(chat, currentUser);
+        checkChatAccessForOperation(chat, currentUser);
         User user = userService.get(userId);
 
         List<User> participants = chat.getParticipants();

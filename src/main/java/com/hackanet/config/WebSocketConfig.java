@@ -22,18 +22,18 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-//        registry.setApplicationDestinationPrefixes();
-//        registry.enableSimpleBroker("/topic");   // Enables a simple in-memory broker
+        registry.setApplicationDestinationPrefixes();
+        registry.enableSimpleBroker("");   // Enables a simple in-memory broker
 
 
         //   Use this for enabling a Full featured broker like RabbitMQ
 
 
-        registry.enableStompBrokerRelay("/topic")
-                .setRelayHost("localhost")
-                // once stomp is enabled, the stomp adapter works on 61613 port by default
-                .setRelayPort(61613)
-                .setClientLogin("guest")
-                .setClientPasscode("guest");
+//        registry.enableStompBrokerRelay("/hackanet-chat")
+//                .setRelayHost("localhost")
+//                // once stomp is enabled, the stomp adapter works on 61613 port by default
+//                .setRelayPort(61613)
+//                .setClientLogin("guest")
+//                .setClientPasscode("guest");
     }
 }

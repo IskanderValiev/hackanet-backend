@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 
@@ -15,6 +16,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
  */
 @ComponentScan("com.hackanet")
 @EnableJpaRepositories(basePackages = "com.hackanet.repositories")
+@EnableElasticsearchRepositories(basePackages = "com.hackanet.repositories")
 @EntityScan(basePackages = "com.hackanet.models")
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableAspectJAutoProxy

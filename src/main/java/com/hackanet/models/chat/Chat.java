@@ -2,6 +2,7 @@ package com.hackanet.models.chat;
 
 import com.hackanet.models.AbstractEntity;
 import com.hackanet.models.User;
+import com.hackanet.models.enums.ChatType;
 import lombok.*;
 
 import javax.persistence.*;
@@ -30,4 +31,6 @@ public class Chat extends AbstractEntity {
     private User admin;
     @OneToMany(mappedBy = "chat", orphanRemoval = true)
     private List<ChatMessage> messages;
+    @Enumerated(EnumType.STRING)
+    private ChatType type;
 }

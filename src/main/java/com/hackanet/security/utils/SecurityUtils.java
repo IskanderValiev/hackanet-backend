@@ -31,7 +31,11 @@ public class SecurityUtils {
     }
 
     public static void checkChatAccess(Chat chat, User user) {
-//        if (!chat.getParticipants().contains(user))
+        if (!chat.getParticipants().contains(user))
+            throw new ForbiddenException("You have no access to this chat");
+    }
+
+    public static void checkChatAccessForOperation(Chat chat, User user) {
         if (!chat.getAdmin().getId().equals(user.getId()))
             throw new ForbiddenException("You have no access to this chat");
     }

@@ -2,6 +2,7 @@ package com.hackanet.json.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.hackanet.models.enums.ChatType;
 import lombok.*;
 
 import java.util.List;
@@ -22,4 +23,5 @@ public class ChatDto {
     private List<UserSimpleDto> participants;
     private List<ChatMessageDto> messages;
     private UserSimpleDto admin;
+    private ChatType chatType;
 }

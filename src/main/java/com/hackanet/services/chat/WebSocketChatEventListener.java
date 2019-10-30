@@ -28,7 +28,9 @@ public class WebSocketChatEventListener {
     private ChatMessageService chatMessageService;
 
     @EventListener
-    public void handleWebSocketConnectListener(SessionConnectedEvent event) {}
+    public void handleWebSocketConnectListener(SessionConnectedEvent event) {
+        
+    }
 
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {}

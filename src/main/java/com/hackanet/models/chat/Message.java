@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * @author Iskander Valiev
@@ -18,14 +19,15 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 @Document(indexName = "hackanet", type = "message")
 public class Message {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
     private Long senderId;
     private Long chatId;
     private Timestamp timestamp;
     private String text;
+    private List<Long> attachments;
 }
