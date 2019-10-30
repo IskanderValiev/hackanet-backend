@@ -19,6 +19,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
@@ -56,6 +57,11 @@ public class HackathonServiceImpl implements HackathonService {
         Date end = form.getEnd();
         if (start.after(end))
             throw new BadRequestException("Start date is after end date");
+
+        List<Long> requiredSkills = form.getRequiredSkills();
+        if (requiredSkills == null)
+            requiredSkills = Collections.emptyList();
+
         Hackathon hackathon = Hackathon.builder()
                 .name(form.getName().trim())
                 .nameLc(form.getName().trim().toLowerCase())
@@ -68,7 +74,7 @@ public class HackathonServiceImpl implements HackathonService {
                 .city(StringUtils.capitalize(form.getCity()))
                 .currency(form.getCurrency())
                 .prize(form.getPrizeFund())
-                .requiredSkills(skillService.getByIdsIn(form.getRequiredSkills()))
+                .requiredSkills(skillService.getByIdsIn(requiredSkills))
                 .build();
         hackathon = hackathonRepository.save(hackathon);
         return hackathon;

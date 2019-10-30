@@ -7,24 +7,32 @@ import com.hackanet.json.dto.TokenDto;
 import com.hackanet.json.forms.UserLoginForm;
 import com.hackanet.json.forms.UserRegistrationForm;
 import com.hackanet.json.forms.UserSearchForm;
+import com.hackanet.json.forms.UserUpdateForm;
+import com.hackanet.models.FileInfo;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.Skill;
 import com.hackanet.models.User;
 import com.hackanet.repositories.UserRepository;
 import com.hackanet.security.role.Role;
 import com.hackanet.security.utils.PasswordUtil;
+import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.utils.PhoneUtil;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import static com.hackanet.utils.StringUtils.generateRandomString;
 
 /**
  * @author Iskander Valiev
@@ -49,6 +57,8 @@ public class UserServiceImpl implements UserService {
     private SkillService skillService;
     @Autowired
     private HackathonService hackathonService;
+    @Autowired
+    private FileInfoService fileInfoService;
 
 
     @Override
@@ -129,6 +139,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<User> getByIds(List<Long> ids) {
+        return userRepository.findAllByIdIn(ids);
+    }
+
+    @Override
     public List<User> userList(UserSearchForm form) {
         if (form.getLimit() == null)
             form.setLimit(DEFAULT_LIMIT);
@@ -151,6 +166,64 @@ public class UserServiceImpl implements UserService {
         else user.getAttendedHackathons().remove(hackathon);
 
         userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public User saveFromGoogle(Map<String, Object> userDetails) {
+        String email = (String) userDetails.get("email");
+        boolean userExists = exists(email);
+        if (userExists)
+            return get(email);
+
+//            map.get("email_verified"); in case we need to change user status
+        FileInfo fileInfo = FileInfo.builder()
+                .name(generateRandomString())
+                .previewLink((String) userDetails.get("picture"))
+                .build();
+
+        fileInfoService.save(fileInfo);
+
+        User user = User.builder()
+                .email(email)
+                .name((String) userDetails.get("given_name"))
+                .lastname((String) userDetails.get("family_name"))
+                .image(fileInfo)
+                .role(Role.USER)
+                .build();
+        user = userRepository.save(user);
+        return user;
+    }
+
+    @Override
+    public User update(@NotNull Long id, @NotNull User currentUser, @NotNull UserUpdateForm form) {
+        User user = get(id);
+
+        SecurityUtils.checkProfileAccess(currentUser, user);
+
+        if (!StringUtils.isBlank(form.getName()))
+            user.setName(form.getName());
+
+        if (!StringUtils.isBlank(form.getLastname()))
+            user.setLastname(form.getLastname());
+
+        if (!StringUtils.isBlank(form.getAbout()))
+            user.setAbout(form.getAbout());
+
+        if (!StringUtils.isBlank(form.getCity()))
+            user.setAbout(form.getCity());
+
+        if (!StringUtils.isBlank(form.getCountry()))
+            user.setCountry(form.getCountry());
+
+        if (form.getImage() != null)
+            user.setImage(fileInfoService.get(form.getImage()));
+
+        if (form.getSkills() != null)
+            user.setSkills(skillService.getByIdsIn(form.getSkills()));
+
+        user = userRepository.save(user);
+        return user;
     }
 
     private CriteriaQuery<User> getUsersListQuery(CriteriaBuilder criteriaBuilder, UserSearchForm form) {
