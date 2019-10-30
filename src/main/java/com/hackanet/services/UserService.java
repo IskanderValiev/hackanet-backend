@@ -1,5 +1,6 @@
 package com.hackanet.services;
 
+import com.google.common.collect.Multimap;
 import com.hackanet.json.dto.TokenDto;
 import com.hackanet.json.forms.UserLoginForm;
 import com.hackanet.json.forms.UserRegistrationForm;
@@ -7,6 +8,8 @@ import com.hackanet.json.forms.UserSearchForm;
 import com.hackanet.json.forms.UserUpdateForm;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.User;
+import com.hackanet.models.UserPhoneToken;
+import com.hackanet.push.enums.ClientType;
 
 import java.util.List;
 import java.util.Map;
@@ -22,4 +25,5 @@ public interface UserService {
     void updateUsersHackathonList(User user, Hackathon hackathon, boolean add);
     User saveFromGoogle(Map<String, Object> userDetails);
     User update(Long id, User currentUser, UserUpdateForm form);
+    Multimap<ClientType, UserPhoneToken> getTokensForUser(Long userId);
 }
