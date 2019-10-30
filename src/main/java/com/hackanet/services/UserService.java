@@ -4,6 +4,7 @@ import com.hackanet.json.dto.TokenDto;
 import com.hackanet.json.forms.UserLoginForm;
 import com.hackanet.json.forms.UserRegistrationForm;
 import com.hackanet.json.forms.UserSearchForm;
+import com.hackanet.json.forms.UserUpdateForm;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.User;
 
@@ -20,4 +21,5 @@ public interface UserService {
     List<User> userList(UserSearchForm form);
     void updateUsersHackathonList(User user, Hackathon hackathon, boolean add);
     User saveFromGoogle(Map<String, Object> userDetails);
+    User update(Long id, User currentUser, UserUpdateForm form);
 }

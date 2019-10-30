@@ -40,6 +40,11 @@ public class SecurityUtils {
             throw new ForbiddenException("You have no access to this chat");
     }
 
+    public static void checkProfileAccess(User currentUser, User changeableUser) {
+        if (!currentUser.equals(changeableUser))
+            throw new ForbiddenException("You have no access to this profile");
+    }
+
     public static boolean isSuperAdmin(User user) {
         return Role.SUPER_ADMIN.equals(user.getRole());
     }
