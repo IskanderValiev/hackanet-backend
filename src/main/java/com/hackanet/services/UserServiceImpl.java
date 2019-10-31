@@ -1,5 +1,7 @@
 package com.hackanet.services;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.hackanet.config.JwtConfig;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
@@ -8,10 +10,9 @@ import com.hackanet.json.forms.UserLoginForm;
 import com.hackanet.json.forms.UserRegistrationForm;
 import com.hackanet.json.forms.UserSearchForm;
 import com.hackanet.json.forms.UserUpdateForm;
-import com.hackanet.models.FileInfo;
-import com.hackanet.models.Hackathon;
-import com.hackanet.models.Skill;
-import com.hackanet.models.User;
+import com.hackanet.models.*;
+import com.hackanet.push.enums.ClientType;
+import com.hackanet.repositories.UserPhoneTokenRepository;
 import com.hackanet.repositories.UserRepository;
 import com.hackanet.security.role.Role;
 import com.hackanet.security.utils.PasswordUtil;
@@ -22,6 +23,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +32,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -59,6 +63,8 @@ public class UserServiceImpl implements UserService {
     private HackathonService hackathonService;
     @Autowired
     private FileInfoService fileInfoService;
+    @Autowired
+    private UserPhoneTokenRepository userPhoneTokenRepository;
 
 
     @Override
@@ -224,6 +230,14 @@ public class UserServiceImpl implements UserService {
 
         user = userRepository.save(user);
         return user;
+    }
+
+    @Override
+    public Multimap<ClientType, UserPhoneToken> getTokensForUser(Long userId) {
+        Multimap<ClientType, UserPhoneToken> multimap = ArrayListMultimap.create();
+        List<UserPhoneToken> availableTokens = userPhoneTokenRepository.findAllByUserId(userId);
+        availableTokens.forEach(it -> multimap.put(it.getDeviceType(), it));
+        return multimap;
     }
 
     private CriteriaQuery<User> getUsersListQuery(CriteriaBuilder criteriaBuilder, UserSearchForm form) {
