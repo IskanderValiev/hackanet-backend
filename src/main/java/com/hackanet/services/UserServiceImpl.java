@@ -65,6 +65,8 @@ public class UserServiceImpl implements UserService {
     private FileInfoService fileInfoService;
     @Autowired
     private UserPhoneTokenRepository userPhoneTokenRepository;
+    @Autowired
+    private EmailService emailService;
 
 
     @Override
@@ -93,6 +95,8 @@ public class UserServiceImpl implements UserService {
         user = userRepository.save(user);
 
         final String prefix = jwtConfig.getPrefix() + " ";
+
+        emailService.sendWelcomeEmail(user);
         return TokenDto.builder()
                 .userId(user.getId())
                 .role(user.getRole().toString())
@@ -198,6 +202,8 @@ public class UserServiceImpl implements UserService {
                 .role(Role.USER)
                 .build();
         user = userRepository.save(user);
+
+        emailService.sendWelcomeEmail(user);
         return user;
     }
 
