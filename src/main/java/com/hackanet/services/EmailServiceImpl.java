@@ -1,5 +1,6 @@
 package com.hackanet.services;
 
+import com.hackanet.models.PasswordChangeRequest;
 import com.hackanet.models.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,5 +61,11 @@ public class EmailServiceImpl implements EmailService {
     public void sendWelcomeEmail(User user) {
         String s = templateService.prepareWelcomeEmail(user);
         send(s, "Welcome to Hackanet", user.getEmail());
+    }
+
+    @Override
+    public void sendPasswordResetEmail(User user, PasswordChangeRequest request) {
+        String s = templateService.prepareResetPasswordEmail(user, request);
+        send(s, "Reset password request", user.getEmail());
     }
 }

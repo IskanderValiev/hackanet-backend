@@ -2,6 +2,7 @@ package com.hackanet.services;
 
 import com.hackanet.config.AppConfig;
 import com.hackanet.exceptions.TemplateException;
+import com.hackanet.models.PasswordChangeRequest;
 import com.hackanet.models.User;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -27,6 +28,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     private static final String WELCOME_EMAIL_TEMPLATE = "welcome_email.ftl";
     private static final String TEST = "test.ftl";
+    private static final String RESET_PASSWORD_TEMPLATE = "reset_password.ftl";
 
     @Autowired
     private AppConfig appConfig;
@@ -85,6 +87,14 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public String test() {
         return resolveTemplate(new HashMap<>(), TEST, null);
+    }
+
+    @Override
+    public String prepareResetPasswordEmail(User user, PasswordChangeRequest request) {
+        Map<String, Object> dataModel = new HashMap<>();
+        dataModel.put("link", String.format(appConfig.getMainUrl() + appConfig.getPasswordResetLink(), request.getCode(), user.getEmail()));
+        log.info("Preparing reset password email");
+        return resolveTemplate(dataModel, RESET_PASSWORD_TEMPLATE, null);
     }
 
 }

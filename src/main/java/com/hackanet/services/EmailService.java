@@ -1,5 +1,6 @@
 package com.hackanet.services;
 
+import com.hackanet.models.PasswordChangeRequest;
 import com.hackanet.models.User;
 
 public interface EmailService {
@@ -9,4 +10,5 @@ public interface EmailService {
 
     void test(String email);
     void sendWelcomeEmail(User user);
+    void sendPasswordResetEmail(User user, PasswordChangeRequest request);
 }

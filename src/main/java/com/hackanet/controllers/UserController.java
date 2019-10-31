@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -37,6 +38,8 @@ public class UserController {
     private static final String LOGIN = "/login";
     private static final String USER_PROFILE = "/{id}";
     private static final String LIST = "/list";
+    private static final String RESET_PASSWORD = "/password/reset";
+    private static final String RESET_PASSWORD_REQUEST = RESET_PASSWORD + "/request";
 
     @Autowired
     private UserService userService;
@@ -84,5 +87,21 @@ public class UserController {
                                           @PathVariable Long id) {
         User user = userService.update(id, currentUser, form);
         return ResponseEntity.ok(userMapper.map(user));
+    }
+
+    @ApiOperation("Send reset password request")
+    @GetMapping(RESET_PASSWORD_REQUEST)
+    public ResponseEntity<String> resetPasswordRequest(@RequestParam("email") String email) {
+        userService.passwordResetRequest(email);
+        return new ResponseEntity<>("OK", HttpStatus.OK);
+    }
+
+    @ApiOperation("Change password")
+    @PostMapping(RESET_PASSWORD)
+    public ResponseEntity<String> resetPassword(@RequestParam("email") String email,
+                                                @RequestParam("code") String code,
+                                                @RequestParam("newPassword") String newPassword) {
+        userService.changePassword(code, newPassword, email);
+        return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 }
