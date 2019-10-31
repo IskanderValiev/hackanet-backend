@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
  * on 3/31/19
  */
 @Configuration
-@ConfigurationProperties(prefix = "easy.reserve")
+@ConfigurationProperties(prefix = "hackanet")
 @Builder
 @Data
 @NoArgsConstructor
