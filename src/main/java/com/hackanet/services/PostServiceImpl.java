@@ -2,18 +2,26 @@ package com.hackanet.services;
 
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.PostCreateForm;
+import com.hackanet.json.forms.PostSearchForm;
 import com.hackanet.json.forms.PostUpdateForm;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.Post;
 import com.hackanet.models.User;
+import com.hackanet.models.enums.PostImportance;
 import com.hackanet.repositories.PostRepository;
 import com.hackanet.security.utils.SecurityUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
+
+import static org.apache.commons.lang.StringUtils.isBlank;
 
 /**
  * @author Iskander Valiev
@@ -23,6 +31,8 @@ import java.util.List;
 @Service
 public class PostServiceImpl implements PostService {
 
+    private static final Integer DEFAULT_LIMIT = 10;
+
     @Autowired
     private PostRepository postRepository;
     @Autowired
@@ -31,6 +41,8 @@ public class PostServiceImpl implements PostService {
     private FileInfoService fileInfoService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private EntityManager entityManager;
 
     @Override
     public Post add(PostCreateForm form, User user) {
@@ -47,7 +59,9 @@ public class PostServiceImpl implements PostService {
         }
         if (form.getImages() != null && !form.getImages().isEmpty())
             post.setImages(fileInfoService.getByIdsIn(form.getImages()));
-
+        if (Boolean.TRUE.equals(form.getSendImportanceRequest()))
+            post.setImportance(PostImportance.WAITING);
+        else post.setImportance(PostImportance.NOT_IMPORTANT);
         post = postRepository.save(post);
         return post;
     }
@@ -56,8 +70,10 @@ public class PostServiceImpl implements PostService {
     public Post update(Long id, User user, PostUpdateForm form) {
         Post post = get(id);
         SecurityUtils.checkPostAccess(post, user);
-        post.setTitle(form.getTitle());
-        post.setContent(form.getContent());
+        if (!isBlank(form.getTitle()))
+            post.setTitle(form.getTitle());
+        if (!isBlank(form.getContent()))
+            post.setContent(form.getContent());
         if (form.getHackathon() != null) {
             post.setHackathon(hackathonService.get(form.getHackathon()));
         }
@@ -91,4 +107,52 @@ public class PostServiceImpl implements PostService {
         SecurityUtils.checkPostAccess(post, user);
         postRepository.delete(post);
     }
+
+    @Override
+    public Post changePostImportance(Long id, PostImportance importance) {
+        Post post = get(id);
+        post.setImportance(importance);
+        post = postRepository.save(post);
+        return post;
+    }
+
+    @Override
+    public List<Post> getByImportance(PostImportance importance) {
+        return postRepository.findAllByImportance(importance);
+    }
+
+    @Override
+    public List<Post> postList(PostSearchForm form) {
+        if (form.getLimit() == null) form.setLimit(DEFAULT_LIMIT);
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Post> postsListQuery = getPostsListQuery(criteriaBuilder, form);
+        TypedQuery<Post> query = entityManager.createQuery(postsListQuery);
+        if (form.getPage() != null) {
+            query.setFirstResult((form.getLimit() - 1) * form.getLimit());
+        } else {
+            form.setPage(1);
+        }
+        query.setMaxResults(form.getLimit());
+        return query.getResultList();
+    }
+
+    private CriteriaQuery<Post> getPostsListQuery(CriteriaBuilder criteriaBuilder, PostSearchForm form) {
+        CriteriaQuery<Post> query = criteriaBuilder.createQuery(Post.class);
+        Root<Post> root = query.from(Post.class);
+        query.select(root);
+        List<Predicate> predicates = new ArrayList<>();
+        String title = form.getTitle();
+        if (!StringUtils.isBlank(title)) {
+            title = title.toLowerCase();
+            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), "%" + title + "%"));
+        }
+        if (form.getHackathonId() == null) {
+            Join<Post, Hackathon> join = root.join("hackathon", JoinType.INNER);
+            join.on(criteriaBuilder.equal(join.get("id"), form.getHackathonId()));
+            predicates.add(join.getOn());
+        }
+        query.where(criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()])));
+        return query;
+    }
+
 }

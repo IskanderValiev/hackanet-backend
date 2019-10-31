@@ -65,7 +65,7 @@ public class HackathonController {
     }
 
     @GetMapping(HACKATHON)
-    @ApiOperation(value = "Get all hackathons")
+    @ApiOperation(value = "Get the information about hackathons")
     public ResponseEntity<HackathonDto> get(@PathVariable Long id) {
         Hackathon hackathon = hackathonService.get(id);
         return new ResponseEntity<>(mapper.map(hackathon), HttpStatus.OK);
@@ -99,7 +99,7 @@ public class HackathonController {
     }
 
     @PostMapping(LIST)
-    @ApiOperation(value = "Search users")
+    @ApiOperation(value = "Search hackathons")
     public ResponseEntity<List<HackathonDto>> list(@RequestBody HackathonSearchForm form) {
         List<Hackathon> hackathons = hackathonService.hackathonList(form);
         return ResponseEntity.ok(mapper.map(hackathons));

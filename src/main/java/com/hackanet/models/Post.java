@@ -1,10 +1,9 @@
 package com.hackanet.models;
 
-import com.hackanet.application.AppConstants;
+import com.hackanet.models.enums.PostImportance;
 import lombok.*;
 
 import javax.persistence.*;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -36,4 +35,6 @@ public class Post extends AbstractEntity {
     @JoinColumn(name = "hackathon_id")
     private Hackathon hackathon;
     private Timestamp date;
+    @Enumerated(EnumType.STRING)
+    private PostImportance importance;
 }
