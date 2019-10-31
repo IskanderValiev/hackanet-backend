@@ -9,4 +9,8 @@ public class PushSendException extends Exception {
     public PushSendException(String message) {
         super(message);
     }
+
+    public PushSendException(Throwable cause) {
+        super(cause);
+    }
 }

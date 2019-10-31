@@ -22,7 +22,7 @@ public class PushNotificationResolverService {
         String key = msg.getType().getValue();
         List<String> bodyArgs = Lists.newArrayList();
         Map<String, Object> customData = new HashMap<>();
-        switch (msg.getType()) {
+//        switch (msg.getType()) {
 //            case BONUS_ACCRUAL:
 //                OrderPayload orderPayload = (OrderPayload) msg.getPayloadEntity();
 //                bodyArgs.add(orderPayload.getBonuses().toString());
@@ -34,7 +34,8 @@ public class PushNotificationResolverService {
 //                orderPayload = (OrderPayload) msg.getPayloadEntity();
 //                bodyArgs.add(orderPayload.getOrderStatus().getRusTitle());
 //                break;
-        }
+//        }
+        bodyArgs.add("NEW_PUSH");
         ResolvedPush resolvedPush = ResolvedPush.builder()
                 .body(body)
                 .title(title)

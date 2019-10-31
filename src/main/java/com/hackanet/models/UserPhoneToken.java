@@ -3,10 +3,7 @@ package com.hackanet.models;
 import com.hackanet.push.enums.ClientType;
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.*;
 
 /**
  * @author Iskander Valiev
@@ -19,9 +16,15 @@ import javax.persistence.Enumerated;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(indexes = {
+        @Index(
+                columnList = "user_id" + ", "
+                        + "deviceType" + ", "
+                        + "deviceId", unique = true)})
 public class UserPhoneToken extends AbstractEntity {
-    @Column(nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
     @Enumerated(EnumType.STRING)
     private ClientType deviceType;
     @Column(nullable = false, length = 500)

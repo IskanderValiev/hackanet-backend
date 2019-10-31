@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 //import com.hackanet.config.AMPQConfig;
+import com.hackanet.config.AMPQConfig;
 import com.hackanet.models.UserPhoneToken;
 import com.hackanet.push.ResolvedPush;
 import com.hackanet.push.enums.ClientType;
+import com.hackanet.push.enums.PushType;
 import com.hackanet.services.UserService;
 import com.hackanet.utils.PushAvailabilityChecker;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +58,15 @@ public class RabbitMQPushNotificationService implements MessageListener {
 
     @Autowired
     private UserService userService;
+
+    public void sendTestNotification() {
+        PushNotificationMsg msg = PushNotificationMsg.builder()
+                .toUserId(1L)
+                .type(PushType.NEW_MESSAGE)
+                .payloadEntity("NEW_MESSAGE")
+                .build();
+        rabbitTemplate.convertAndSend(AMPQConfig.QUEUE_NAME, buildMessage(msg));
+    }
 
     private Message buildMessage(PushNotificationMsg msgEntity) {
         MessageProperties messageProperties = new MessageProperties();
@@ -106,7 +117,7 @@ public class RabbitMQPushNotificationService implements MessageListener {
                 }
                 log.debug("Send push notification with type {} and retry {}", msg.getType(), msg.getRetries());
                 msg.setRetries(++retries);
-//                rabbitTemplate.convertAndSend(AMPQConfig.QUEUE_NAME, buildMessage(msg));
+                rabbitTemplate.convertAndSend(AMPQConfig.QUEUE_NAME, buildMessage(msg));
             } else {
                 log.debug("Push notification msg reached its max retries and will be removed");
             }

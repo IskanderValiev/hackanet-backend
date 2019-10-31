@@ -69,10 +69,10 @@ public class AMPQConfig {
         return container;
     }
 
-    @Bean(name = "rabbitObjectMapper")
-    public ObjectMapper rabbitObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-        return objectMapper;
-    }
+//    @Bean(name = "rabbitObjectMapper")
+//    public ObjectMapper rabbitObjectMapper() {
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+//        return objectMapper;
+//    }
 }
