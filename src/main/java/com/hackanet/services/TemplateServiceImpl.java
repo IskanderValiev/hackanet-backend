@@ -70,8 +70,15 @@ public class TemplateServiceImpl implements TemplateService {
     public String prepareEmail(User user) {
         Map<String, Object> dataModel = new HashMap<>();
         dataModel.put("name", user.getName());
-        dataModel.put("link", String.format(appConfig.getMainUrl() + appConfig.getConfirmLink(), ""));
         log.info("Building email");
+        return resolveTemplate(dataModel, WELCOME_EMAIL_TEMPLATE, null);
+    }
+
+    @Override
+    public String prepareWelcomeEmail(User user) {
+        Map<String, Object> dataModel = new HashMap<>();
+        dataModel.put("name", user.getName());
+        log.info("Preparing welcome email");
         return resolveTemplate(dataModel, WELCOME_EMAIL_TEMPLATE, null);
     }
 

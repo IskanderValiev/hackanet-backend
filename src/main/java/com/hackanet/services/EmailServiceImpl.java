@@ -1,5 +1,6 @@
 package com.hackanet.services;
 
+import com.hackanet.models.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -24,7 +25,8 @@ public class EmailServiceImpl implements EmailService {
     private TemplateService templateService;
     @Autowired
     private JavaMailSender javaMailSender;
-
+    @Autowired
+    private UserService userService;
     private ExecutorService executorService = Executors.newCachedThreadPool();
 
     @Override
@@ -52,5 +54,11 @@ public class EmailServiceImpl implements EmailService {
         String test = templateService.test();
         log.info("Mail sent to {}", email);
         send(test, "Welcome to Hackanet", email);
+    }
+
+    @Override
+    public void sendWelcomeEmail(User user) {
+        String s = templateService.prepareWelcomeEmail(user);
+        send(s, "Welcome to Hackanet", user.getEmail());
     }
 }
