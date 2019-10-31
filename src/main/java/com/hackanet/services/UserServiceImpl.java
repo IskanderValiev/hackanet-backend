@@ -67,18 +67,23 @@ public class UserServiceImpl implements UserService {
         String password = form.getPassword();
         if (exists(email))
             throw new BadRequestException("User with such email already exists");
+        String phone = PhoneUtil.formatPhone(form.getPhone());
+        if (existsByPhone(phone))
+            throw new BadRequestException("User with such phone already exists");
         User user = User.builder()
                 .email(email)
                 .hashedPassword(passwordUtil.hash(password))
                 .phone(PhoneUtil.formatPhone(form.getPhone().trim()))
                 .name(form.getName())
-                .skills(skillService.getByIdsIn(form.getSkills()))
                 .lastname(form.getLastname())
                 .city(form.getCity())
                 .country(form.getCountry())
                 .about(form.getAbout())
                 .role(Role.USER)
                 .build();
+
+        if (form.getSkills() != null && !form.getSkills().isEmpty())
+            user.setSkills(skillService.getByIdsIn(form.getSkills()));
         user = userRepository.save(user);
 
         final String prefix = jwtConfig.getPrefix() + " ";
@@ -115,6 +120,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public Boolean exists(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    @Override
+    public Boolean existsByPhone(String phone) {
+        phone = PhoneUtil.formatPhone(phone);
+        return userRepository.existsByPhone(phone);
     }
 
     @Override

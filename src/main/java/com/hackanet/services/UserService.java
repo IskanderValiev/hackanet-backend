@@ -15,6 +15,7 @@ public interface UserService {
     TokenDto register(UserRegistrationForm form);
     TokenDto login(UserLoginForm form);
     Boolean exists(String email);
+    Boolean existsByPhone(String phone);
     User get(String email);
     User get(Long id);
     List<User> getByIds(List<Long> ids);
