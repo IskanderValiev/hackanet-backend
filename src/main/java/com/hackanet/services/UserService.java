@@ -27,4 +27,6 @@ public interface UserService {
     User saveFromGoogle(Map<String, Object> userDetails);
     User update(Long id, User currentUser, UserUpdateForm form);
     Multimap<ClientType, UserPhoneToken> getTokensForUser(Long userId);
+    void passwordResetRequest(String email);
+    void changePassword(String code, String newPassword, String email);
 }

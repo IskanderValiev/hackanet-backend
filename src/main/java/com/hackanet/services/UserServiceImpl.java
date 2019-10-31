@@ -2,6 +2,7 @@ package com.hackanet.services;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.hackanet.application.Patterns;
 import com.hackanet.config.JwtConfig;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
@@ -12,29 +13,33 @@ import com.hackanet.json.forms.UserSearchForm;
 import com.hackanet.json.forms.UserUpdateForm;
 import com.hackanet.models.*;
 import com.hackanet.push.enums.ClientType;
+import com.hackanet.repositories.PasswordChangeRequestRepository;
 import com.hackanet.repositories.UserPhoneTokenRepository;
 import com.hackanet.repositories.UserRepository;
 import com.hackanet.security.role.Role;
 import com.hackanet.security.utils.PasswordUtil;
 import com.hackanet.security.utils.SecurityUtils;
+import com.hackanet.utils.DateTimeUtil;
 import com.hackanet.utils.PhoneUtil;
+import com.hackanet.utils.RandomString;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 import static com.hackanet.utils.StringUtils.generateRandomString;
 
@@ -44,10 +49,12 @@ import static com.hackanet.utils.StringUtils.generateRandomString;
  * on 10/20/19
  */
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     // FIXME: 10/21/19 change the value
     private static final Integer DEFAULT_LIMIT = 10;
+    private static final Integer PASSWORD_REQUEST_EXPIRED_TIME = 15;
 
     @Autowired
     private UserRepository userRepository;
@@ -67,6 +74,8 @@ public class UserServiceImpl implements UserService {
     private UserPhoneTokenRepository userPhoneTokenRepository;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private PasswordChangeRequestRepository passwordChangeRequestRepository;
 
 
     @Override
@@ -182,9 +191,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User saveFromGoogle(Map<String, Object> userDetails) {
         String email = (String) userDetails.get("email");
-        boolean userExists = exists(email);
+        boolean userExists = exists(email.toLowerCase());
         if (userExists)
-            return get(email);
+            return get(email.toLowerCase());
 
 //            map.get("email_verified"); in case we need to change user status
         FileInfo fileInfo = FileInfo.builder()
@@ -195,7 +204,7 @@ public class UserServiceImpl implements UserService {
         fileInfoService.save(fileInfo);
 
         User user = User.builder()
-                .email(email)
+                .email(email.toLowerCase())
                 .name((String) userDetails.get("given_name"))
                 .lastname((String) userDetails.get("family_name"))
                 .image(fileInfo)
@@ -244,6 +253,85 @@ public class UserServiceImpl implements UserService {
         List<UserPhoneToken> availableTokens = userPhoneTokenRepository.findAllByUserId(userId);
         availableTokens.forEach(it -> multimap.put(it.getDeviceType(), it));
         return multimap;
+    }
+
+    @Override
+    public void passwordResetRequest(String email) {
+        if (StringUtils.isBlank(email)) throw new BadRequestException("Email is empty or null");
+
+        RandomString randomString = new RandomString(21);
+        String code = randomString.nextString();
+        Optional<PasswordChangeRequest> optional = passwordChangeRequestRepository.findByCode(code);
+        if (optional.isPresent()) {
+            do {
+                log.warn("Password change request with such code already exists. Generating new code.");
+                code = randomString.nextString();
+                optional = passwordChangeRequestRepository.findByCode(code);
+            } while (optional.isPresent());
+        }
+
+        email = email.trim().toLowerCase();
+        User user = get(email);
+
+        PasswordChangeRequest request = passwordChangeRequestRepository.findAllByUserIdAndUsed(user.getId(), false);
+        if (request == null) {
+            request = PasswordChangeRequest.builder()
+                    .code(code)
+                    .createdDate(LocalDateTime.now())
+                    .used(Boolean.FALSE)
+                    .userId(user.getId())
+                    .build();
+            passwordChangeRequestRepository.save(request);
+        } else {
+            LocalDateTime now = LocalDateTime.now();
+            long minutes = DateTimeUtil.getDifferenceBetweenLocalDateTimes(request.getCreatedDate(), now);
+            if (minutes > PASSWORD_REQUEST_EXPIRED_TIME) {
+                request.setCode(code);
+                request.setUsed(Boolean.FALSE);
+                request.setCreatedDate(now);
+                passwordChangeRequestRepository.save(request);
+            }
+        }
+        emailService.sendPasswordResetEmail(user, request);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(String code, String newPassword, String email) {
+        if (StringUtils.isBlank(code))
+            throw new BadRequestException("Code is empty or null");
+
+        if (StringUtils.isBlank(email))
+            throw new BadRequestException("Email is empty");
+
+        boolean matches = Pattern.matches(Patterns.VALID_PASSWORD_REGEX, newPassword.trim());
+        if (!matches)
+            throw new BadRequestException("Password is invalid");
+
+        PasswordChangeRequest passwordRequest = passwordChangeRequestRepository.findByCode(code)
+                .orElseThrow(() -> new NotFoundException("Password change request not found"));
+
+        if (Boolean.TRUE.equals(passwordRequest.getUsed()))
+            throw new BadRequestException("The password change request has been already used");
+
+        LocalDateTime now = LocalDateTime.now();
+        long minutes = DateTimeUtil.getDifferenceBetweenLocalDateTimes(passwordRequest.getCreatedDate(), now);
+        if (minutes > PASSWORD_REQUEST_EXPIRED_TIME) {
+            throw new BadRequestException("Password reset request has expired");
+        }
+
+        User user = get(passwordRequest.getUserId());
+        if (passwordUtil.matches(newPassword, user.getHashedPassword()))
+            throw new BadRequestException("You can't use old password as a new one");
+        if (!user.getEmail().equals(email)) {
+            throw new BadRequestException("Emails are not the same");
+        }
+
+        user.setHashedPassword(passwordUtil.hash(newPassword));
+        userRepository.save(user);
+
+        passwordRequest.setUsed(Boolean.TRUE);
+        passwordChangeRequestRepository.save(passwordRequest);
     }
 
     private CriteriaQuery<User> getUsersListQuery(CriteriaBuilder criteriaBuilder, UserSearchForm form) {
