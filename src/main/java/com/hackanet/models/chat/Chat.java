@@ -1,6 +1,7 @@
 package com.hackanet.models.chat;
 
 import com.hackanet.models.AbstractEntity;
+import com.hackanet.models.Team;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.ChatType;
 import lombok.*;
@@ -26,11 +27,15 @@ public class Chat extends AbstractEntity {
             joinColumns = @JoinColumn(name = "participant"),
             inverseJoinColumns = @JoinColumn(name = "chat_id"))
     private List<User> participants;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id")
-    private User admin;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "chats_admins",
+    joinColumns = {@JoinColumn(name = "admin_id")},
+    inverseJoinColumns = {@JoinColumn(name = "chat_id")})
+    private List<User> admins;
     @OneToMany(mappedBy = "chat", orphanRemoval = true)
     private List<ChatMessage> messages;
     @Enumerated(EnumType.STRING)
     private ChatType type;
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "chat")
+    private Team team;
 }

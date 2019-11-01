@@ -53,6 +53,7 @@ public class User extends AbstractEntity {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "hackathon_id"))
     private List<Hackathon> attendedHackathons;
-    @OneToMany(mappedBy = "admin")
+    @ManyToMany(mappedBy = "admins")
     private List<Chat> chatsOwner;
+    private Boolean lookingForTeam;
 }

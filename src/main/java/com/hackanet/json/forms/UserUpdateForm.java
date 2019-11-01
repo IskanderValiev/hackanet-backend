@@ -27,4 +27,5 @@ public class UserUpdateForm {
     private String country;
     private String city;
     private List<Long> skills;
+    private Boolean lookingForTeam;
 }

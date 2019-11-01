@@ -32,7 +32,7 @@ public class ChatMapper implements Mapper<Chat, ChatDto> {
                 .id(from.getId())
                 .participants(userSimpleMapper.map(from.getParticipants()))
                 .messages(messageMapper.map(from.getMessages()))
-                .admin(userSimpleMapper.map(from.getAdmin()))
+                .admin(userSimpleMapper.map(from.getAdmins()))
                 .chatType(from.getType())
                 .build();
     }

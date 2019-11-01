@@ -74,7 +74,7 @@ public class HackathonServiceImpl implements HackathonService {
                 .city(StringUtils.capitalize(form.getCity()))
                 .currency(form.getCurrency())
                 .prize(form.getPrizeFund())
-                .requiredSkills(skillService.getByIdsIn(requiredSkills))
+                .requiredSkills(skillService.getByIds(requiredSkills))
                 .build();
         hackathon = hackathonRepository.save(hackathon);
         return hackathon;
@@ -138,7 +138,7 @@ public class HackathonServiceImpl implements HackathonService {
 
         List<Long> requiredSkills = form.getRequiredSkills();
         if (requiredSkills != null && !requiredSkills.isEmpty()) {
-            hackathon.setRequiredSkills(skillService.getByIdsIn(requiredSkills));
+            hackathon.setRequiredSkills(skillService.getByIds(requiredSkills));
         }
         hackathon = hackathonRepository.save(hackathon);
         return hackathon;

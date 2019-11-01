@@ -11,4 +11,5 @@ public interface ChatService {
     Chat get(Long id);
     List<Chat> getByUser(User user);
     Chat addOrRemoveUser(Long chatId, Long user, User currentUser, Boolean add);
+    Chat createForTeam(List<User> participants);
 }

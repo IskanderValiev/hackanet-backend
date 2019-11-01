@@ -2,26 +2,24 @@ package com.hackanet.json.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.hackanet.models.enums.ChatType;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
 
 import java.util.List;
 
 /**
  * @author Iskander Valiev
  * created by isko
- * on 10/24/19
+ * on 11/1/19
  */
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @Builder
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class ChatDto {
+public class TeamParticipantDto {
     private Long id;
-    private List<UserSimpleDto> participants;
-    private List<ChatMessageDto> messages;
-    private List<UserSimpleDto> admin;
-    private ChatType chatType;
+    private List<SkillDto> skills;
+    private Boolean isTeamLeader;
+    private String name;
+    private String lastName;
+    private FileInfoDto image;
 }

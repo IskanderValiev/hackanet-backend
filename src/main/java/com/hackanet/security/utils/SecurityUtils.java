@@ -1,11 +1,9 @@
 package com.hackanet.security.utils;
 
 import com.hackanet.exceptions.ForbiddenException;
-import com.hackanet.models.FileInfo;
-import com.hackanet.models.Hackathon;
-import com.hackanet.models.Post;
-import com.hackanet.models.User;
+import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
+import com.hackanet.models.enums.ChatType;
 import com.hackanet.security.role.Role;
 
 /**
@@ -36,7 +34,7 @@ public class SecurityUtils {
     }
 
     public static void checkChatAccessForOperation(Chat chat, User user) {
-        if (!chat.getAdmin().getId().equals(user.getId()))
+        if (!chat.getAdmins().contains(user))
             throw new ForbiddenException("You have no access to this chat");
     }
 
@@ -49,4 +47,18 @@ public class SecurityUtils {
         return Role.SUPER_ADMIN.equals(user.getRole());
     }
 
+    public static void checkTeamAccess(Team team, User user) {
+        if (!team.getParticipants().contains(user))
+            throw new ForbiddenException("You have no access to this team");
+    }
+
+    public static void checkTeamAccessAsTeamLeader(Team team, User user) {
+        if (!team.getTeamLeader().equals(user))
+            throw new ForbiddenException("You have no access to this team as a team leader");
+    }
+
+    public static void checkJoinToTeamRequestAccess(User user, JoinToTeamRequest request) {
+        if (!request.getUser().getId().equals(user.getId()))
+            throw new ForbiddenException("You have no access to this join to team request");
+    }
 }

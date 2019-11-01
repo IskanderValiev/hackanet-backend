@@ -64,7 +64,7 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
-    public List<Skill> getByIdsIn(List<Long> ids) {
+    public List<Skill> getByIds(List<Long> ids) {
         return skillRepository.findAllByIdIn(ids);
     }
 }

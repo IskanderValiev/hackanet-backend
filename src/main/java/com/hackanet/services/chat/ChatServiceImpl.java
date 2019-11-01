@@ -6,6 +6,7 @@ import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.ChatCreateForm;
 import com.hackanet.models.User;
 import com.hackanet.models.chat.Chat;
+import com.hackanet.models.enums.ChatType;
 import com.hackanet.repositories.chat.ChatRepository;
 import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.UserService;
@@ -42,7 +43,7 @@ public class ChatServiceImpl implements ChatService {
         List<User> participants = userService.getByIds(form.getParticipantsIds());
         Chat chat = Chat.builder()
                 .participants(participants)
-                .admin(currentUser)
+                .admins(Collections.singletonList(currentUser))
                 .type(form.getChatType())
                 .build();
         chat = chatRepository.save(chat);
@@ -80,6 +81,17 @@ public class ChatServiceImpl implements ChatService {
             throw new BadRequestException("The user is not in the chat");
         }
         chat.setParticipants(participants);
+        chat = chatRepository.save(chat);
+        return chat;
+    }
+
+    @Override
+    public Chat createForTeam(List<User> participants) {
+        Chat chat = Chat.builder()
+                .type(ChatType.TEAM_CHAT)
+                .participants(participants)
+                .admins(participants)
+                .build();
         chat = chatRepository.save(chat);
         return chat;
     }

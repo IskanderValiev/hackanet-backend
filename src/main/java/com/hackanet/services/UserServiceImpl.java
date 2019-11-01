@@ -97,10 +97,11 @@ public class UserServiceImpl implements UserService {
                 .country(form.getCountry())
                 .about(form.getAbout())
                 .role(Role.USER)
+                .lookingForTeam(Boolean.FALSE)
                 .build();
 
         if (form.getSkills() != null && !form.getSkills().isEmpty())
-            user.setSkills(skillService.getByIdsIn(form.getSkills()));
+            user.setSkills(skillService.getByIds(form.getSkills()));
         user = userRepository.save(user);
 
         final String prefix = jwtConfig.getPrefix() + " ";
@@ -209,6 +210,7 @@ public class UserServiceImpl implements UserService {
                 .lastname((String) userDetails.get("family_name"))
                 .image(fileInfo)
                 .role(Role.USER)
+                .lookingForTeam(Boolean.FALSE)
                 .build();
         user = userRepository.save(user);
 
@@ -241,8 +243,11 @@ public class UserServiceImpl implements UserService {
             user.setImage(fileInfoService.get(form.getImage()));
 
         if (form.getSkills() != null)
-            user.setSkills(skillService.getByIdsIn(form.getSkills()));
+            user.setSkills(skillService.getByIds(form.getSkills()));
 
+        if (form.getLookingForTeam() != null) {
+            user.setLookingForTeam(form.getLookingForTeam());
+        }
         user = userRepository.save(user);
         return user;
     }
@@ -339,6 +344,13 @@ public class UserServiceImpl implements UserService {
         Root<User> root = query.from(User.class);
         query.select(root);
         List<Predicate> predicates = new ArrayList<>();
+        if (form.getLookingForTeam() != null) {
+            if (form.getLookingForTeam()) {
+                predicates.add(criteriaBuilder.isTrue(root.get("lookingForTeam")));
+            } else {
+                predicates.add(criteriaBuilder.isFalse(root.get("lookingForTeam")));
+            }
+        }
         if (!StringUtils.isBlank(form.getName())) {
             Expression<String> nameInLowerCase = criteriaBuilder.lower(root.get("name"));
             Expression<String> lastnameInLowerCase = criteriaBuilder.lower(root.get("lastname"));

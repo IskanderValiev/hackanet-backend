@@ -119,6 +119,11 @@ public class SwearWordsFilter {
         return badWords;
     }
 
+    public static Boolean containsBadWords(String input) {
+        List<String> badWords = badWordsFound(input);
+        return !badWords.isEmpty();
+    }
+
     public static String filterText(String input) {
         List<String> badWords = badWordsFound(input);
         for (String badWord : badWords) {
