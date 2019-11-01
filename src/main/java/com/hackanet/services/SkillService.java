@@ -12,5 +12,5 @@ public interface SkillService {
     List<Skill> getAll();
     Skill get(Long id);
     List<Skill> getByNameLike(String name);
-    List<Skill> getByIdsIn(List<Long> ids);
+    List<Skill> getByIds(List<Long> ids);
 }

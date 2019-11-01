@@ -1,5 +1,7 @@
 package com.hackanet.utils;
 
+import com.hackanet.exceptions.BadRequestException;
+
 import java.util.UUID;
 
 /**
@@ -16,5 +18,10 @@ public class StringUtils {
     public static boolean isPhrase(String input) {
         String[] arr = input.trim().split(" ");
         return arr.length > 1;
+    }
+
+    public static void throwExceptionIfStringContainsBadWords(String input, String fieldName) {
+        if (SwearWordsFilter.containsBadWords(input))
+            throw new BadRequestException(fieldName + " contains bad words");
     }
 }
