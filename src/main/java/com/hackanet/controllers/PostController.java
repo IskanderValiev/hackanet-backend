@@ -39,6 +39,7 @@ public class PostController {
     private static final String POST = "/{id}";
     private static final String GET_BY_IMPORTANCE = "/importance";
     private static final String CHANGE_IMPORTANCE = POST + GET_BY_IMPORTANCE;
+    private static final String GET_LIKED_POSTS_FOR_USER = "/liked";
 
     @Autowired
     private PostMapper postMapper;
@@ -135,6 +136,18 @@ public class PostController {
     @ApiOperation("Search posts")
     public ResponseEntity<List<PostDto>> search(@RequestBody PostSearchForm form) {
         List<Post> posts = postService.postList(form);
+        return ResponseEntity.ok(postMapper.map(posts));
+    }
+
+    @GetMapping(GET_LIKED_POSTS_FOR_USER)
+    @ApiOperation("Get liked posts")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<PostDto>> getLikedPosts(@AuthenticationPrincipal User user) {
+        List<Post> posts = postService.getLikedPostsForUser(user.getId());
         return ResponseEntity.ok(postMapper.map(posts));
     }
 }

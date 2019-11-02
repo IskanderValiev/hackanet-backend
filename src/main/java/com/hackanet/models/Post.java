@@ -37,4 +37,6 @@ public class Post extends AbstractEntity {
     private Timestamp date;
     @Enumerated(EnumType.STRING)
     private PostImportance importance;
+    @OneToMany(mappedBy = "post")
+    private List<PostLike> likes;
 }

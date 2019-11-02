@@ -24,4 +24,5 @@ public interface PostService {
     Post changePostImportance(Long id, PostImportance importance);
     List<Post> getByImportance(PostImportance importance);
     List<Post> postList(PostSearchForm form);
+    List<Post> getLikedPostsForUser(Long userId);
 }

@@ -6,6 +6,7 @@ import com.hackanet.json.forms.PostSearchForm;
 import com.hackanet.json.forms.PostUpdateForm;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.Post;
+import com.hackanet.models.PostLike;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.PostImportance;
 import com.hackanet.repositories.PostRepository;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.remove;
 
 /**
  * @author Iskander Valiev
@@ -134,6 +136,21 @@ public class PostServiceImpl implements PostService {
         }
         query.setMaxResults(form.getLimit());
         return query.getResultList();
+    }
+
+    @Override
+    public List<Post> getLikedPostsForUser(Long userId) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Post> query = criteriaBuilder.createQuery(Post.class);
+        Root<Post> root = query.from(Post.class);
+        query.select(root);
+        List<Predicate> predicates = new ArrayList<>();
+        Join<Post, PostLike> join = root.join("likes");
+        join.on(criteriaBuilder.equal(root.get("id"), userId));
+        predicates.add(join.getOn());
+        query.where(criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()])));
+        TypedQuery<Post> typedQuery = entityManager.createQuery(query);
+        return typedQuery.getResultList();
     }
 
     private CriteriaQuery<Post> getPostsListQuery(CriteriaBuilder criteriaBuilder, PostSearchForm form) {
