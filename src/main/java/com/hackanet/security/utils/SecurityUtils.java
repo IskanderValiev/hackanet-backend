@@ -61,4 +61,9 @@ public class SecurityUtils {
         if (!request.getUser().getId().equals(user.getId()))
             throw new ForbiddenException("You have no access to this join to team request");
     }
+
+    public static void checkPostLikeAccess(PostLike postLike, User user) {
+        if (!postLike.getUser().equals(user))
+            throw new ForbiddenException("You have no access to this post like");
+    }
 }

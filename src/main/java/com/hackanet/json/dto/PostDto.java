@@ -28,4 +28,5 @@ public class PostDto {
     private HackathonDto hackathonDto;
     private List<FileInfoDto> images;
     private Timestamp date;
+    private Long likesCount;
 }
