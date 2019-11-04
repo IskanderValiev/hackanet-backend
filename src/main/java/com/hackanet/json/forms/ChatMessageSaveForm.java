@@ -33,6 +33,5 @@ public class ChatMessageSaveForm {
     @Length(max = 1000)
     @ApiModelProperty(required = true)
     private String text;
-    // TODO: 10/24/19 attachments
     private List<Long> attachments;
 }
