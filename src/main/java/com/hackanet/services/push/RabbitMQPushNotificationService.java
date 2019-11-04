@@ -6,13 +6,18 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 //import com.hackanet.config.AMPQConfig;
 import com.hackanet.config.AMPQConfig;
+import com.hackanet.json.mappers.MessageMapper;
+import com.hackanet.models.User;
 import com.hackanet.models.UserPhoneToken;
+import com.hackanet.models.chat.Chat;
 import com.hackanet.push.ResolvedPush;
 import com.hackanet.push.enums.ClientType;
 import com.hackanet.push.enums.PushType;
 import com.hackanet.services.UserService;
+import com.hackanet.services.chat.ChatService;
 import com.hackanet.utils.PushAvailabilityChecker;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
 import org.springframework.amqp.core.MessageProperties;
@@ -22,6 +27,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.hackanet.utils.PushAvailabilityChecker.isAvailableForAndroid;
 import static com.hackanet.utils.PushAvailabilityChecker.isAvailableForiOS;
@@ -58,6 +64,29 @@ public class RabbitMQPushNotificationService implements MessageListener {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ChatService chatService;
+
+    @Autowired
+    private MessageMapper messageMapper;
+
+    public void sendNewMessageNotification(@NotNull com.hackanet.models.chat.Message message) {
+        Chat chat = chatService.get(message.getChatId());
+        List<User> participants = chat.getParticipants().stream()
+                .filter(participant -> !participant.getId().equals(message.getSenderId()))
+                .collect(Collectors.toList());
+
+        participants.forEach(participant -> {
+            PushNotificationMsg msg = PushNotificationMsg.builder()
+                    .toUserId(participant.getId())
+                    .fromUserId(message.getSenderId())
+                    .payloadEntity(messageMapper.map(message))
+                    .type(PushType.NEW_MESSAGE)
+                    .build();
+            rabbitTemplate.convertAndSend(AMPQConfig.QUEUE_NAME, buildMessage(msg));
+        });
+    }
 
     public void sendTestNotification() {
         PushNotificationMsg msg = PushNotificationMsg.builder()

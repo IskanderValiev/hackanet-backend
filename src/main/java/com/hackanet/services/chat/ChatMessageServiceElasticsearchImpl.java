@@ -10,6 +10,7 @@ import com.hackanet.models.chat.Message;
 import com.hackanet.repositories.chat.MessageRepository;
 import com.hackanet.services.FileInfoService;
 import com.hackanet.services.UserService;
+import com.hackanet.services.push.RabbitMQPushNotificationService;
 import com.hackanet.utils.SwearWordsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
@@ -17,6 +18,7 @@ import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.SimpleField;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -46,7 +48,10 @@ public class ChatMessageServiceElasticsearchImpl {
     private ElasticsearchTemplate elasticsearchTemplate;
     @Autowired
     private FileInfoService fileInfoService;
+    @Autowired
+    private RabbitMQPushNotificationService rabbitMQPushNotificationService;
 
+    @Transactional
     public Message saveMessage(ChatMessageSaveForm form) {
         List<Long> attachments = null;
         if (form.getAttachments() != null) {
@@ -71,6 +76,7 @@ public class ChatMessageServiceElasticsearchImpl {
                 .senderId(form.getSenderId())
                 .build();
         chatMessage = messageRepository.save(chatMessage);
+        rabbitMQPushNotificationService.sendNewMessageNotification(chatMessage);
         return chatMessage;
     }
 
