@@ -190,6 +190,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    // TODO: 11/4/19 return TokenDto
     public User saveFromGoogle(Map<String, Object> userDetails) {
         String email = (String) userDetails.get("email");
         boolean userExists = exists(email.toLowerCase());
