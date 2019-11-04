@@ -6,6 +6,7 @@ import com.hackanet.models.Hackathon;
 import com.hackanet.models.Post;
 import com.hackanet.models.User;
 import com.hackanet.services.PostLikeService;
+import com.hackanet.services.PostViewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,8 @@ public class PostMapper implements Mapper<Post, PostDto> {
     private Mapper<FileInfo, FileInfoDto> fileMapper;
     @Autowired
     private PostLikeService postLikeService;
+    @Autowired
+    private PostViewService postViewService;
 
     @Override
     public PostDto map(Post from) {
@@ -36,6 +39,7 @@ public class PostMapper implements Mapper<Post, PostDto> {
                 .author(userMapper.map(from.getOwner()))
                 .date(from.getDate())
                 .likesCount(postLikeService.getCountOfPostLikes(from.getId()))
+                .views(postViewService.countOfUniqueViews(from.getId()))
                 .build();
 
         if (from.getHackathon() != null)

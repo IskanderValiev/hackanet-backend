@@ -29,4 +29,5 @@ public class PostDto {
     private List<FileInfoDto> images;
     private Timestamp date;
     private Long likesCount;
+    private Long views;
 }

@@ -9,6 +9,7 @@ import com.hackanet.models.Post;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.PostImportance;
 import com.hackanet.services.PostService;
+import com.hackanet.services.PostViewService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -45,6 +46,8 @@ public class PostController {
     private PostMapper postMapper;
     @Autowired
     private PostService postService;
+    @Autowired
+    private PostViewService postViewService;
 
     @PostMapping(ADD)
     @ApiOperation(value = "Add new post")
@@ -87,9 +90,15 @@ public class PostController {
     }
 
     @GetMapping(POST)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = false, dataType = "string", paramType = "header")
+    })
     @ApiOperation("Get post by id")
-    public ResponseEntity<PostDto> get(@PathVariable Long id) {
+    public ResponseEntity<PostDto> get(@PathVariable Long id,
+                                       @AuthenticationPrincipal User user) {
         Post post = postService.get(id);
+        postViewService.addView(user, post);
         return ResponseEntity.ok(postMapper.map(post));
     }
 
