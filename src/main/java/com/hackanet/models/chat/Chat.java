@@ -1,6 +1,7 @@
 package com.hackanet.models.chat;
 
 import com.hackanet.models.AbstractEntity;
+import com.hackanet.models.Hackathon;
 import com.hackanet.models.Team;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.ChatType;
@@ -22,10 +23,10 @@ import java.util.List;
 @Entity
 @Table(name = "chats")
 public class Chat extends AbstractEntity {
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "chat_participants_table",
-            joinColumns = @JoinColumn(name = "participant"),
-            inverseJoinColumns = @JoinColumn(name = "chat_id"))
+            joinColumns = @JoinColumn(name = "chat_id"),
+            inverseJoinColumns = @JoinColumn(name = "participant_id"))
     private List<User> participants;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "chats_admins",
@@ -38,4 +39,7 @@ public class Chat extends AbstractEntity {
     private ChatType type;
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "chat")
     private Team team;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hackathon_id")
+    private Hackathon hackathon;
 }

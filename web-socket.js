@@ -5,22 +5,34 @@ var stompClient = null;
 var name = null;
 var k = 0;
 
+var headers = {
+    login: 'mylogin',
+    passcode: 'mypasscode',
+    // additional header
+    'Authorization': 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiQURNSU4iLCJlbWFpbCI6Imlza2FuZC52YWxpZXZAeWFuZGV4LnJ1Iiwic3ViIjoiMSJ9.XPbjyLPS_AHCtjbk9xEteRI_ruOtWSiCedR6O9HSKoKY1ZuXXdyfBDA2ere6diN4ice27ZG0w4WgX_1SmhQikg'
+};
 function connect(event) {
     name = document.querySelector('#name').value.trim();
     if (name) {
         document.querySelector('#welcome-page').classList.add('hidden');
         document.querySelector('#dialogue-page').classList.remove('hidden');
         var socket = new SockJS('http://localhost:8080/hackanet/ws');
+
+
         stompClient = Stomp.over(socket);
-        stompClient.connect({}, connectionSuccess);
+        stompClient.connect(headers, connectionSuccess);
     }
     console.log('connecting');
     event.preventDefault();
 }
 
+function onError() {
+    console.log("Shit happens...")
+}
+
 function connectionSuccess() {
     k = 0;
-    stompClient.send("/chat/3/connect", {}, "connected");
+    stompClient.send("/chat/3/connect", headers, "connected");
     stompClient.subscribe('/chat/3', onMessageReceived);
 }
 
@@ -32,7 +44,7 @@ function sendMessage(event) {
             sender_id: 2,
             chat_id: 2
         };
-        stompClient.send("/chat/3/send", {}, JSON
+        stompClient.send("/chat/3/send", headers, JSON
             .stringify(chatMessage));
         document.querySelector('#chatMessage').value = '';
     }
@@ -44,7 +56,7 @@ function onMessageReceived(payload) {
     var message = JSON.parse(payload.body);
     var messageElement = document.createElement('li');
     console.log('message type: ' + message.text);
-    if (k===0) {
+    if (k === 0) {
         for (var i = 0; i < message.length; i++) {
             messageElement.classList.add('message-data');
             // var element = document.createElement('i');

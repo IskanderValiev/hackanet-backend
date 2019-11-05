@@ -8,7 +8,9 @@ import com.hackanet.models.Team;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.JoinToTeamRequestStatus;
 import com.hackanet.security.utils.SecurityUtils;
+import com.hackanet.services.EmailService;
 import com.hackanet.services.TeamService;
+import com.hackanet.services.chat.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +29,10 @@ public class JoinToTeamRequestServiceImpl implements JoinToTeamRequestService {
     private JoinToTeamRequestRepository joinToTeamRequestRepository;
     @Autowired
     private TeamService teamService;
+    @Autowired
+    private ChatService chatService;
+    @Autowired
+    private EmailService emailService;
 
     @Override
     public JoinToTeamRequest create(User user, JoinToTeamRequestCreateForm form) {
@@ -72,9 +78,19 @@ public class JoinToTeamRequestServiceImpl implements JoinToTeamRequestService {
             participants.add(request.getUser());
             team.setParticipants(participants);
             teamService.save(team);
+
+            chatService.addOrRemoveUser(team.getChat().getId(), request.getUser().getId(), null, true);
+            emailService.sendTeamWelcomeEmail(request.getUser(), team);
             //send email about approving
         } else if (JoinToTeamRequestStatus.REJECTED.equals(status)) {
             //send email about reject
+            List<User> participants = team.getParticipants();
+            User participant = request.getUser();
+            if (participants.contains(participant)) {
+                participants.remove(participant);
+                chatService.addOrRemoveUser(team.getChat().getId(), request.getUser().getId(), null, false);
+            }
+            emailService.sendTeamRejectEmail(request.getUser(), team);
         }
 
         request.setRequestStatus(status);

@@ -2,7 +2,9 @@ package com.hackanet.services;
 
 import com.hackanet.config.AppConfig;
 import com.hackanet.exceptions.TemplateException;
+import com.hackanet.models.Hackathon;
 import com.hackanet.models.PasswordChangeRequest;
+import com.hackanet.models.Team;
 import com.hackanet.models.User;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -29,6 +31,9 @@ public class TemplateServiceImpl implements TemplateService {
     private static final String WELCOME_EMAIL_TEMPLATE = "welcome_email.ftl";
     private static final String TEST = "test.ftl";
     private static final String RESET_PASSWORD_TEMPLATE = "reset_password.ftl";
+    private static final String TEAM_WELCOME_TEMPLATE = "team_welcome.ftl";
+    private static final String TEAM_REJECT_TEMPLATE = "team_reject.ftl";
+    private static final String HACKATHON_WELCOME_TEMPLATE = "hackathon_welcome.ftl";
 
     @Autowired
     private AppConfig appConfig;
@@ -95,6 +100,31 @@ public class TemplateServiceImpl implements TemplateService {
         dataModel.put("link", String.format(appConfig.getMainUrl() + appConfig.getPasswordResetLink(), request.getCode(), user.getEmail()));
         log.info("Preparing reset password email");
         return resolveTemplate(dataModel, RESET_PASSWORD_TEMPLATE, null);
+    }
+
+    @Override
+    public String prepareTeamWelcomeEmail(User user, Team team) {
+        Map<String, Object> dataModel = new HashMap<>();
+        dataModel.put("teamName", team.getName());
+        dataModel.put("members", team.getParticipants());
+        log.info("Preparing team welcome email");
+        return resolveTemplate(dataModel, TEAM_WELCOME_TEMPLATE, null);
+    }
+
+    @Override
+    public String prepareTeamRejectEmail(User user, Team team) {
+        Map<String, Object> dataModel = new HashMap<>();
+        dataModel.put("teamName", team.getName());
+        log.info("Preparing team reject email");
+        return resolveTemplate(dataModel, TEAM_REJECT_TEMPLATE, null);
+    }
+
+    @Override
+    public String prepareHackathonWelcomeEmail(User user, Hackathon hackathon) {
+        Map<String, Object> dataModel = new HashMap<>();
+        dataModel.put("hackathonName", hackathon.getName());
+        log.info("Preparing hackathon welcome email");
+        return resolveTemplate(dataModel, HACKATHON_WELCOME_TEMPLATE, null);
     }
 
 }

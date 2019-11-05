@@ -13,6 +13,7 @@ import com.hackanet.models.chat.Chat;
 import com.hackanet.repositories.TeamRepository;
 import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.chat.ChatService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.hackanet.utils.StringUtils.throwExceptionIfStringContainsBadWords;
 
@@ -32,6 +34,7 @@ import static com.hackanet.utils.StringUtils.throwExceptionIfStringContainsBadWo
  * on 10/31/19
  */
 @Service
+@Slf4j
 public class TeamServiceImpl implements TeamService {
 
     private static final Integer DEFAULT_LIMIT = 10;
@@ -88,19 +91,43 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    @Transactional
     public Team updateTeam(Long id, User user, TeamUpdateForm form) {
-        Team team = get(id);
+        final Team team = get(id);
 
         SecurityUtils.checkTeamAccess(team, user);
 
-        String name = form.getName().trim();
+        String name = form.getName();
         if (!StringUtils.isBlank(name)) {
-            throwExceptionIfStringContainsBadWords(name, "name");
-            team.setName(name);
+            throwExceptionIfStringContainsBadWords(name.trim(), "name");
+            team.setName(name.trim());
         }
 
+        /*
+        * if user is contained in participants but is not contained in members =>
+        * the user will be added in chat and team
+        *
+        * if user is contained in members but is not contained in participants =>
+        * the user will be removed from the chat and the team
+        * */
         List<Long> participants = form.getParticipants();
         if (participants != null && !participants.isEmpty()) {
+            List<Long> members = team.getParticipants().stream()
+                    .map(User::getId)
+                    .collect(Collectors.toList());
+
+            participants.forEach(p -> {
+                if (!members.contains(p)) {
+                    chatService.addOrRemoveUser(team.getChat().getId(), p, null, true);
+                }
+            });
+
+            members.forEach(m -> {
+                if (!participants.contains(m)) {
+                    chatService.addOrRemoveUser(team.getChat().getId(), m, null, false);
+                    log.info("Removing member with id = {}", m);
+                }
+            });
             team.setParticipants(userService.getByIds(participants));
         }
 
@@ -113,8 +140,7 @@ public class TeamServiceImpl implements TeamService {
             team.setTeamLeader(userService.get(form.getTeamLeader()));
         }
 
-        team = teamRepository.save(team);
-        return team;
+        return teamRepository.save(team);
     }
 
     @Override

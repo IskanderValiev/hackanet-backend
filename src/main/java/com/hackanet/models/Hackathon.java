@@ -1,5 +1,6 @@
 package com.hackanet.models;
 
+import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.Currency;
 import lombok.*;
 
@@ -52,10 +53,18 @@ public class Hackathon extends AbstractEntity {
     private List<Skill> requiredSkills;
     @ManyToMany(mappedBy = "attendedHackathons")
     private List<User> participants;
+    @OneToMany(mappedBy = "hackathon")
+    private List<Chat> chats;
+
+    private Boolean deleted;
 
     public List<FileInfo> getFileInfo() {
         if (fileInfo == null)
             fileInfo = new ArrayList<>();
         return fileInfo;
+    }
+
+    public Boolean getDeleted() {
+        return Boolean.TRUE.equals(this.deleted);
     }
 }

@@ -6,9 +6,11 @@ import com.hackanet.json.forms.JoinToHackathonRequestCreateForm;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.JoinToHackathonRequest;
 import com.hackanet.models.User;
+import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.RequestStatus;
 import com.hackanet.repositories.JoinToHackathonRequestRepository;
 import com.hackanet.security.utils.SecurityUtils;
+import com.hackanet.services.chat.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +32,10 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
     private HackathonService hackathonService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private ChatService chatService;
+    @Autowired
+    private EmailService emailService;
 
     @Override
     public JoinToHackathonRequest createRequest(JoinToHackathonRequestCreateForm form, User user) {
@@ -72,6 +78,24 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
         switch (status) {
             case APPROVED:
                 User participant = request.getUser();
+
+                List<Chat> chats = hackathon.getChats();
+                if (chats != null) {
+                    if (chats.isEmpty()) {
+                        List<Chat> forHackathon = chatService.createForHackathon(hackathon);
+                        hackathon.setChats(forHackathon);
+                        hackathonService.save(hackathon);
+                    } else {
+                        chats.forEach(chat -> {
+                            chatService.addOrRemoveUser(chat.getId(), participant.getId(), null, true);
+                        });
+                    }
+                } else {
+                    List<Chat> forHackathon = chatService.createForHackathon(hackathon);
+                    hackathon.setChats(forHackathon);
+                    hackathonService.save(hackathon);
+                }
+                emailService.sendHackathonWelcomeEmail(participant, hackathon);
                 userService.updateUsersHackathonList(participant, hackathon, true);
                 break;
             case REJECTED:
