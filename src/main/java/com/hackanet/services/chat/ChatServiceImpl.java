@@ -1,23 +1,23 @@
 package com.hackanet.services.chat;
 
 import com.google.common.collect.Lists;
-import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.ChatCreateForm;
+import com.hackanet.models.Hackathon;
 import com.hackanet.models.User;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.ChatType;
 import com.hackanet.repositories.chat.ChatRepository;
-import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.hackanet.security.utils.SecurityUtils.*;
+import static com.hackanet.security.utils.SecurityUtils.checkChatAccessForOperation;
 
 /**
  * @author Iskander Valiev
@@ -64,7 +64,9 @@ public class ChatServiceImpl implements ChatService {
     public Chat addOrRemoveUser(Long chatId, Long userId, User currentUser, Boolean add) {
         Chat chat = get(chatId);
         // any participant can add and remove user from chat
-        checkChatAccessForOperation(chat, currentUser);
+        if (currentUser != null) {
+            checkChatAccessForOperation(chat, currentUser);
+        }
         User user = userService.get(userId);
 
         List<User> participants = chat.getParticipants();
@@ -74,11 +76,11 @@ public class ChatServiceImpl implements ChatService {
                 participants = new ArrayList<>();
             if (!participants.contains(user))
                 participants.add(user);
-        } else if (participants.contains(user)) {
-            // TODO: 10/27/19 pick up a new admin if user who created the chat has leaved
-            participants.remove(user);
         } else {
-            throw new BadRequestException("The user is not in the chat");
+            if (participants.contains(user)) {
+                // TODO: 10/27/19 pick up a new admin if user who created the chat has leaved
+                participants.remove(user);
+            }
         }
         chat.setParticipants(participants);
         chat = chatRepository.save(chat);
@@ -94,5 +96,30 @@ public class ChatServiceImpl implements ChatService {
                 .build();
         chat = chatRepository.save(chat);
         return chat;
+    }
+
+    @Override
+    @Transactional
+    public List<Chat> createForHackathon(Hackathon hackathon) {
+        List<User> participants = hackathon.getParticipants() == null ?
+                new ArrayList<>() : hackathon.getParticipants();
+        participants.add(hackathon.getOwner());
+
+        Chat newsChat = Chat.builder()
+                .admins(Collections.singletonList(hackathon.getOwner()))
+                .type(ChatType.NEWS)
+                .participants(participants)
+                .hackathon(hackathon)
+                .build();
+
+        Chat participantsChat = Chat.builder()
+                .type(ChatType.PARTICIPANTS_CONFERENCE)
+                .participants(participants)
+                .hackathon(hackathon)
+                .build();
+
+        List<Chat> chats = new ArrayList<>();
+        Collections.addAll(chats, newsChat, participantsChat);
+        return chatRepository.saveAll(chats);
     }
 }

@@ -36,4 +36,5 @@ public class HackathonDto {
     private Integer prizeFund;
     private String currency;
     private List<UserSimpleDto> participants;
+    private Boolean deleted;
 }

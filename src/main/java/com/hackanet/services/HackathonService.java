@@ -11,6 +11,7 @@ import java.util.List;
 public interface HackathonService {
     List<com.hackanet.models.Hackathon> getAll();
     Hackathon save(User user, HackathonCreateForm form);
+    Hackathon save(Hackathon hackathon);
     Hackathon get(Long id);
     Hackathon update(Long id, User user, HackathonUpdateForm form);
     void delete(Long id, User user);

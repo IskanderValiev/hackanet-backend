@@ -49,6 +49,7 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
                 .currency(from.getCurrency().toString())
                 .prizeFund(from.getPrize())
                 .city(from.getCity())
+                .deleted(from.getDeleted())
                 .build();
         if (hackathon.getLogo() != null)
             hackathon.setLogo(fileMapper.map(from.getLogo()));

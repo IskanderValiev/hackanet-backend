@@ -1,6 +1,8 @@
 package com.hackanet.services;
 
+import com.hackanet.models.Hackathon;
 import com.hackanet.models.PasswordChangeRequest;
+import com.hackanet.models.Team;
 import com.hackanet.models.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,5 +69,23 @@ public class EmailServiceImpl implements EmailService {
     public void sendPasswordResetEmail(User user, PasswordChangeRequest request) {
         String s = templateService.prepareResetPasswordEmail(user, request);
         send(s, "Reset password request", user.getEmail());
+    }
+
+    @Override
+    public void sendTeamWelcomeEmail(User user, Team team) {
+        String s = templateService.prepareTeamWelcomeEmail(user, team);
+        send(s, "Welcome to the team", user.getEmail());
+    }
+
+    @Override
+    public void sendTeamRejectEmail(User user, Team team) {
+        String s = templateService.prepareTeamRejectEmail(user, team);
+        send(s, "Team request is rejected", user.getEmail());
+    }
+
+    @Override
+    public void sendHackathonWelcomeEmail(User user, Hackathon hackathon) {
+        String s = templateService.prepareHackathonWelcomeEmail(user, hackathon);
+        send(s, "Welcome to the hackathon", user.getEmail());
     }
 }

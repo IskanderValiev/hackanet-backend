@@ -23,8 +23,8 @@ public class Team extends AbstractEntity {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "team_participants",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "team_id"))
+            joinColumns = @JoinColumn(name = "team_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> participants;
 
     @ManyToOne(fetch = FetchType.LAZY)

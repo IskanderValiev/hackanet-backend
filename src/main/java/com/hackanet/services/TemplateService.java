@@ -1,6 +1,8 @@
 package com.hackanet.services;
 
+import com.hackanet.models.Hackathon;
 import com.hackanet.models.PasswordChangeRequest;
+import com.hackanet.models.Team;
 import com.hackanet.models.User;
 
 public interface TemplateService {
@@ -8,4 +10,7 @@ public interface TemplateService {
     String prepareWelcomeEmail(User user);
     String test();
     String prepareResetPasswordEmail(User user, PasswordChangeRequest request);
+    String prepareTeamWelcomeEmail(User user, Team team);
+    String prepareTeamRejectEmail(User user, Team team);
+    String prepareHackathonWelcomeEmail(User user, Hackathon hackathon);
 }

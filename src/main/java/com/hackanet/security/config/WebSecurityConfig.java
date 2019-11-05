@@ -79,7 +79,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-    //абсолютно небезопасная хуйня, потом заменить на нужные айпишники фронта
+    //потом заменить на нужные айпишники фронта
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -10,9 +10,11 @@ import com.hackanet.models.Hackathon;
 import com.hackanet.models.Skill;
 import com.hackanet.models.User;
 import com.hackanet.repositories.HackathonRepository;
+import com.hackanet.services.chat.ChatService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -46,12 +48,16 @@ public class HackathonServiceImpl implements HackathonService {
     @Autowired
     private EntityManager entityManager;
 
+    @Autowired
+    private ChatService chatService;
+
     @Override
     public List<Hackathon> getAll() {
         return hackathonRepository.findAll();
     }
 
     @Override
+    @Transactional
     public Hackathon save(User user, HackathonCreateForm form) {
         Date start = form.getStart();
         Date end = form.getEnd();
@@ -68,16 +74,28 @@ public class HackathonServiceImpl implements HackathonService {
                 .startDate(start)
                 .endDate(end)
                 .owner(user)
-                .logo(fileInfoService.get(form.getLogoId()))
                 .description(form.getDescription().trim())
                 .country(StringUtils.capitalize(form.getCountry()))
                 .city(StringUtils.capitalize(form.getCity()))
                 .currency(form.getCurrency())
                 .prize(form.getPrizeFund())
                 .requiredSkills(skillService.getByIds(requiredSkills))
+                .deleted(false)
                 .build();
+
+        if (form.getLogoId() != null) {
+            FileInfo logo = fileInfoService.get(form.getLogoId());
+            hackathon.setLogo(logo);
+        }
         hackathon = hackathonRepository.save(hackathon);
+
+        chatService.createForHackathon(hackathon);
         return hackathon;
+    }
+
+    @Override
+    public Hackathon save(Hackathon hackathon) {
+        return hackathonRepository.save(hackathon);
     }
 
     @Override
@@ -148,7 +166,8 @@ public class HackathonServiceImpl implements HackathonService {
     public void delete(Long id, User user) {
         Hackathon hackathon = get(id);
         checkHackathonAccess(hackathon, user);
-        hackathonRepository.delete(hackathon);
+        hackathon.setDeleted(true);
+        hackathonRepository.save(hackathon);
     }
 
     @Override
@@ -172,6 +191,7 @@ public class HackathonServiceImpl implements HackathonService {
         Root<Hackathon> root = query.from(Hackathon.class);
         query.select(root);
         List<Predicate> predicates = new ArrayList<>();
+        predicates.add(criteriaBuilder.isFalse(root.get("deleted")));
         String name = form.getName();
         if (!StringUtils.isBlank(name)) {
             name = name.toLowerCase();

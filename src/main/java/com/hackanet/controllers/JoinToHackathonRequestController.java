@@ -74,7 +74,7 @@ public class JoinToHackathonRequestController {
             @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
                     required = true, dataType = "string", paramType = "header")
     })
-    @ApiOperation(value = "Get all requests by hackathon id")
+    @ApiOperation(value = "Update status of the request")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<JoinToHackathonRequestDto> changeStatus(@RequestParam RequestStatus status,
                                                                   @PathVariable Long id,
