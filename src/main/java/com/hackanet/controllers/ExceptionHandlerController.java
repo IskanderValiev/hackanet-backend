@@ -3,6 +3,7 @@ package com.hackanet.controllers;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.ForbiddenException;
 import com.hackanet.exceptions.NotFoundException;
+import com.hackanet.exceptions.UnauthorizedException;
 import com.hackanet.json.dto.ExceptionDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,12 @@ public class ExceptionHandlerController {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ExceptionDto> handleNotFound(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ExceptionDto.of(ex.getMessage()));
+    }
+
+    @ResponseBody
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ExceptionDto> handleUnauthorized(UnauthorizedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionDto.of(ex.getMessage()));
     }
 
 
