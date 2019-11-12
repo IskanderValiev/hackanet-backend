@@ -1,8 +1,7 @@
 package com.hackanet.models;
 
 import com.hackanet.models.chat.Chat;
-import com.hackanet.security.role.Role;
-import com.neovisionaries.i18n.CountryCode;
+import com.hackanet.security.enums.Role;
 import lombok.*;
 
 import javax.persistence.*;
@@ -55,4 +54,8 @@ public class User extends AbstractEntity {
     @ManyToMany(mappedBy = "admins")
     private List<Chat> chatsOwner;
     private Boolean lookingForTeam;
+    @Column(unique = true)
+    private String accessTokenParam;
+    @Column(unique = true)
+    private String refreshTokenParam;
 }

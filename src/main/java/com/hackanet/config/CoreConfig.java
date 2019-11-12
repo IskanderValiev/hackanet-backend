@@ -1,6 +1,7 @@
 package com.hackanet.config;
 
 import com.hackanet.security.filters.CORSFilter;
+import com.hackanet.security.filters.JwtTokenAuthFilter;
 import freemarker.template.TemplateException;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
 
 import javax.net.ssl.SSLContext;
+import javax.servlet.Filter;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -64,6 +66,15 @@ public class CoreConfig {
 //        registration.addInitParameter("paramName", "paramValue");
         registration.setName("corsFilter");
         registration.setOrder(1);
+        return registration;
+    }
+
+    //https://stackoverflow.com/questions/29285607/spring-security-custom-filter-called-multiple-times
+    @Bean
+    public FilterRegistrationBean registrationBean(JwtTokenAuthFilter filter) {
+        FilterRegistrationBean registration = new FilterRegistrationBean(filter);
+        registration.setEnabled(false);
+        registration.setOrder(2);
         return registration;
     }
 
