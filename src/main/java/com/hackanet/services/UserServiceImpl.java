@@ -406,7 +406,7 @@ public class UserServiceImpl implements UserService {
         userToken.setAccessTokenExpiresAt(LocalDateTime.now().plusHours(4));
         userTokenRepository.save(userToken);
 
-        if (LocalDateTime.now().isAfter(userToken.getRefreshTokenExpiresAt()))
+        if (userTokenExpired(userToken, true))
             throw new ForbiddenException("Refresh token has expired");
 
         User updateAccessTokenUser = get(user.getId());
