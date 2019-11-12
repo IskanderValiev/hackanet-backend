@@ -11,6 +11,8 @@ import java.util.List;
  * created by isko
  * on 10/31/19
  */
+@ToString
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @Getter
 @Setter

@@ -4,6 +4,7 @@ import com.hackanet.exceptions.ForbiddenException;
 import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.ChatType;
+import com.hackanet.models.enums.CompanyType;
 import com.hackanet.security.role.Role;
 
 /**
@@ -65,5 +66,15 @@ public class SecurityUtils {
     public static void checkPostLikeAccess(PostLike postLike, User user) {
         if (!postLike.getUser().equals(user))
             throw new ForbiddenException("You have no access to this post like");
+    }
+
+    public static void checkCompanyAccess(Company company, User user) {
+        if (!company.getAdmin().equals(user) || CompanyType.ADDED_BY_NAME.equals(company.getType()))
+            throw new ForbiddenException("You have no access to this company");
+    }
+
+    public static void checkPortfolioAccess(Portfolio portfolio, User user) {
+        if (!portfolio.getUser().equals(user))
+            throw new ForbiddenException("You have no access to this portfolio");
     }
 }

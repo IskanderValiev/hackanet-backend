@@ -4,8 +4,7 @@ import com.hackanet.models.FileInfo;
 
 import java.util.List;
 
-public interface FileInfoService {
-    FileInfo get(Long id);
+public interface FileInfoService extends CrudService<FileInfo> {
     FileInfo get(String name);
     void delete(FileInfo fileInfo);
     FileInfo save(FileInfo fileInfo);

@@ -5,14 +5,12 @@ import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.TeamCreateForm;
 import com.hackanet.json.forms.TeamSearchForm;
 import com.hackanet.json.forms.TeamUpdateForm;
-import com.hackanet.models.Hackathon;
-import com.hackanet.models.Skill;
-import com.hackanet.models.Team;
-import com.hackanet.models.User;
+import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.repositories.TeamRepository;
 import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.chat.ChatService;
+import com.hackanet.services.scheduler.JobRunner;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +22,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.hackanet.utils.StringUtils.throwExceptionIfStringContainsBadWords;
@@ -51,6 +50,10 @@ public class TeamServiceImpl implements TeamService {
     private SkillService skillService;
     @Autowired
     private EntityManager entityManager;
+    @Autowired
+    private JobRunner jobRunner;
+    @Autowired
+    private UserNotificationSettingsService userNotificationSettingsService;
 
     @Override
     public Team save(Team team) {
@@ -87,6 +90,11 @@ public class TeamServiceImpl implements TeamService {
                 .build();
 
         team = teamRepository.save(team);
+
+        UserNotificationSettings settings = userNotificationSettingsService.getOrCreateDefaultsSettingsForUser(teamLeader);
+        if (Boolean.TRUE.equals(settings.getPushEnabled())) {
+            jobRunner.addHackathonJobReviewRequestJobToTeamLeader(settings, teamLeader, team);
+        }
         return team;
     }
 

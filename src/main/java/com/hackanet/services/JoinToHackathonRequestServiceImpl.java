@@ -36,6 +36,10 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
     private ChatService chatService;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private PortfolioService portfolioService;
+    @Autowired
+    private HackathonJobDescriptionService hackathonJobDescriptionService;
 
     @Override
     public JoinToHackathonRequest createRequest(JoinToHackathonRequestCreateForm form, User user) {
@@ -75,9 +79,9 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
         Hackathon hackathon = request.getHackathon();
         SecurityUtils.checkHackathonAccess(hackathon, user);
         request.setStatus(status);
+        User participant = request.getUser();
         switch (status) {
             case APPROVED:
-                User participant = request.getUser();
 
                 List<Chat> chats = hackathon.getChats();
                 if (chats != null) {
@@ -98,6 +102,15 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
                 emailService.sendHackathonWelcomeEmail(participant, hackathon);
                 userService.updateUsersHackathonList(participant, hackathon, true);
                 break;
+
+            case ATTENDED:
+                Date startDate = hackathon.getStartDate();
+                Date date = new Date(System.currentTimeMillis());
+                if (date.before(startDate))
+                    throw new BadRequestException("Registration for hackathons has not been started yet");
+                portfolioService.addHackathonJob(participant.getId(), hackathon);
+                break;
+
             case REJECTED:
             case WAITING:
                 break;

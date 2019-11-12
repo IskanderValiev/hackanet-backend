@@ -14,4 +14,5 @@ public interface EmailService {
     void sendTeamWelcomeEmail(User user, Team team);
     void sendTeamRejectEmail(User user, Team team);
     void sendHackathonWelcomeEmail(User user, Hackathon hackathon);
+    void sendHackathonJobReviewRequestEmail(User user, Team team);
 }

@@ -88,4 +88,10 @@ public class EmailServiceImpl implements EmailService {
         String s = templateService.prepareHackathonWelcomeEmail(user, hackathon);
         send(s, "Welcome to the hackathon", user.getEmail());
     }
+
+    @Override
+    public void sendHackathonJobReviewRequestEmail(User user, Team team) {
+        String s = templateService.prepareHackathonJobReviewRequestEmail(user, team);
+        send(s, "Hackathon job review", user.getEmail());
+    }
 }

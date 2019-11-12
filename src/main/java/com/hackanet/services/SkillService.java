@@ -5,12 +5,10 @@ import com.hackanet.models.User;
 
 import java.util.List;
 
-public interface SkillService {
+public interface SkillService extends CrudService<Skill> {
     Skill add(String name);
     Skill update(Long id, String name);
     void delete(Long id);
-    List<Skill> getAll();
-    Skill get(Long id);
     List<Skill> getByNameLike(String name);
     List<Skill> getByIds(List<Long> ids);
 }

@@ -1,5 +1,6 @@
 package com.hackanet.json.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.hackanet.models.FileInfo;
@@ -27,6 +28,7 @@ public class PostDto {
     private UserSimpleDto author;
     private HackathonDto hackathonDto;
     private List<FileInfoDto> images;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private Timestamp date;
     private Long likesCount;
     private Long views;

@@ -1,5 +1,6 @@
 package com.hackanet.services;
 
+import com.hackanet.application.AppConstants;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.HackathonCreateForm;
@@ -33,8 +34,6 @@ import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
  */
 @Service
 public class HackathonServiceImpl implements HackathonService {
-
-    private static final Integer DEFAULT_LIMIT = 10;
 
     @Autowired
     private HackathonRepository hackathonRepository;
@@ -173,7 +172,7 @@ public class HackathonServiceImpl implements HackathonService {
     @Override
     public List<Hackathon> hackathonList(HackathonSearchForm form) {
         if (form.getLimit() == null)
-            form.setLimit(DEFAULT_LIMIT);
+            form.setLimit(AppConstants.DEFAULT_LIMIT);
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Hackathon> hackathonListQuery = getHackathonsListQuery(criteriaBuilder, form);
         TypedQuery<Hackathon> query = entityManager.createQuery(hackathonListQuery);
