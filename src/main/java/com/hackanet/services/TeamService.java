@@ -13,11 +13,10 @@ import java.util.List;
  * created by isko
  * on 10/31/19
  */
-public interface TeamService {
+public interface TeamService extends CrudService<Team> {
     Team save(Team team);
     Team createTeam(TeamCreateForm form);
     Team updateTeam(Long id, User user, TeamUpdateForm form);
-    Team get(Long id);
     List<Team> getByHackathon(Long hackathonId);
     List<Team> teamList(TeamSearchForm form);
 }

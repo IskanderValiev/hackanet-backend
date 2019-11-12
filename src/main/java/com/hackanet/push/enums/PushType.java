@@ -1,12 +1,12 @@
 package com.hackanet.push.enums;
 
 public enum PushType {
-    NEW_MESSAGE("NEW_MESSAGE");
+    NEW_MESSAGE, HACKATHON_JOB_REVIEW_REQUEST, JOIN_TO_TEAM_REQUEST_STATUS;
 
     private String value;
 
-    PushType(String value) {
-        this.value = value;
+    PushType() {
+        this.value = name();
     }
 
     public String getValue() {

@@ -6,7 +6,7 @@ import com.hackanet.json.mappers.JoinToTeamRequestMapper;
 import com.hackanet.models.JoinToTeamRequest;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.JoinToTeamRequestStatus;
-import com.hackanet.repositories.JoinToTeamRequestService;
+import com.hackanet.services.JoinToTeamRequestService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

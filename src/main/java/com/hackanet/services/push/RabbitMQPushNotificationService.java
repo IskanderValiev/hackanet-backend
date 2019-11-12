@@ -7,14 +7,18 @@ import com.google.common.collect.Multimap;
 //import com.hackanet.config.AMPQConfig;
 import com.hackanet.config.AMPQConfig;
 import com.hackanet.json.mappers.MessageMapper;
+import com.hackanet.models.JoinToTeamRequest;
+import com.hackanet.models.Team;
 import com.hackanet.models.User;
 import com.hackanet.models.UserPhoneToken;
 import com.hackanet.models.chat.Chat;
+import com.hackanet.models.chat.ChatSettings;
 import com.hackanet.push.ResolvedPush;
 import com.hackanet.push.enums.ClientType;
 import com.hackanet.push.enums.PushType;
 import com.hackanet.services.UserService;
 import com.hackanet.services.chat.ChatService;
+import com.hackanet.services.chat.ChatSettingsService;
 import com.hackanet.utils.PushAvailabilityChecker;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -71,6 +75,9 @@ public class RabbitMQPushNotificationService implements MessageListener {
     @Autowired
     private MessageMapper messageMapper;
 
+    @Autowired
+    private ChatSettingsService chatSettingsService;
+
     public void sendNewMessageNotification(@NotNull com.hackanet.models.chat.Message message) {
         Chat chat = chatService.get(message.getChatId());
         List<User> participants = chat.getParticipants().stream()
@@ -78,13 +85,17 @@ public class RabbitMQPushNotificationService implements MessageListener {
                 .collect(Collectors.toList());
 
         participants.forEach(participant -> {
-            PushNotificationMsg msg = PushNotificationMsg.builder()
-                    .toUserId(participant.getId())
-                    .fromUserId(message.getSenderId())
-                    .payloadEntity(messageMapper.map(message))
-                    .type(PushType.NEW_MESSAGE)
-                    .build();
-            rabbitTemplate.convertAndSend(AMPQConfig.QUEUE_NAME, buildMessage(msg));
+            // do not send notification if muted has been set false
+            ChatSettings chatSettings = chatSettingsService.getOrCreateForUser(participant, chat.getId());
+            if (!chatSettings.getMuted()) {
+                PushNotificationMsg msg = PushNotificationMsg.builder()
+                        .toUserId(participant.getId())
+                        .fromUserId(message.getSenderId())
+                        .payloadEntity(messageMapper.map(message))
+                        .type(PushType.NEW_MESSAGE)
+                        .build();
+                rabbitTemplate.convertAndSend(AMPQConfig.QUEUE_NAME, buildMessage(msg));
+            }
         });
     }
 
@@ -93,6 +104,24 @@ public class RabbitMQPushNotificationService implements MessageListener {
                 .toUserId(1L)
                 .type(PushType.NEW_MESSAGE)
                 .payloadEntity("NEW_MESSAGE")
+                .build();
+        rabbitTemplate.convertAndSend(AMPQConfig.QUEUE_NAME, buildMessage(msg));
+    }
+
+    public void sendHackathonJobReviewRequestNotification(User user, Team team) {
+        PushNotificationMsg msg = PushNotificationMsg.builder()
+                .toUserId(user.getId())
+                .type(PushType.HACKATHON_JOB_REVIEW_REQUEST)
+                .payloadEntity(team)
+                .build();
+        rabbitTemplate.convertAndSend(AMPQConfig.QUEUE_NAME, buildMessage(msg));
+    }
+
+    public void sendJoinToTeamRequestUpdatedStatusNotification(User user , JoinToTeamRequest request) {
+        PushNotificationMsg msg = PushNotificationMsg.builder()
+                .toUserId(user.getId())
+                .type(PushType.JOIN_TO_TEAM_REQUEST_STATUS)
+                .payloadEntity(request)
                 .build();
         rabbitTemplate.convertAndSend(AMPQConfig.QUEUE_NAME, buildMessage(msg));
     }

@@ -14,6 +14,9 @@ public class SkillMapper implements Mapper<Skill, SkillDto> {
 
     @Override
     public SkillDto map(Skill from) {
+        if (from == null)
+            return null;
+
         return SkillDto.builder()
                 .id(from.getId())
                 .name(from.getName())

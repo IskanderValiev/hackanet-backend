@@ -1,5 +1,6 @@
 package com.hackanet.services;
 
+import com.hackanet.application.AppConstants;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.PostCreateForm;
 import com.hackanet.json.forms.PostSearchForm;
@@ -23,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.remove;
 
 /**
  * @author Iskander Valiev
@@ -32,8 +32,6 @@ import static org.apache.commons.lang.StringUtils.remove;
  */
 @Service
 public class PostServiceImpl implements PostService {
-
-    private static final Integer DEFAULT_LIMIT = 10;
 
     @Autowired
     private PostRepository postRepository;
@@ -125,7 +123,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<Post> postList(PostSearchForm form) {
-        if (form.getLimit() == null) form.setLimit(DEFAULT_LIMIT);
+        if (form.getLimit() == null) form.setLimit(AppConstants.DEFAULT_LIMIT);
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Post> postsListQuery = getPostsListQuery(criteriaBuilder, form);
         TypedQuery<Post> query = entityManager.createQuery(postsListQuery);

@@ -8,11 +8,9 @@ import com.hackanet.models.User;
 
 import java.util.List;
 
-public interface HackathonService {
-    List<com.hackanet.models.Hackathon> getAll();
+public interface HackathonService extends CrudService<Hackathon> {
     Hackathon save(User user, HackathonCreateForm form);
     Hackathon save(Hackathon hackathon);
-    Hackathon get(Long id);
     Hackathon update(Long id, User user, HackathonUpdateForm form);
     void delete(Long id, User user);
     List<Hackathon> hackathonList(HackathonSearchForm form);

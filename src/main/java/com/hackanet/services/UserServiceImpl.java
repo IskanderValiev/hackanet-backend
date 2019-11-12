@@ -7,10 +7,7 @@ import com.hackanet.config.JwtConfig;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.dto.TokenDto;
-import com.hackanet.json.forms.UserLoginForm;
-import com.hackanet.json.forms.UserRegistrationForm;
-import com.hackanet.json.forms.UserSearchForm;
-import com.hackanet.json.forms.UserUpdateForm;
+import com.hackanet.json.forms.*;
 import com.hackanet.models.*;
 import com.hackanet.push.enums.ClientType;
 import com.hackanet.repositories.PasswordChangeRequestRepository;
@@ -67,8 +64,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private SkillService skillService;
     @Autowired
-    private HackathonService hackathonService;
-    @Autowired
     private FileInfoService fileInfoService;
     @Autowired
     private UserPhoneTokenRepository userPhoneTokenRepository;
@@ -76,9 +71,13 @@ public class UserServiceImpl implements UserService {
     private EmailService emailService;
     @Autowired
     private PasswordChangeRequestRepository passwordChangeRequestRepository;
-
+    @Autowired
+    private PortfolioService portfolioService;
+    @Autowired
+    private UserNotificationSettingsService userNotificationSettingsService;
 
     @Override
+    @Transactional
     public TokenDto register(UserRegistrationForm form) {
         String email = form.getEmail().toLowerCase();
         String password = form.getPassword();
@@ -103,6 +102,9 @@ public class UserServiceImpl implements UserService {
         if (form.getSkills() != null && !form.getSkills().isEmpty())
             user.setSkills(skillService.getByIds(form.getSkills()));
         user = userRepository.save(user);
+
+        userNotificationSettingsService.getOrCreateDefaultsSettingsForUser(user);
+        portfolioService.getByUserId(user.getId());
 
         final String prefix = jwtConfig.getPrefix() + " ";
 
@@ -338,6 +340,23 @@ public class UserServiceImpl implements UserService {
 
         passwordRequest.setUsed(Boolean.TRUE);
         passwordChangeRequestRepository.save(passwordRequest);
+    }
+
+    @Override
+    public User createForCompany(CompanyCreateForm form) {
+        String email = form.getEmail().trim().toLowerCase();
+        String password = form.getPassword();
+
+        User user = User.builder()
+                .email(email)
+                .hashedPassword(passwordUtil.hash(password))
+                .role(Role.COMPANY_ADMIN)
+                .country(form.getCountry())
+                .city(form.getCity())
+                .name(form.getName())
+                .build();
+
+        return userRepository.save(user);
     }
 
     private CriteriaQuery<User> getUsersListQuery(CriteriaBuilder criteriaBuilder, UserSearchForm form) {
