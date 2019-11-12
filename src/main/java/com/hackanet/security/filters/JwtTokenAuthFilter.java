@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
@@ -32,6 +33,7 @@ public class JwtTokenAuthFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest)servletRequest;
+        HttpServletResponse response = (HttpServletResponse) servletResponse;
         String authorizationHeader = request.getHeader("Authorization");
         JwtTokenAuthentication authentication;
 
@@ -59,9 +61,10 @@ public class JwtTokenAuthFilter implements Filter {
                 } else {
                     message = "{\"message\": \"Refresh token has expired.\"}";
                 }
-                servletResponse.setContentLength(message.length());
-                servletResponse.setContentType("application/json");
-                servletResponse.getOutputStream().print(message);
+                response.setContentLength(message.length());
+                response.setContentType("application/json");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getOutputStream().print(message);
                 return;
             }
         }
