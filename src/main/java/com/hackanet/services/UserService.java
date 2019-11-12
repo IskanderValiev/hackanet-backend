@@ -6,6 +6,7 @@ import com.hackanet.json.forms.*;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.User;
 import com.hackanet.models.UserPhoneToken;
+import com.hackanet.models.UserToken;
 import com.hackanet.push.enums.ClientType;
 
 import java.util.List;
@@ -26,4 +27,7 @@ public interface UserService extends CrudService<User> {
     void passwordResetRequest(String email);
     void changePassword(String code, String newPassword, String email);
     User createForCompany(CompanyCreateForm form);
+    TokenDto updateAccessToken(User user);
+    UserToken getByUserId(Long userId);
+    boolean userTokenExpired(UserToken token, boolean isRefreshToken);
 }

@@ -40,6 +40,7 @@ public class UserController {
     private static final String LIST = "/list";
     private static final String RESET_PASSWORD = "/password/reset";
     private static final String RESET_PASSWORD_REQUEST = RESET_PASSWORD + "/request";
+    private static final String GET_NEW_ACCESS_TOKEN = "/token/refresh";
 
     @Autowired
     private UserService userService;
@@ -103,5 +104,17 @@ public class UserController {
                                                 @RequestParam("newPassword") String newPassword) {
         userService.changePassword(code, newPassword, email);
         return new ResponseEntity<>("OK", HttpStatus.OK);
+    }
+
+    @PostMapping(GET_NEW_ACCESS_TOKEN)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    @ApiOperation("Get access token using REFRESH TOKEN")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<TokenDto> getAccessToken(@AuthenticationPrincipal User user) {
+        TokenDto tokenDto = userService.updateAccessToken(user);
+        return ResponseEntity.ok(tokenDto);
     }
 }

@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import com.hackanet.application.Patterns;
 import com.hackanet.config.JwtConfig;
 import com.hackanet.exceptions.BadRequestException;
+import com.hackanet.exceptions.ForbiddenException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.dto.TokenDto;
 import com.hackanet.json.forms.*;
@@ -13,7 +14,9 @@ import com.hackanet.push.enums.ClientType;
 import com.hackanet.repositories.PasswordChangeRequestRepository;
 import com.hackanet.repositories.UserPhoneTokenRepository;
 import com.hackanet.repositories.UserRepository;
-import com.hackanet.security.role.Role;
+import com.hackanet.repositories.UserTokenRepository;
+import com.hackanet.security.enums.Role;
+import com.hackanet.security.enums.TokenType;
 import com.hackanet.security.utils.PasswordUtil;
 import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.utils.DateTimeUtil;
@@ -75,6 +78,8 @@ public class UserServiceImpl implements UserService {
     private PortfolioService portfolioService;
     @Autowired
     private UserNotificationSettingsService userNotificationSettingsService;
+    @Autowired
+    private UserTokenRepository userTokenRepository;
 
     @Override
     @Transactional
@@ -97,6 +102,8 @@ public class UserServiceImpl implements UserService {
                 .about(form.getAbout())
                 .role(Role.USER)
                 .lookingForTeam(Boolean.FALSE)
+                .accessTokenParam(new RandomString().nextString())
+                .refreshTokenParam(new RandomString().nextString())
                 .build();
 
         if (form.getSkills() != null && !form.getSkills().isEmpty())
@@ -107,20 +114,31 @@ public class UserServiceImpl implements UserService {
         portfolioService.getByUserId(user.getId());
 
         final String prefix = jwtConfig.getPrefix() + " ";
-
         emailService.sendWelcomeEmail(user);
+        String accessToken = getTokenValue(user, TokenType.ACCESS);
+        String refreshToken = getTokenValue(user, TokenType.REFRESH);
+        createTokenForUser(user, refreshToken);
+
         return TokenDto.builder()
                 .userId(user.getId())
                 .role(user.getRole().toString())
-                .token(prefix + Jwts.builder()
-                        .claim("role", user.getRole().toString())
-                        .claim("email", user.getEmail())
-                        .setSubject(user.getId().toString())
-                        .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecret()).compact())
+                .accessToken(prefix + accessToken)
+                .refreshToken(prefix + refreshToken)
                 .build();
     }
 
+    private UserToken createTokenForUser(User user, String refreshToken) {
+        UserToken userToken = UserToken.builder()
+                .user(user)
+                .accessTokenExpiresAt(LocalDateTime.now().plusHours(4))
+                .refreshTokenExpiresAt(LocalDateTime.now().plusDays(180))
+                .refreshToken(refreshToken)
+                .build();
+        return userTokenRepository.save(userToken);
+    }
+
     @Override
+    @Transactional
     public TokenDto login(UserLoginForm form) {
         String email = form.getEmail().toLowerCase();
         String password = form.getPassword();
@@ -128,13 +146,35 @@ public class UserServiceImpl implements UserService {
         User user = get(email);
 
         if (passwordUtil.matches(password, user.getHashedPassword())) {
+            String value = getTokenValue(user, TokenType.ACCESS);
+
+            UserToken token = userTokenRepository.findByUserId(user.getId());
+            if (token == null) {
+
+                String refreshToken = getTokenValue(user, TokenType.REFRESH);
+
+                token = UserToken.builder()
+                        .user(user)
+                        .refreshToken(refreshToken)
+                        .refreshTokenExpiresAt(LocalDateTime.now().plusDays(180))
+                        .accessTokenExpiresAt(LocalDateTime.now().plusHours(4))
+                        .build();
+                token = userTokenRepository.save(token);
+            }
+            if (userTokenExpired(token, true)) {
+                user.setRefreshTokenParam(new RandomString().nextString());
+                userRepository.save(user);
+            }
+
             final String prefix = jwtConfig.getPrefix() + " ";
-            String value = Jwts.builder()
-                    .claim("role", user.getRole().toString())
-                    .claim("email", user.getEmail())
-                    .setSubject(user.getId().toString())
-                    .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecret()).compact();
-            return TokenDto.builder().token(prefix + value).userId(user.getId()).role(user.getRole().toString()).build();
+            return TokenDto.builder()
+                    .accessToken(prefix + value)
+                    .accessTokenExpiresAt(token.getAccessTokenExpiresAt())
+                    .refreshToken(token.getRefreshToken())
+                    .refreshTokenExpiresAt(token.getRefreshTokenExpiresAt())
+                    .userId(user.getId())
+                    .role(user.getRole().toString())
+                    .build();
         } else throw new BadRequestException("Login/Password is incorrect");
     }
 
@@ -357,6 +397,64 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public TokenDto updateAccessToken(User user) {
+        UserToken userToken = userTokenRepository.findByUserId(user.getId());
+        userToken.setAccessTokenExpiresAt(LocalDateTime.now().plusHours(4));
+        userTokenRepository.save(userToken);
+
+        if (LocalDateTime.now().isAfter(userToken.getRefreshTokenExpiresAt()))
+            throw new ForbiddenException("Refresh token has expired");
+
+        User updateAccessTokenUser = get(user.getId());
+        updateAccessTokenUser.setAccessTokenParam(new RandomString().nextString());
+        updateAccessTokenUser = userRepository.save(updateAccessTokenUser);
+
+        String value = getTokenValue(updateAccessTokenUser, TokenType.ACCESS);
+
+        return TokenDto.builder()
+                .userId(user.getId())
+                .role(updateAccessTokenUser.getRole().toString())
+                .refreshTokenExpiresAt(userToken.getRefreshTokenExpiresAt())
+                .refreshToken(userToken.getRefreshToken())
+                .accessToken(jwtConfig.getPrefix() + " " + value)
+                .accessTokenExpiresAt(userToken.getAccessTokenExpiresAt())
+                .build();
+    }
+
+    @Override
+    public UserToken getByUserId(Long userId) {
+        return userTokenRepository.findByUserId(userId);
+    }
+
+    /**
+     *
+     * checks if the token has expired
+     *
+     * @param token to check
+     * @param isRefreshToken type of token
+     *
+     * @return true if token has expired
+     * */
+    @Override
+    public boolean userTokenExpired(@NotNull UserToken token, boolean isRefreshToken) {
+        if (isRefreshToken)
+            return LocalDateTime.now().isAfter(token.getRefreshTokenExpiresAt());
+        else
+            return LocalDateTime.now().isAfter(token.getAccessTokenExpiresAt());
+    }
+
+    private String getTokenValue(User user, TokenType type) {
+        return Jwts.builder()
+                .claim("role", user.getRole().toString())
+                .claim("email", user.getEmail())
+                .claim("tokenParam", TokenType.REFRESH.equals(type) ? user.getRefreshTokenParam() : user.getAccessTokenParam())
+                .claim("token-type", type.toString())
+                .setSubject(user.getId().toString())
+                .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecret()).compact();
     }
 
     private CriteriaQuery<User> getUsersListQuery(CriteriaBuilder criteriaBuilder, UserSearchForm form) {

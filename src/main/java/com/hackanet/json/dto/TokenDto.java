@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * @author Iskander Valiev
  * created by isko
@@ -20,5 +22,8 @@ import lombok.NoArgsConstructor;
 public class TokenDto {
     private Long userId;
     private String role;
-    private String token;
+    private String accessToken;
+    private LocalDateTime accessTokenExpiresAt;
+    private String refreshToken;
+    private LocalDateTime refreshTokenExpiresAt;
 }

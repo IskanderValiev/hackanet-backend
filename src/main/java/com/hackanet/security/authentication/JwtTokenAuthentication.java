@@ -12,6 +12,7 @@ public class JwtTokenAuthentication implements Authentication {
     private boolean isAuthenticated;
     private UserDetails userDetails;
     private String token;
+    private boolean refresh;
 
     public JwtTokenAuthentication(String token) {
         this.token = token;
@@ -57,5 +58,13 @@ public class JwtTokenAuthentication implements Authentication {
 
     public void setUserDetails(UserDetails userDetails) {
         this.userDetails = userDetails;
+    }
+
+    public boolean isRefresh() {
+        return refresh;
+    }
+
+    public void setRefresh(boolean refresh) {
+        this.refresh = refresh;
     }
 }
