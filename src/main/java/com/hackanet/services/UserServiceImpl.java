@@ -2,6 +2,7 @@ package com.hackanet.services;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.hackanet.application.AppConstants;
 import com.hackanet.application.Patterns;
 import com.hackanet.config.JwtConfig;
 import com.hackanet.exceptions.BadRequestException;
@@ -130,8 +131,8 @@ public class UserServiceImpl implements UserService {
     private UserToken createTokenForUser(User user, String refreshToken) {
         UserToken userToken = UserToken.builder()
                 .user(user)
-                .accessTokenExpiresAt(LocalDateTime.now().plusHours(4))
-                .refreshTokenExpiresAt(LocalDateTime.now().plusDays(180))
+                .accessTokenExpiresAt(LocalDateTime.now().plusHours(AppConstants.ACCESS_TOKEN_EXPIRING_TIME_IN_HOURS))
+                .refreshTokenExpiresAt(LocalDateTime.now().plusDays(AppConstants.REFRESH_TOKEN_EXPIRING_TIME_IN_DAYS))
                 .refreshToken(refreshToken)
                 .build();
         return userTokenRepository.save(userToken);
@@ -156,8 +157,8 @@ public class UserServiceImpl implements UserService {
                 token = UserToken.builder()
                         .user(user)
                         .refreshToken(refreshToken)
-                        .refreshTokenExpiresAt(LocalDateTime.now().plusDays(180))
-                        .accessTokenExpiresAt(LocalDateTime.now().plusHours(4))
+                        .refreshTokenExpiresAt(LocalDateTime.now().plusDays(AppConstants.REFRESH_TOKEN_EXPIRING_TIME_IN_DAYS))
+                        .accessTokenExpiresAt(LocalDateTime.now().plusHours(AppConstants.ACCESS_TOKEN_EXPIRING_TIME_IN_HOURS))
                         .build();
                 token = userTokenRepository.save(token);
             }
@@ -403,7 +404,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public TokenDto updateAccessToken(User user) {
         UserToken userToken = userTokenRepository.findByUserId(user.getId());
-        userToken.setAccessTokenExpiresAt(LocalDateTime.now().plusHours(4));
+        userToken.setAccessTokenExpiresAt(LocalDateTime.now().plusHours(AppConstants.ACCESS_TOKEN_EXPIRING_TIME_IN_HOURS));
         userTokenRepository.save(userToken);
 
         if (userTokenExpired(userToken, true))
