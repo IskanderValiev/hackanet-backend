@@ -3,6 +3,7 @@ package com.hackanet.application;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
@@ -14,6 +15,11 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
  * created by isko
  * on 10/18/19
  */
+//The @EnableCaching annotation triggers a post-processor that inspects every Spring bean
+//for the presence of caching annotations on public methods.
+//If such an annotation is found, a proxy is automatically created to intercept
+//the method call and handle the caching behavior accordingly.
+@EnableCaching
 @ComponentScan("com.hackanet")
 @EnableJpaRepositories(basePackages = "com.hackanet.repositories")
 @EnableElasticsearchRepositories(basePackages = "com.hackanet.repositories")

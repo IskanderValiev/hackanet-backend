@@ -14,6 +14,9 @@ import com.hackanet.repositories.HackathonRepository;
 import com.hackanet.services.chat.ChatService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,11 +53,13 @@ public class HackathonServiceImpl implements HackathonService {
     @Autowired
     private ChatService chatService;
 
+    @Cacheable("hackathon")
     @Override
     public List<Hackathon> getAll() {
         return hackathonRepository.findAll();
     }
 
+    @CachePut("hackathons")
     @Override
     @Transactional
     public Hackathon save(User user, HackathonCreateForm form) {
@@ -110,6 +115,7 @@ public class HackathonServiceImpl implements HackathonService {
      *      if user is not an owner of the hackathon
      *
      * */
+    @CacheEvict("hackathons")
     @Override
     public Hackathon update(Long id, User user, HackathonUpdateForm form) {
         Hackathon hackathon = get(id);
