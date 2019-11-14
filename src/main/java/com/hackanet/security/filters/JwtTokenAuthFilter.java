@@ -54,7 +54,7 @@ public class JwtTokenAuthFilter implements Filter {
             }
             context.setAuthentication(provider.authenticate(authentication));
 
-            if (!context.getAuthentication().isAuthenticated()) {
+            if (!StringUtils.isBlank(context.getAuthentication().getName()) && !context.getAuthentication().isAuthenticated()) {
                 String message;
                 if (authentication.isRefresh()) {
                     message = "{\"message\": \"Access token has expired.\"}";

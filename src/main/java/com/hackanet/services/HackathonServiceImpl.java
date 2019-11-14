@@ -1,6 +1,7 @@
 package com.hackanet.services;
 
 import com.hackanet.application.AppConstants;
+import com.hackanet.components.Profiling;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.HackathonCreateForm;
@@ -14,9 +15,11 @@ import com.hackanet.repositories.HackathonRepository;
 import com.hackanet.services.chat.ChatService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +38,7 @@ import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
  * created by isko
  * on 10/19/19
  */
+@Profiling(enabled = true)
 @Service
 public class HackathonServiceImpl implements HackathonService {
 
@@ -53,7 +57,7 @@ public class HackathonServiceImpl implements HackathonService {
     @Autowired
     private ChatService chatService;
 
-    @Cacheable("hackathon")
+    @Cacheable(value = "hackathons")
     @Override
     public List<Hackathon> getAll() {
         return hackathonRepository.findAll();
@@ -115,7 +119,7 @@ public class HackathonServiceImpl implements HackathonService {
      *      if user is not an owner of the hackathon
      *
      * */
-    @CacheEvict("hackathons")
+    @CacheEvict(value = "hackathons", allEntries = true)
     @Override
     public Hackathon update(Long id, User user, HackathonUpdateForm form) {
         Hackathon hackathon = get(id);
