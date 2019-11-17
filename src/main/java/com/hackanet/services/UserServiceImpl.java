@@ -1,5 +1,6 @@
 package com.hackanet.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.hackanet.application.AppConstants;
@@ -35,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +45,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static com.hackanet.utils.StringUtils.generateRandomString;
+import static com.hackanet.utils.StringUtils.getJsonOfTokenDtoFromPrincipalName;
 
 /**
  * @author Iskander Valiev
@@ -81,6 +84,8 @@ public class UserServiceImpl implements UserService {
     private UserNotificationSettingsService userNotificationSettingsService;
     @Autowired
     private UserTokenRepository userTokenRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Override
     @Transactional
@@ -113,29 +118,9 @@ public class UserServiceImpl implements UserService {
 
         userNotificationSettingsService.getOrCreateDefaultsSettingsForUser(user);
         portfolioService.getByUserId(user.getId());
-
-        final String prefix = jwtConfig.getPrefix() + " ";
         emailService.sendWelcomeEmail(user);
-        String accessToken = getTokenValue(user, TokenType.ACCESS);
-        String refreshToken = getTokenValue(user, TokenType.REFRESH);
-        createTokenForUser(user, refreshToken);
-
-        return TokenDto.builder()
-                .userId(user.getId())
-                .role(user.getRole().toString())
-                .accessToken(prefix + accessToken)
-                .refreshToken(prefix + refreshToken)
-                .build();
-    }
-
-    private UserToken createTokenForUser(User user, String refreshToken) {
-        UserToken userToken = UserToken.builder()
-                .user(user)
-                .accessTokenExpiresAt(LocalDateTime.now().plusHours(AppConstants.ACCESS_TOKEN_EXPIRING_TIME_IN_HOURS))
-                .refreshTokenExpiresAt(LocalDateTime.now().plusDays(AppConstants.REFRESH_TOKEN_EXPIRING_TIME_IN_DAYS))
-                .refreshToken(refreshToken)
-                .build();
-        return userTokenRepository.save(userToken);
+        UserToken token = getOrCreateTokenIfNotExists(user);
+        return buildTokenDtoByUser(user, token);
     }
 
     @Override
@@ -151,16 +136,7 @@ public class UserServiceImpl implements UserService {
 
             UserToken token = userTokenRepository.findByUserId(user.getId());
             if (token == null) {
-
-                String refreshToken = getTokenValue(user, TokenType.REFRESH);
-
-                token = UserToken.builder()
-                        .user(user)
-                        .refreshToken(refreshToken)
-                        .refreshTokenExpiresAt(LocalDateTime.now().plusDays(AppConstants.REFRESH_TOKEN_EXPIRING_TIME_IN_DAYS))
-                        .accessTokenExpiresAt(LocalDateTime.now().plusHours(AppConstants.ACCESS_TOKEN_EXPIRING_TIME_IN_HOURS))
-                        .build();
-                token = userTokenRepository.save(token);
+                token = getOrCreateTokenIfNotExists(user);
             }
             if (userTokenExpired(token, true)) {
                 user.setRefreshTokenParam(new RandomString().nextString());
@@ -233,12 +209,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    // TODO: 11/4/19 return TokenDto
-    public User saveFromGoogle(Map<String, Object> userDetails) {
+    public TokenDto saveFromGoogle(Map<String, Object> userDetails) {
         String email = (String) userDetails.get("email");
-        boolean userExists = exists(email.toLowerCase());
-        if (userExists)
-            return get(email.toLowerCase());
+        User user = get(email.toLowerCase());
+        if (user != null) {
+            UserToken userToken = getOrCreateTokenIfNotExists(user);
+            return buildTokenDtoByUser(user, userToken);
+        }
 
 //            map.get("email_verified"); in case we need to change user status
         FileInfo fileInfo = FileInfo.builder()
@@ -248,18 +225,20 @@ public class UserServiceImpl implements UserService {
 
         fileInfoService.save(fileInfo);
 
-        User user = User.builder()
+        user = User.builder()
                 .email(email.toLowerCase())
                 .name((String) userDetails.get("given_name"))
                 .lastname((String) userDetails.get("family_name"))
                 .image(fileInfo)
                 .role(Role.USER)
                 .lookingForTeam(Boolean.FALSE)
+                .refreshTokenParam(new RandomString().nextString())
+                .accessTokenParam(new RandomString().nextString())
                 .build();
         user = userRepository.save(user);
-
+        UserToken userToken = getOrCreateTokenIfNotExists(user);
         emailService.sendWelcomeEmail(user);
-        return user;
+        return buildTokenDtoByUser(user, userToken);
     }
 
     @Override
@@ -404,11 +383,12 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public TokenDto updateAccessToken(User user) {
         UserToken userToken = userTokenRepository.findByUserId(user.getId());
-        userToken.setAccessTokenExpiresAt(LocalDateTime.now().plusHours(AppConstants.ACCESS_TOKEN_EXPIRING_TIME_IN_HOURS));
-        userTokenRepository.save(userToken);
 
         if (userTokenExpired(userToken, true))
             throw new ForbiddenException("Refresh token has expired");
+
+        userToken.setAccessTokenExpiresAt(LocalDateTime.now().plusHours(AppConstants.ACCESS_TOKEN_EXPIRING_TIME_IN_HOURS));
+        userTokenRepository.save(userToken);
 
         User updateAccessTokenUser = get(user.getId());
         updateAccessTokenUser.setAccessTokenParam(new RandomString().nextString());
@@ -446,6 +426,16 @@ public class UserServiceImpl implements UserService {
             return LocalDateTime.now().isAfter(token.getRefreshTokenExpiresAt());
         else
             return LocalDateTime.now().isAfter(token.getAccessTokenExpiresAt());
+    }
+
+    @Override
+    public TokenDto getTokenDtoFromString(String principalName) {
+        principalName = getJsonOfTokenDtoFromPrincipalName(principalName);
+        try {
+            return objectMapper.readValue(principalName, TokenDto.class);
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
+        }
     }
 
     private String getTokenValue(User user, TokenType type) {
@@ -498,5 +488,29 @@ public class UserServiceImpl implements UserService {
         query.distinct(true);
         query.where(criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()])));
         return query;
+    }
+
+    private UserToken getOrCreateTokenIfNotExists(User user) {
+        UserToken userToken = userTokenRepository.findByUserId(user.getId());
+        if (userToken != null) return userToken;
+
+        userToken = UserToken.builder()
+                .user(user)
+                .accessTokenExpiresAt(LocalDateTime.now().plusHours(AppConstants.ACCESS_TOKEN_EXPIRING_TIME_IN_HOURS))
+                .refreshTokenExpiresAt(LocalDateTime.now().plusDays(AppConstants.REFRESH_TOKEN_EXPIRING_TIME_IN_DAYS))
+                .refreshToken(getTokenValue(user, TokenType.REFRESH))
+                .build();
+        return userTokenRepository.save(userToken);
+    }
+
+    private TokenDto buildTokenDtoByUser(User user, UserToken userToken) {
+        return TokenDto.builder()
+                .userId(user.getId())
+                .refreshToken(userToken.getRefreshToken())
+                .accessToken(getTokenValue(user, TokenType.ACCESS))
+                .refreshTokenExpiresAt(userToken.getRefreshTokenExpiresAt())
+                .accessTokenExpiresAt(userToken.getAccessTokenExpiresAt())
+                .role(user.getRole().toString())
+                .build();
     }
 }

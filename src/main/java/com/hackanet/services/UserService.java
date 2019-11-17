@@ -21,7 +21,7 @@ public interface UserService extends CrudService<User> {
     List<User> getByIds(List<Long> ids);
     List<User> userList(UserSearchForm form);
     void updateUsersHackathonList(User user, Hackathon hackathon, boolean add);
-    User saveFromGoogle(Map<String, Object> userDetails);
+    TokenDto saveFromGoogle(Map<String, Object> userDetails);
     User update(Long id, User currentUser, UserUpdateForm form);
     Multimap<ClientType, UserPhoneToken> getTokensForUser(Long userId);
     void passwordResetRequest(String email);
@@ -30,4 +30,5 @@ public interface UserService extends CrudService<User> {
     TokenDto updateAccessToken(User user);
     UserToken getByUserId(Long userId);
     boolean userTokenExpired(UserToken token, boolean isRefreshToken);
+    TokenDto getTokenDtoFromString(String string);
 }
