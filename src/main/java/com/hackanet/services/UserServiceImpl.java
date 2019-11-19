@@ -20,6 +20,7 @@ import com.hackanet.repositories.UserTokenRepository;
 import com.hackanet.security.enums.Role;
 import com.hackanet.security.enums.TokenType;
 import com.hackanet.security.utils.PasswordUtil;
+import com.hackanet.security.utils.ProviderUtils;
 import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.utils.DateTimeUtil;
 import com.hackanet.utils.PhoneUtil;
@@ -30,6 +31,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +49,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import static com.hackanet.security.utils.ProviderUtils.*;
+import static com.hackanet.security.utils.ProviderUtils.isGithub;
 import static com.hackanet.utils.StringUtils.generateRandomString;
 import static com.hackanet.utils.StringUtils.getJsonOfTokenDtoFromPrincipalName;
 
@@ -211,8 +218,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public TokenDto saveFromGoogle(Map<String, Object> userDetails) {
         String email = (String) userDetails.get("email");
-        User user = get(email.toLowerCase());
-        if (user != null) {
+        boolean exists = exists(email.toLowerCase());
+        User user;
+        if (exists) {
+            user = get(email.toLowerCase());
             UserToken userToken = getOrCreateTokenIfNotExists(user);
             return buildTokenDtoByUser(user, userToken);
         }
@@ -239,6 +248,71 @@ public class UserServiceImpl implements UserService {
         UserToken userToken = getOrCreateTokenIfNotExists(user);
         emailService.sendWelcomeEmail(user);
         return buildTokenDtoByUser(user, userToken);
+    }
+
+    @Override
+    public TokenDto saveFromGoogle(Authentication authentication) {
+        DefaultOidcUser oidcUser = (DefaultOidcUser) authentication.getPrincipal();
+        return saveFromGoogle(oidcUser.getAttributes());
+    }
+
+    @Override
+    @Transactional
+    public TokenDto saveFromGithub(Map<String, Object> userDetails) {
+        User.UserBuilder userBuilder = User.builder();
+        String email = (String) userDetails.get("email");
+        String login = (String) userDetails.get("login");
+        if (!StringUtils.isBlank(email)) {
+            boolean exists = exists(email.toLowerCase());
+            if (exists) {
+                User user = get(email.toLowerCase());
+                UserToken userToken = getOrCreateTokenIfNotExists(user);
+                return buildTokenDtoByUser(user, userToken);
+            }
+            userBuilder.email(email);
+        } else if (!StringUtils.isBlank(login)) {
+            boolean exists = exists(login.toLowerCase());
+            if (exists) {
+                User user = get(login.toLowerCase());
+                UserToken userToken = getOrCreateTokenIfNotExists(user);
+                return buildTokenDtoByUser(user, userToken);
+            }
+            userBuilder.email(login);
+        } else throw new BadRequestException("Email and login are null or empty.");
+
+        String name = (String) userDetails.get("name");
+        if (!StringUtils.isBlank(name))
+            userBuilder.name(name);
+        else
+            userBuilder.name(login);
+        userBuilder.role(Role.USER)
+                .accessTokenParam(new RandomString().nextString())
+                .refreshTokenParam(new RandomString().nextString())
+                .country((String) userDetails.get("location"));
+
+        User user = userRepository.save(userBuilder.build());
+        UserToken token = getOrCreateTokenIfNotExists(user);
+
+        String avatarUrl = (String) userDetails.get("avatar_url");
+        FileInfo fileInfo = FileInfo.builder()
+                .previewLink(avatarUrl)
+                .user(user)
+                .build();
+        fileInfoService.save(fileInfo);
+        return buildTokenDtoByUser(user, token);
+    }
+
+    @Override
+    public TokenDto saveFromGithub(Authentication authentication) {
+        DefaultOAuth2User oidcUser = (DefaultOAuth2User) authentication.getPrincipal();
+        return saveFromGithub(oidcUser.getAttributes());
+    }
+
+    @Override
+    public TokenDto saveFromSocialNetwork(OAuth2AuthenticationToken principal) {
+        if (isGoogle(principal)) return saveFromGoogle(principal);
+        if (isGithub(principal)) return saveFromGithub(principal);
+        throw new BadRequestException("Exception has been thrown");
     }
 
     @Override
@@ -412,14 +486,12 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     *
      * checks if the token has expired
      *
-     * @param token to check
+     * @param token          to check
      * @param isRefreshToken type of token
-     *
      * @return true if token has expired
-     * */
+     */
     @Override
     public boolean userTokenExpired(@NotNull UserToken token, boolean isRefreshToken) {
         if (isRefreshToken)

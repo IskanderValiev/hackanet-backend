@@ -8,6 +8,8 @@ import com.hackanet.models.User;
 import com.hackanet.models.UserPhoneToken;
 import com.hackanet.models.UserToken;
 import com.hackanet.push.enums.ClientType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,10 @@ public interface UserService extends CrudService<User> {
     List<User> userList(UserSearchForm form);
     void updateUsersHackathonList(User user, Hackathon hackathon, boolean add);
     TokenDto saveFromGoogle(Map<String, Object> userDetails);
+    TokenDto saveFromGoogle(Authentication principal);
+    TokenDto saveFromGithub(Map<String, Object> userDetails);
+    TokenDto saveFromGithub(Authentication principal);
+    TokenDto saveFromSocialNetwork(OAuth2AuthenticationToken principal);
     User update(Long id, User currentUser, UserUpdateForm form);
     Multimap<ClientType, UserPhoneToken> getTokensForUser(Long userId);
     void passwordResetRequest(String email);
