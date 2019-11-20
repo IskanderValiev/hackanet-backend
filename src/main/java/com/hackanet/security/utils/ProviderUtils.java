@@ -20,4 +20,8 @@ public class ProviderUtils {
     public static boolean isFacebook(OAuth2AuthenticationToken token) {
         return token.getAuthorizedClientRegistrationId().equals("facebook");
     }
+
+    public static boolean isLinkedIn(OAuth2AuthenticationToken token) {
+        return token.getAuthorizedClientRegistrationId().equals("linkedin");
+    }
 }

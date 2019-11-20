@@ -23,10 +23,10 @@ public interface UserService extends CrudService<User> {
     List<User> getByIds(List<Long> ids);
     List<User> userList(UserSearchForm form);
     void updateUsersHackathonList(User user, Hackathon hackathon, boolean add);
-    TokenDto saveFromGoogle(Map<String, Object> userDetails);
     TokenDto saveFromGoogle(Authentication principal);
-    TokenDto saveFromGithub(Map<String, Object> userDetails);
     TokenDto saveFromGithub(Authentication principal);
+    TokenDto saveFromFacebook(Authentication principal);
+    TokenDto saveFromLinkedIn(Authentication principal);
     TokenDto saveFromSocialNetwork(OAuth2AuthenticationToken principal);
     User update(Long id, User currentUser, UserUpdateForm form);
     Multimap<ClientType, UserPhoneToken> getTokensForUser(Long userId);

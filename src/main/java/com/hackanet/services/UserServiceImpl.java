@@ -214,9 +214,8 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    @Override
     @Transactional
-    public TokenDto saveFromGoogle(Map<String, Object> userDetails) {
+    protected TokenDto saveFromGoogle(Map<String, Object> userDetails) {
         String email = (String) userDetails.get("email");
         boolean exists = exists(email.toLowerCase());
         User user;
@@ -256,9 +255,8 @@ public class UserServiceImpl implements UserService {
         return saveFromGoogle(oidcUser.getAttributes());
     }
 
-    @Override
     @Transactional
-    public TokenDto saveFromGithub(Map<String, Object> userDetails) {
+    protected TokenDto saveFromGithub(Map<String, Object> userDetails) {
         User.UserBuilder userBuilder = User.builder();
         String email = (String) userDetails.get("email");
         String login = (String) userDetails.get("login");
@@ -312,7 +310,46 @@ public class UserServiceImpl implements UserService {
     public TokenDto saveFromSocialNetwork(OAuth2AuthenticationToken principal) {
         if (isGoogle(principal)) return saveFromGoogle(principal);
         if (isGithub(principal)) return saveFromGithub(principal);
-        throw new BadRequestException("Exception has been thrown");
+        if (isFacebook(principal)) return saveFromFacebook(principal);
+        if (isLinkedIn(principal)) return saveFromLinkedIn(principal);
+        throw new BadRequestException("Provider has not been found");
+    }
+
+    @Override
+    public TokenDto saveFromFacebook(Authentication authentication) {
+        DefaultOAuth2User oidcUser = (DefaultOAuth2User) authentication.getPrincipal();
+        return saveFromFacebook(oidcUser.getAttributes());
+    }
+
+    @Override
+    public TokenDto saveFromLinkedIn(Authentication authentication) {
+        DefaultOAuth2User oidcUser = (DefaultOAuth2User) authentication.getPrincipal();
+        return saveFromLinkedIn(oidcUser.getAttributes());
+    }
+
+    @Transactional
+    protected TokenDto saveFromLinkedIn(Map<String, Object> userDetails) {
+        String name = (String) userDetails.get("localizedFirstName");
+        String lastName = (String) userDetails.get("localizedLastName");
+
+        // TODO: 11/20/19 get email and save user if he does not exist with received email
+        User user = User.builder()
+                .name(name)
+                .lastname(lastName)
+                .role(Role.USER)
+                .refreshTokenParam(new RandomString().nextString())
+                .accessTokenParam(new RandomString().nextString())
+                .build();
+
+        user = userRepository.save(user);
+
+
+        return new TokenDto();
+    }
+
+    @Transactional
+    protected TokenDto saveFromFacebook(Map<String, Object> userDetails) {
+        return new TokenDto();
     }
 
     @Override
