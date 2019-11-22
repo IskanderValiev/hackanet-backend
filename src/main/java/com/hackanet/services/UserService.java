@@ -11,6 +11,7 @@ import com.hackanet.push.enums.ClientType;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface UserService extends CrudService<User> {
     TokenDto register(UserRegistrationForm form);
@@ -18,7 +19,7 @@ public interface UserService extends CrudService<User> {
     Boolean exists(String email);
     Boolean existsByPhone(String phone);
     User get(String email);
-    List<User> getByIds(List<Long> ids);
+    Set<User> getByIds(List<Long> ids);
     List<User> userList(UserSearchForm form);
     void updateUsersHackathonList(User user, Hackathon hackathon, boolean add);
     User saveFromGoogle(Map<String, Object> userDetails);

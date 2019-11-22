@@ -37,4 +37,6 @@ public class HackathonDto {
     private String currency;
     private List<UserSimpleDto> participants;
     private Boolean deleted;
+    private Double latitude;
+    private Double longitude;
 }

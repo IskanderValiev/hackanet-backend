@@ -1,10 +1,12 @@
 package com.hackanet.models;
 
 import com.hackanet.models.chat.Chat;
+import com.hackanet.models.enums.TeamType;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Iskander Valiev
@@ -42,4 +44,7 @@ public class Team extends AbstractEntity {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "teams_skills_looking_for")
     private List<Skill> skillsLookingFor;
+
+    @Enumerated(EnumType.STRING)
+    private TeamType teamType;
 }

@@ -1,6 +1,7 @@
 package com.hackanet.services.chat;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.ChatCreateForm;
 import com.hackanet.models.Hackathon;
@@ -13,9 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.hackanet.security.utils.SecurityUtils.checkChatAccessForOperation;
 
@@ -40,10 +40,10 @@ public class ChatServiceImpl implements ChatService {
         } else if (form.getParticipantsIds().isEmpty())
             form.getParticipantsIds().add(currentUser.getId());
 
-        List<User> participants = userService.getByIds(form.getParticipantsIds());
+        Set<User> participants = userService.getByIds(form.getParticipantsIds());
         Chat chat = Chat.builder()
                 .participants(participants)
-                .admins(Collections.singletonList(currentUser))
+                .admins(Collections.singleton(currentUser))
                 .type(form.getChatType())
                 .build();
         chat = chatRepository.save(chat);
@@ -64,23 +64,16 @@ public class ChatServiceImpl implements ChatService {
     public Chat addOrRemoveUser(Long chatId, Long userId, User currentUser, Boolean add) {
         Chat chat = get(chatId);
         // any participant can add and remove user from chat
-        if (currentUser != null) {
-            checkChatAccessForOperation(chat, currentUser);
-        }
+        if (currentUser != null) checkChatAccessForOperation(chat, currentUser);
         User user = userService.get(userId);
 
-        List<User> participants = chat.getParticipants();
+        Set<User> participants = chat.getParticipants();
 
         if (Boolean.TRUE.equals(add)) {
-            if (participants == null)
-                participants = new ArrayList<>();
-            if (!participants.contains(user))
-                participants.add(user);
+            participants.add(user);
         } else {
-            if (participants.contains(user)) {
-                // TODO: 10/27/19 pick up a new admin if user who created the chat has leaved
-                participants.remove(user);
-            }
+            // TODO: 10/27/19 pick up a new admin if user who created the chat has leaved
+            participants.remove(user);
         }
         chat.setParticipants(participants);
         chat = chatRepository.save(chat);
@@ -88,10 +81,28 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Chat createForTeam(List<User> participants) {
+    public Chat addOrRemoveListOfUsers(Long chatId, List<User> users, User currentUser, Boolean add) {
+        Chat chat = get(chatId);
+        if (currentUser != null) {
+            checkChatAccessForOperation(chat, currentUser);
+        }
+
+        Set<User> participants = chat.getParticipants();
+        if (Boolean.TRUE.equals(add)) {
+            participants.addAll(users);
+        } else {
+            participants.removeAll(users);
+        }
+        chat.setParticipants(participants);
+        return chatRepository.save(chat);
+    }
+
+    @Override
+    public Chat createForTeam(Set<User> participants) {
+        Set<User> members = new HashSet<>(participants);
         Chat chat = Chat.builder()
                 .type(ChatType.TEAM_CHAT)
-                .participants(participants)
+                .participants(members)
                 .admins(participants)
                 .build();
         chat = chatRepository.save(chat);
@@ -101,20 +112,20 @@ public class ChatServiceImpl implements ChatService {
     @Override
     @Transactional
     public List<Chat> createForHackathon(Hackathon hackathon) {
-        List<User> participants = hackathon.getParticipants() == null ?
-                new ArrayList<>() : hackathon.getParticipants();
+        Set<User> participants = hackathon.getParticipants();
         participants.add(hackathon.getOwner());
+        HashSet<User> members = new HashSet<>(participants);
 
         Chat newsChat = Chat.builder()
-                .admins(Collections.singletonList(hackathon.getOwner()))
+                .admins(Collections.singleton(hackathon.getOwner()))
                 .type(ChatType.NEWS)
-                .participants(participants)
+                .participants(members)
                 .hackathon(hackathon)
                 .build();
 
         Chat participantsChat = Chat.builder()
                 .type(ChatType.PARTICIPANTS_CONFERENCE)
-                .participants(participants)
+                .participants(members)
                 .hackathon(hackathon)
                 .build();
 

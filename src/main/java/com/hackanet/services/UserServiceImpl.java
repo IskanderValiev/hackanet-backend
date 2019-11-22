@@ -36,10 +36,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.hackanet.utils.StringUtils.generateRandomString;
@@ -202,7 +199,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getByIds(List<Long> ids) {
+    public Set<User> getByIds(List<Long> ids) {
         return userRepository.findAllByIdIn(ids);
     }
 
