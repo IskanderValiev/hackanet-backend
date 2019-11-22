@@ -46,8 +46,9 @@ public class TeamController {
                     required = true, dataType = "string", paramType = "header")
     })
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<TeamDto> create(@Valid @RequestBody TeamCreateForm form) {
-        Team team = teamService.createTeam(form);
+    public ResponseEntity<TeamDto> create(@Valid @RequestBody TeamCreateForm form,
+                                          @AuthenticationPrincipal User user) {
+        Team team = teamService.createTeam(user, form);
         return new ResponseEntity<>(teamMapper.map(team), HttpStatus.CREATED);
     }
 

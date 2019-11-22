@@ -1,12 +1,15 @@
 package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.ChatDto;
+import com.hackanet.json.dto.UserSimpleDto;
 import com.hackanet.models.chat.Chat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * @author Iskander Valiev
@@ -28,11 +31,13 @@ public class ChatMapper implements Mapper<Chat, ChatDto> {
             from.setMessages(Collections.emptyList());
         }
 
+        List<UserSimpleDto> userSimpleDtos = userSimpleMapper.map(from.getParticipants());
+        List<UserSimpleDto> adminDtos = userSimpleMapper.map(from.getAdmins());
         return ChatDto.builder()
                 .id(from.getId())
-                .participants(userSimpleMapper.map(from.getParticipants()))
+                .participants(new HashSet<>(userSimpleDtos))
                 .messages(messageMapper.map(from.getMessages()))
-                .admin(userSimpleMapper.map(from.getAdmins()))
+                .admin(new HashSet<>(adminDtos))
                 .chatType(from.getType())
                 .build();
     }

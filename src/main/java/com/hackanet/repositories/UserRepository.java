@@ -5,10 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     Boolean existsByEmail(String email);
     Boolean existsByPhone(String phone);
-    List<User> findAllByIdIn(List<Long> ids);
+    Set<User> findAllByIdIn(List<Long> ids);
 }

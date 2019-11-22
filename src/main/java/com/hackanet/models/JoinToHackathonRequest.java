@@ -1,5 +1,6 @@
 package com.hackanet.models;
 
+import com.hackanet.models.enums.JoinType;
 import com.hackanet.models.enums.RequestStatus;
 import lombok.*;
 
@@ -19,9 +20,10 @@ import java.sql.Date;
 @Entity
 @Table(name = "join_to_hackathon_requests")
 public class JoinToHackathonRequest extends AbstractEntity {
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Column(nullable = false)
+    private Long entityId;
+    @Enumerated(EnumType.STRING)
+    private JoinType joinType;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hackathon_id")
     private Hackathon hackathon;

@@ -1,6 +1,10 @@
 package com.hackanet.repositories;
 
+import com.hackanet.models.Hackathon;
 import com.hackanet.models.JoinToHackathonRequest;
+import com.hackanet.models.User;
+import com.hackanet.models.enums.JoinType;
+import com.hackanet.models.enums.RequestStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -12,4 +16,6 @@ import java.util.List;
  */
 public interface JoinToHackathonRequestRepository extends JpaRepository<JoinToHackathonRequest, Long> {
     List<JoinToHackathonRequest> findAllByHackathonId(Long hackathonId);
+    JoinToHackathonRequest findByHackathonAndEntityIdAndJoinTypeAndStatus(Hackathon hackathon, Long entityId, JoinType joinType, RequestStatus status);
+    boolean existsByEntityIdAndJoinTypeAndHackathonId(Long entityId, JoinType joinType, Long hackathonId);
 }

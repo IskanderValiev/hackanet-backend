@@ -1,5 +1,6 @@
 package com.hackanet.models.chat;
 
+import com.google.common.collect.Sets;
 import com.hackanet.models.AbstractEntity;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.Team;
@@ -8,7 +9,9 @@ import com.hackanet.models.enums.ChatType;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Iskander Valiev
@@ -27,12 +30,12 @@ public class Chat extends AbstractEntity {
     @JoinTable(name = "chat_participants_table",
             joinColumns = @JoinColumn(name = "chat_id"),
             inverseJoinColumns = @JoinColumn(name = "participant_id"))
-    private List<User> participants;
+    private Set<User> participants;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "chats_admins",
     joinColumns = {@JoinColumn(name = "admin_id")},
     inverseJoinColumns = {@JoinColumn(name = "chat_id")})
-    private List<User> admins;
+    private Set<User> admins;
     @OneToMany(mappedBy = "chat", orphanRemoval = true)
     private List<ChatMessage> messages;
     @Enumerated(EnumType.STRING)
@@ -42,4 +45,12 @@ public class Chat extends AbstractEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hackathon_id")
     private Hackathon hackathon;
+
+    public Set<User> getParticipants() {
+        return participants == null ? Collections.emptySet() : participants;
+    }
+
+    public Set<User> getAdmins() {
+        return admins == null ? Sets.newHashSet() : admins;
+    }
 }

@@ -15,8 +15,9 @@ import java.util.List;
  */
 public interface TeamService extends CrudService<Team> {
     Team save(Team team);
-    Team createTeam(TeamCreateForm form);
+    Team createTeam(User user, TeamCreateForm form);
     Team updateTeam(Long id, User user, TeamUpdateForm form);
     List<Team> getByHackathon(Long hackathonId);
     List<Team> teamList(TeamSearchForm form);
+    Team getByHackathonIdAndUserId(Long hackathonId, Long userId);
 }

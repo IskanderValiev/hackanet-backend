@@ -1,23 +1,19 @@
-package com.hackanet.json.forms;
+package com.hackanet.json.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.hackanet.models.enums.TeamType;
+import lombok.Builder;
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * @author Iskander Valiev
  * created by isko
- * on 11/1/19
+ * on 11/21/19
  */
 @Data
+@Builder
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class TeamUpdateForm {
+public class TeamSimpleDto {
+    private Long id;
     private String name;
-    private List<Long> participants;
-    private List<Long> skillsLookingFor;
-    private Long teamLeader;
-    private TeamType teamType;
 }

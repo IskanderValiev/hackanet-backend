@@ -27,9 +27,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
 
@@ -59,6 +57,7 @@ public class HackathonServiceImpl implements HackathonService {
 
     @Cacheable(value = "hackathons")
     @Override
+    @Transactional
     public List<Hackathon> getAll() {
         return hackathonRepository.findAll();
     }
@@ -89,6 +88,8 @@ public class HackathonServiceImpl implements HackathonService {
                 .prize(form.getPrizeFund())
                 .requiredSkills(skillService.getByIds(requiredSkills))
                 .deleted(false)
+                .longitude(form.getLongitude())
+                .latitude(form.getLatitude())
                 .build();
 
         if (form.getLogoId() != null) {
@@ -163,6 +164,18 @@ public class HackathonServiceImpl implements HackathonService {
         if (!StringUtils.isBlank(city))
             hackathon.setCity(city);
 
+        if (form.getLatitude() != null) {
+            if (form.getLatitude() > 90 || form.getLatitude() < -90)
+                throw new BadRequestException("latitude must be >= -90 and <= 90");
+            hackathon.setLatitude(form.getLatitude());
+        }
+
+        if (form.getLongitude() != null) {
+            if (form.getLongitude() > 180 || form.getLongitude() < -180)
+                throw new BadRequestException("longitude must be >= -180 and <= 180");
+            hackathon.setLongitude(form.getLongitude());
+        }
+
         List<Long> requiredSkills = form.getRequiredSkills();
         if (requiredSkills != null && !requiredSkills.isEmpty()) {
             hackathon.setRequiredSkills(skillService.getByIds(requiredSkills));
@@ -193,6 +206,18 @@ public class HackathonServiceImpl implements HackathonService {
         }
         query.setMaxResults(form.getLimit());
         return query.getResultList();
+    }
+
+    @CacheEvict(value = "hackathons", allEntries = true)
+    @Override
+    public void updateUsersHackathonList(List<User> users, Hackathon hackathon, boolean add) {
+        Set<User> participants = hackathon.getParticipants();
+        if (Boolean.TRUE.equals(add))
+            participants.addAll(new HashSet<>(users));
+        else
+            participants.removeAll(new HashSet<>(users));
+        hackathon.setParticipants(participants);
+        hackathonRepository.save(hackathon);
     }
 
     private CriteriaQuery<Hackathon> getHackathonsListQuery(CriteriaBuilder criteriaBuilder, HackathonSearchForm form) {

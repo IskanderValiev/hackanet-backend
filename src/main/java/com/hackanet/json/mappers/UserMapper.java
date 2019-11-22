@@ -4,12 +4,12 @@ import com.hackanet.json.dto.FileInfoDto;
 import com.hackanet.json.dto.SkillDto;
 import com.hackanet.json.dto.UserDto;
 import com.hackanet.models.FileInfo;
+import com.hackanet.models.ReviewStatistic;
 import com.hackanet.models.Skill;
 import com.hackanet.models.User;
+import com.hackanet.services.UserReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * @author Iskander Valiev
@@ -23,9 +23,12 @@ public class UserMapper implements Mapper<User, UserDto> {
     private Mapper<FileInfo, FileInfoDto> mapper;
     @Autowired
     private Mapper<Skill, SkillDto> skillMapper;
+    @Autowired
+    private UserReviewService userReviewService;
 
     @Override
     public UserDto map(User from) {
+        ReviewStatistic rating = userReviewService.getReviewsCountAndUserRating(from.getId());
         UserDto user = UserDto.builder()
                 .id(from.getId())
                 .email(from.getEmail())
@@ -35,6 +38,8 @@ public class UserMapper implements Mapper<User, UserDto> {
                 .country(from.getCountry())
                 .city(from.getCity())
                 .about(from.getAbout())
+                .reviewCount(rating.getCount())
+                .rating(rating.getAverage())
                 .build();
         if (from.getImage() != null)
             user.setImage(mapper.map(from.getImage()));

@@ -50,7 +50,7 @@ public class JoinToTeamRequestServiceImpl implements JoinToTeamRequestService {
 
         Team team = teamService.get(form.getTeamId());
         if (team.getParticipants().contains(user))
-            throw new BadRequestException("You already in the team");
+            throw new BadRequestException("You are already in the team");
 
         JoinToTeamRequest request = JoinToTeamRequest.builder()
                 .requestStatus(JoinToTeamRequestStatus.WAITING)

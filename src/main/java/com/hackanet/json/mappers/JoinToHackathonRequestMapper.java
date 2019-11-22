@@ -5,7 +5,11 @@ import com.hackanet.json.dto.JoinToHackathonRequestDto;
 import com.hackanet.json.dto.UserSimpleDto;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.JoinToHackathonRequest;
+import com.hackanet.models.Team;
 import com.hackanet.models.User;
+import com.hackanet.models.enums.JoinType;
+import com.hackanet.services.TeamService;
+import com.hackanet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -20,20 +24,39 @@ public class JoinToHackathonRequestMapper implements Mapper<JoinToHackathonReque
 
     @Autowired
     @Qualifier("hackathonMapper")
-    private Mapper<Hackathon, HackathonDto> mapper;
+    private HackathonMapper mapper;
 
     @Autowired
     @Qualifier("userSimpleMapper")
-    private Mapper<User, UserSimpleDto> userMapper;
+    private UserSimpleMapper userMapper;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private TeamMapper teamMapper;
+
+    @Autowired
+    private TeamService teamService;
 
     @Override
     public JoinToHackathonRequestDto map(JoinToHackathonRequest from) {
-        return JoinToHackathonRequestDto.builder()
+        JoinToHackathonRequestDto build = JoinToHackathonRequestDto.builder()
                 .id(from.getId())
                 .hackathon(mapper.map(from.getHackathon()))
-                .user(userMapper.map(from.getUser()))
+                .joinType(from.getJoinType())
                 .message(from.getMessage())
                 .date(from.getDate())
+                .status(from.getStatus())
                 .build();
+
+        if (JoinType.ALONE.equals(from.getJoinType())) {
+            User usr = userService.get(from.getEntityId());
+            build.setEntity(userMapper.map(usr));
+        } else {
+            Team team = teamService.get(from.getEntityId());
+            build.setEntity(teamMapper.map(team));
+        }
+        return build;
     }
 }

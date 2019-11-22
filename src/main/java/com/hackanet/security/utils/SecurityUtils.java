@@ -76,4 +76,9 @@ public class SecurityUtils {
         if (!portfolio.getUser().equals(user))
             throw new ForbiddenException("You have no access to this portfolio");
     }
+
+    public static void checkUserReviewAccess(UserReview userReview, User user) {
+        if (userReview.getUser().equals(user))
+            throw new ForbiddenException("You have no access to this user review");
+    }
 }

@@ -33,4 +33,6 @@ public class HackathonUpdateForm {
     private List<Long> requiredSkills;
     private Integer prizeFund;
     private Currency currency;
+    private Double latitude;
+    private Double longitude;
 }

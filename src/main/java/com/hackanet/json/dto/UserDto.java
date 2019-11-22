@@ -30,4 +30,6 @@ public class UserDto {
     private String city;
     private FileInfoDto image;
     private List<SkillDto> skills;
+    private Long reviewCount;
+    private Double rating;
 }

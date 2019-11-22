@@ -2,6 +2,8 @@ package com.hackanet.json.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.hackanet.models.enums.JoinType;
+import com.hackanet.models.enums.RequestStatus;
 import lombok.*;
 
 import java.sql.Date;
@@ -20,7 +22,9 @@ import java.sql.Date;
 public class JoinToHackathonRequestDto {
     private Long id;
     private String message;
-    private UserSimpleDto user;
+    private JoinType joinType;
+    private Object entity;
+    private RequestStatus status;
     private HackathonDto hackathon;
     private Date date;
 }
