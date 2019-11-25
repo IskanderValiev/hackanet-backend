@@ -6,6 +6,7 @@ import com.hackanet.json.forms.TeamUpdateForm;
 import com.hackanet.models.Team;
 import com.hackanet.models.User;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -15,9 +16,14 @@ import java.util.List;
  */
 public interface TeamService extends CrudService<Team> {
     Team save(Team team);
+    List<Team> save(List<Team> teams);
     Team createTeam(User user, TeamCreateForm form);
     Team updateTeam(Long id, User user, TeamUpdateForm form);
     List<Team> getByHackathon(Long hackathonId);
     List<Team> teamList(TeamSearchForm form);
     Team getByHackathonIdAndUserId(Long hackathonId, Long userId);
+    Team addUser(Team team, User user);
+    List<Team> getByHackathonStartTime(LocalDate startTime);
+    void throwExceptionIfTeamIsNotActual(Team team);
+    List<Team> getTeamsSuggestion(User user);
 }

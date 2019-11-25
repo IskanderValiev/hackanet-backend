@@ -7,7 +7,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.Currency;
 import java.util.List;
 
@@ -23,16 +26,29 @@ import java.util.List;
 @Builder
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class HackathonUpdateForm {
+    @NotNull
+    @NotEmpty
     private String name;
-    private Date start;
-    private Date end;
+    @NotNull
+    private Long start;
+    @NotNull
+    private Long end;
+    @NotNull
     private String description;
     private Long logo;
+    @NotNull
     private String country;
+    @NotNull
     private String city;
     private List<Long> requiredSkills;
+    @NotNull
     private Integer prizeFund;
+    @NotNull
     private Currency currency;
+    @NotNull
     private Double latitude;
+    @NotNull
     private Double longitude;
+    private Long registrationStartDate;
+    private Long registrationEndDate;
 }

@@ -5,6 +5,7 @@ import com.hackanet.models.enums.TeamType;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -47,4 +48,20 @@ public class Team extends AbstractEntity {
 
     @Enumerated(EnumType.STRING)
     private TeamType teamType;
+
+    private Boolean actual;
+
+    private Boolean lookingForHackers;
+
+    public List<User> getParticipants() {
+        return participants == null ? new ArrayList<>() : participants;
+    }
+
+    public Boolean getActual() {
+        return Boolean.TRUE.equals(this.actual);
+    }
+
+    public Boolean getLookingForHackers() {
+        return Boolean.TRUE.equals(this.lookingForHackers);
+    }
 }

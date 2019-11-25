@@ -41,6 +41,8 @@ public class JoinToTeamRequestServiceImpl implements JoinToTeamRequestService {
     private UserNotificationSettingsService userNotificationSettingsService;
     @Autowired
     private RabbitMQPushNotificationService pushNotificationService;
+    @Autowired
+    private SkillCombinationService skillCombinationService;
 
     @Override
     public JoinToTeamRequest create(User user, JoinToTeamRequestCreateForm form) {
@@ -49,6 +51,7 @@ public class JoinToTeamRequestServiceImpl implements JoinToTeamRequestService {
             return joinToTeamRequest;
 
         Team team = teamService.get(form.getTeamId());
+        teamService.throwExceptionIfTeamIsNotActual(team);
         if (team.getParticipants().contains(user))
             throw new BadRequestException("You are already in the team");
 
@@ -79,6 +82,7 @@ public class JoinToTeamRequestServiceImpl implements JoinToTeamRequestService {
     public JoinToTeamRequest updateStatus(User user, Long id, JoinToTeamRequestStatus status) {
         JoinToTeamRequest request = get(id);
         Team team = request.getTeam();
+        teamService.throwExceptionIfTeamIsNotActual(team);
         SecurityUtils.checkTeamAccessAsTeamLeader(team, user);
         User userFromRequest = request.getUser();
 
@@ -91,6 +95,7 @@ public class JoinToTeamRequestServiceImpl implements JoinToTeamRequestService {
             }
 
             chatService.addOrRemoveUser(team.getChat().getId(), userFromRequest.getId(), null, true);
+            skillCombinationService.updateIfUserJoinedToTeam(userFromRequest, team);
 
             if (userNotificationSettingsService.emailEnabled(userFromRequest))
                 emailService.sendTeamWelcomeEmail(userFromRequest, team);

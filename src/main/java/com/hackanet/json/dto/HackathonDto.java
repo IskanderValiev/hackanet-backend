@@ -25,8 +25,8 @@ public class HackathonDto {
     private Long id;
     private String name;
     private String description;
-    private Date start;
-    private Date end;
+    private Long start;
+    private Long end;
     private List<FileInfoDto> image;
     private UserDto owner;
     private FileInfoDto logo;
@@ -39,4 +39,6 @@ public class HackathonDto {
     private Boolean deleted;
     private Double latitude;
     private Double longitude;
+    private Long registrationStartDate;
+    private Long registrationEndDate;
 }

@@ -20,4 +20,5 @@ public class TeamUpdateForm {
     private List<Long> skillsLookingFor;
     private Long teamLeader;
     private TeamType teamType;
+    private Boolean lookingForHackers;
 }

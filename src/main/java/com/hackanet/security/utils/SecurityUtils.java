@@ -78,7 +78,17 @@ public class SecurityUtils {
     }
 
     public static void checkUserReviewAccess(UserReview userReview, User user) {
-        if (userReview.getUser().equals(user))
+        if (!userReview.getUser().equals(user))
             throw new ForbiddenException("You have no access to this user review");
+    }
+
+    public static void checkTeamInvitationAccess(TeamInvitation invitation, User user, boolean asTeamLeaderToo) {
+        if (asTeamLeaderToo) {
+            if (!invitation.getUser().equals(user) && !invitation.getTeam().getTeamLeader().equals(user))
+                throw new ForbiddenException("You have no access to this team invitation");
+        } else {
+            if (!invitation.getUser().equals(user))
+                throw new ForbiddenException("You have no access to this team invitation");
+        }
     }
 }

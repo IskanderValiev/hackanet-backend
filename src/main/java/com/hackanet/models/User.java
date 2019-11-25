@@ -5,6 +5,7 @@ import com.hackanet.security.enums.Role;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -58,4 +59,24 @@ public class User extends AbstractEntity {
     private String accessTokenParam;
     @Column(unique = true)
     private String refreshTokenParam;
+
+    public List<FileInfo> getFiles() {
+        return files == null ? new ArrayList<>() : files;
+    }
+
+    public List<Hackathon> getHackathons() {
+        return hackathons == null ? new ArrayList<>() : hackathons;
+    }
+
+    public List<Skill> getSkills() {
+        return skills == null ? new ArrayList<>() : skills;
+    }
+
+    public List<Hackathon> getAttendedHackathons() {
+        return attendedHackathons == null ? new ArrayList<>() : attendedHackathons;
+    }
+
+    public List<Chat> getChatsOwner() {
+        return chatsOwner == null ? new ArrayList<>() : chatsOwner;
+    }
 }
