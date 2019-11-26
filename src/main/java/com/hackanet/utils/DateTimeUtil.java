@@ -7,6 +7,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
+import java.util.TimeZone;
 
 /**
  * @author Iskander Valiev
@@ -25,6 +26,10 @@ public class DateTimeUtil {
         LocalDateTime localDateTime = localTime.atDate(localDate);
         long mills = localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         return mills;
+    }
+
+    public static long localDateTimeToLong(LocalDateTime localDateTime) {
+        return localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
     public static LocalDateTime timestampToLocalDateTime(Timestamp timestamp) {
@@ -54,6 +59,13 @@ public class DateTimeUtil {
         return OffsetTime.of(localTime, zoneOffset).withOffsetSameInstant(ZoneOffset.UTC).toLocalTime();
     }
 
+    public static LocalDateTime convertLocalDateTimeToUtc(LocalDateTime localDateTime, TimeZone timeZone) {
+        TimeZone utcTimeZone = timeZone;
+        Time offset = new Time(utcTimeZone.getRawOffset());
+        LocalTime offsetLocalTime = offset.toLocalTime();
+        return localDateTime.minusHours(offsetLocalTime.getHour());
+    }
+
     public static long getDifferenceBetweenLocalDateTimes(LocalDateTime from, LocalDateTime to) {
         if (to == null)
             to = LocalDateTime.now();
@@ -61,8 +73,8 @@ public class DateTimeUtil {
         return tempDateTime.until(to, ChronoUnit.MINUTES);
     }
 
-    public static LocalDateTime epochToLocalDateTime(Long epochSeconds) {
-        return LocalDateTime.ofInstant(Instant.ofEpochSecond(epochSeconds), ZoneId.systemDefault());
+    public static LocalDateTime epochToLocalDateTime(Long epochMillis) {
+        return LocalDateTime.ofInstant(Instant.ofEpochSecond(epochMillis / 1000), ZoneId.systemDefault());
     }
 
     public static boolean isNowDontDisturbTime(LocalTime from, LocalTime to) {

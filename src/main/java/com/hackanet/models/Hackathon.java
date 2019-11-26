@@ -1,13 +1,14 @@
 package com.hackanet.models;
 
+import com.google.common.collect.Sets;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.Currency;
 import lombok.*;
 
 import javax.persistence.*;
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 
 /**
  * @author Iskander Valiev
@@ -34,7 +35,7 @@ public class Hackathon extends AbstractEntity {
     private Date startDate;
     @Column(name = "end_date", nullable = false)
     private Date endDate;
-//    @Column(nullable = false)
+    //    @Column(nullable = false)
     private Integer prize;
     @Enumerated(EnumType.STRING)
     private Currency currency;
@@ -53,16 +54,26 @@ public class Hackathon extends AbstractEntity {
     @JoinTable(name = "hackathon_skills_table", joinColumns = @JoinColumn(name = "hackathon_id"))
     private List<Skill> requiredSkills;
     @ManyToMany(mappedBy = "attendedHackathons")
-    private List<User> participants;
+    private Set<User> participants;
     @OneToMany(mappedBy = "hackathon")
     private List<Chat> chats;
+    private Double longitude;
+    private Double latitude;
+    private LocalDateTime registrationStartDate;
+    private LocalDateTime registrationEndDate;
 
     private Boolean deleted;
 
     public List<FileInfo> getFileInfo() {
-        if (fileInfo == null)
-            fileInfo = new ArrayList<>();
-        return fileInfo;
+        return fileInfo == null ? Collections.emptyList() : fileInfo;
+    }
+
+    public List<Chat> getChats() {
+        return chats == null ? Collections.emptyList() : chats;
+    }
+
+    public Set<User> getParticipants() {
+        return participants == null ? Sets.newHashSet() : participants;
     }
 
     public Boolean getDeleted() {

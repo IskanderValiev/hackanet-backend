@@ -2,6 +2,7 @@ package com.hackanet.json.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.hackanet.models.enums.TeamType;
 import lombok.Builder;
 import lombok.Data;
 
@@ -20,4 +21,7 @@ public class TeamDto {
     private List<TeamParticipantDto> participants;
     private List<SkillDto> skillsLookingFor;
     private String name;
+    private TeamType teamType;
+    private Boolean lookingForHackers;
+    private Boolean actual;
 }

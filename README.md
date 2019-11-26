@@ -1,6 +1,6 @@
 ### HackaNet Project API
 
-HackaNet is new project which will help programmers who is obsessed with competitions to find information about all hackathons held in the world. 
+HackaNet is a new social networking which helps programmers who are obsessed with competitions to find team to join for hackathon, to be able spotted by huge companies and to be hired, exchange experience with other hackathon participants, to find new mates in IT industry and to find information about all hackathons held in the world.
 
 # Editor.md
 

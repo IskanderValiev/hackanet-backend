@@ -7,6 +7,7 @@ import com.hackanet.json.forms.TeamSearchForm;
 import com.hackanet.json.forms.TeamUpdateForm;
 import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
+import com.hackanet.models.enums.TeamType;
 import com.hackanet.repositories.TeamRepository;
 import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.chat.ChatService;
@@ -20,9 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hackanet.utils.StringUtils.throwExceptionIfStringContainsBadWords;
@@ -54,6 +55,12 @@ public class TeamServiceImpl implements TeamService {
     private JobRunner jobRunner;
     @Autowired
     private UserNotificationSettingsService userNotificationSettingsService;
+    @Autowired
+    private JoinToHackathonRequestService joinToHackathonRequestService;
+    @Autowired
+    private SkillCombinationService skillCombinationService;
+    @Autowired
+    private TeamInvitationService teamInvitationService;
 
     @Override
     public Team save(Team team) {
@@ -61,20 +68,19 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    @Transactional
-    public Team createTeam(TeamCreateForm form) {
-        if (form.getParticipantsIds().size() < 2)
-            throw new BadRequestException("Team should be contain at least 2 participants");
-        if (!form.getParticipantsIds().contains(form.getTeamLeader()))
-            throw new BadRequestException("Team leader is not in the team");
+    public List<Team> save(List<Team> teams) {
+        return teamRepository.saveAll(teams);
+    }
 
+    @Override
+    @Transactional
+    public Team createTeam(User user, TeamCreateForm form) {
         String name = form.getName().trim();
         throwExceptionIfStringContainsBadWords(name, "name");
 
-        List<User> participants = userService.getByIds(form.getParticipantsIds());
-        User teamLeader = userService.get(form.getTeamLeader());
-        Hackathon hackathon = hackathonService.get(form.getHackathonId());
-        Chat chat = chatService.createForTeam(participants);
+        Set<User> participants = userService.getByIds(form.getParticipantsIds());
+        participants.add(user);
+        Chat chat = chatService.createForTeam(user);
         List<Long> skillsLookingForIds = form.getSkillsLookingFor();
         List<Skill> skillsLookingFor = new ArrayList<>();
         if (skillsLookingForIds != null && !skillsLookingForIds.isEmpty())
@@ -82,19 +88,33 @@ public class TeamServiceImpl implements TeamService {
 
         Team team = Team.builder()
                 .name(name)
-                .participants(participants)
-                .hackathon(hackathon)
                 .chat(chat)
-                .teamLeader(teamLeader)
+                .participants(Collections.singletonList(user))
+                .teamLeader(user)
                 .skillsLookingFor(skillsLookingFor)
+                .teamType(form.getTeamType())
+                .actual(true)
                 .build();
 
-        team = teamRepository.save(team);
-
-        UserNotificationSettings settings = userNotificationSettingsService.getOrCreateDefaultsSettingsForUser(teamLeader);
-        if (Boolean.TRUE.equals(settings.getPushEnabled())) {
-            jobRunner.addHackathonJobReviewRequestJobToTeamLeader(settings, teamLeader, team);
+        if (TeamType.HACKATHON.equals(form.getTeamType())) {
+            if (form.getHackathonId() == null)
+                throw new BadRequestException("hackathonId must not be null if " + TeamType.class.getName() + " is " + TeamType.HACKATHON.toString());
+            Hackathon hackathon = hackathonService.get(form.getHackathonId());
+            if (hackathon.getStartDate().before(new Date()))
+                throw new BadRequestException("The hackathons has already started");
+            team.setHackathon(hackathon);
         }
+        final Team savedTeam = teamRepository.save(team);
+        joinToHackathonRequestService.createForHackathonTeam(team);
+
+        UserNotificationSettings settings = userNotificationSettingsService.getOrCreateDefaultsSettingsForUser(user);
+        if (Boolean.TRUE.equals(settings.getPushEnabled())) {
+            jobRunner.addHackathonJobReviewRequestJobToTeamLeader(settings, user, team);
+        }
+        participants.stream()
+                .filter(p -> !p.equals(user))
+                .forEach(p -> teamInvitationService.createIfNotExists(user, p.getId(), savedTeam.getId()));
+        skillCombinationService.createByTeam(team);
         return team;
     }
 
@@ -111,13 +131,17 @@ public class TeamServiceImpl implements TeamService {
             team.setName(name.trim());
         }
 
+        if (form.getLookingForHackers() != null)
+            team.setLookingForHackers(Boolean.TRUE.equals(form.getLookingForHackers()));
+
         /*
-        * if user is contained in participants but is not contained in members =>
-        * the user will be added in chat and team
-        *
-        * if user is contained in members but is not contained in participants =>
-        * the user will be removed from the chat and the team
-        * */
+         * if user is contained in participants but is not contained in members =>
+         * the user will be added in chat and team
+         *
+         * if user is contained in members but is not contained in participants =>
+         * the user will be removed from the chat and the team
+         * */
+        // TODO: 11/24/19 delete
         List<Long> participants = form.getParticipants();
         if (participants != null && !participants.isEmpty()) {
             List<Long> members = team.getParticipants().stream()
@@ -136,7 +160,8 @@ public class TeamServiceImpl implements TeamService {
                     log.info("Removing member with id = {}", m);
                 }
             });
-            team.setParticipants(userService.getByIds(participants));
+            Set<User> participantSet = userService.getByIds(participants);
+            team.setParticipants(new ArrayList<>(participantSet));
         }
 
         List<Long> skillsLookingFor = form.getSkillsLookingFor();
@@ -148,6 +173,9 @@ public class TeamServiceImpl implements TeamService {
             team.setTeamLeader(userService.get(form.getTeamLeader()));
         }
 
+        if (form.getTeamType() != null) {
+            team.setTeamType(form.getTeamType());
+        }
         return teamRepository.save(team);
     }
 
@@ -172,6 +200,84 @@ public class TeamServiceImpl implements TeamService {
         else form.setPage(1);
         query.setMaxResults(form.getLimit());
         return query.getResultList();
+    }
+
+    @Override
+    public Team getByHackathonIdAndUserId(Long userId, Long hackathonId) {
+        return teamRepository.findByHackathonIdAndUserId(userId, hackathonId);
+    }
+
+    @Override
+    public Team addUser(Team team, User user) {
+        List<User> participants = team.getParticipants();
+        if (!participants.contains(user))
+            participants.add(user);
+        team.setParticipants(participants);
+        return teamRepository.save(team);
+    }
+
+    @Override
+    public List<Team> getByHackathonStartTime(LocalDate startTime) {
+        return teamRepository.findTeamsByStartDateOfHackathon(startTime);
+    }
+
+    @Override
+    public void throwExceptionIfTeamIsNotActual(Team team) {
+        if (!Boolean.TRUE.equals(team.getActual()))
+            throw new BadRequestException("Team is not actual anymore");
+    }
+
+    @Deprecated
+    @Override
+    public List<Team> getTeamsSuggestion(User user) {
+        user = userService.get(user.getEmail());
+        List<Skill> skills = skillCombinationService.mostRelevantSkills(user);
+        if (skills.isEmpty())
+            return teamRepository.findAllByLookingForHackersAndActual(true, true);
+        List<Long> skillsIds = skills.stream().map(Skill::getId).collect(Collectors.toList());
+        return teamRepository.findBySkills(skillsIds);
+    }
+
+
+    /**
+     * Get team suggestions for user.
+     * Works calculating the probability of usage the user's technology with technologies used in teams.
+     *
+     * @param user        - user to suggest teams for
+     * @param hackathonId - hackathonId search teams in
+     * @return list of teams which are looking for hackers, actual and are appropriate by user's skill
+     */
+    @Override
+    public List<Team> getTeamsSuggestion(@NotNull User user, Long hackathonId) {
+        user = userService.get(user.getId());
+        List<Skill> skills = skillCombinationService.mostRelevantSkills(user);
+        if (skills.isEmpty())
+            return teamRepository.findAllByLookingForHackersAndActual(true, true);
+        List<Long> skillsIds = skills.stream().map(Skill::getId).collect(Collectors.toList());
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Team> suggestions = getTeamSuggestionsListQuery(criteriaBuilder, skillsIds, hackathonId);
+        TypedQuery<Team> query = entityManager.createQuery(suggestions);
+        return query.getResultList();
+    }
+
+    private CriteriaQuery<Team> getTeamSuggestionsListQuery(CriteriaBuilder criteriaBuilder, List<Long> skillsIds, Long hackathonId) {
+        CriteriaQuery<Team> query = criteriaBuilder.createQuery(Team.class);
+        Root<Team> root = query.from(Team.class);
+        query.select(root);
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(criteriaBuilder.isTrue(root.get("actual")));
+        predicates.add(criteriaBuilder.isTrue(root.get("lookingForHackers")));
+        if (hackathonId != null) {
+            Join<Team, Hackathon> join = root.join("hackathon", JoinType.INNER);
+            join.on(criteriaBuilder.equal(join.get("id"), hackathonId));
+            predicates.add(join.getOn());
+        }
+        Join<Team, User> teamParticipantsJoin = root.join("participants", JoinType.INNER);
+        Join<User, Skill> userSkillJoin = teamParticipantsJoin.join("skills", JoinType.INNER);
+        userSkillJoin.on(userSkillJoin.get("id").in(skillsIds));
+        query.distinct(true);
+        query.where(criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()])));
+        return query;
     }
 
     private CriteriaQuery<Team> getTeamListQuery(CriteriaBuilder criteriaBuilder, TeamSearchForm form) {

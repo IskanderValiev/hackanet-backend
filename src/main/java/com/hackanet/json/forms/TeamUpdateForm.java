@@ -2,6 +2,7 @@ package com.hackanet.json.forms;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.hackanet.models.enums.TeamType;
 import lombok.Data;
 
 import java.util.List;
@@ -18,4 +19,6 @@ public class TeamUpdateForm {
     private List<Long> participants;
     private List<Long> skillsLookingFor;
     private Long teamLeader;
+    private TeamType teamType;
+    private Boolean lookingForHackers;
 }

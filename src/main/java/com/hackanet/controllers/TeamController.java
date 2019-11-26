@@ -7,6 +7,7 @@ import com.hackanet.json.forms.TeamUpdateForm;
 import com.hackanet.json.mappers.TeamMapper;
 import com.hackanet.models.Team;
 import com.hackanet.models.User;
+import com.hackanet.services.SkillCombinationService;
 import com.hackanet.services.TeamService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -28,8 +29,10 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "Team Controller")
-@RequestMapping("/teams")
+@RequestMapping(TeamController.ROOT)
 public class TeamController {
+
+    public static final String ROOT = "/teams";
 
     private static final String CREATE = "/create";
     private static final String TEAM = "/{id}";
@@ -46,8 +49,9 @@ public class TeamController {
                     required = true, dataType = "string", paramType = "header")
     })
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<TeamDto> create(@Valid @RequestBody TeamCreateForm form) {
-        Team team = teamService.createTeam(form);
+    public ResponseEntity<TeamDto> create(@Valid @RequestBody TeamCreateForm form,
+                                          @AuthenticationPrincipal User user) {
+        Team team = teamService.createTeam(user, form);
         return new ResponseEntity<>(teamMapper.map(team), HttpStatus.CREATED);
     }
 

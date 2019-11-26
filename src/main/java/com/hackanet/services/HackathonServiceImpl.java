@@ -13,13 +13,12 @@ import com.hackanet.models.Skill;
 import com.hackanet.models.User;
 import com.hackanet.repositories.HackathonRepository;
 import com.hackanet.services.chat.ChatService;
+import com.hackanet.utils.DateTimeUtil;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,11 +26,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
+import static com.hackanet.utils.DateTimeUtil.*;
 
 /**
  * @author Iskander Valiev
@@ -59,6 +58,7 @@ public class HackathonServiceImpl implements HackathonService {
 
     @Cacheable(value = "hackathons")
     @Override
+    @Transactional
     public List<Hackathon> getAll() {
         return hackathonRepository.findAll();
     }
@@ -67,14 +67,21 @@ public class HackathonServiceImpl implements HackathonService {
     @Override
     @Transactional
     public Hackathon save(User user, HackathonCreateForm form) {
-        Date start = form.getStart();
-        Date end = form.getEnd();
+        Date start = new Date(form.getStart());
+        Date end = new Date(form.getEnd());
         if (start.after(end))
             throw new BadRequestException("Start date is after end date");
 
         List<Long> requiredSkills = form.getRequiredSkills();
         if (requiredSkills == null)
             requiredSkills = Collections.emptyList();
+
+        LocalDateTime registrationStartDate = form.getRegistrationStartDate() == null
+                ? LocalDateTime.now()
+                : epochToLocalDateTime(form.getRegistrationStartDate());
+        LocalDateTime registrationEndDate = form.getRegistrationEndDate() == null
+                ? end.toLocalDate().minusDays(1).atTime(23, 59)
+                : epochToLocalDateTime(form.getRegistrationEndDate());
 
         Hackathon hackathon = Hackathon.builder()
                 .name(form.getName().trim())
@@ -89,6 +96,10 @@ public class HackathonServiceImpl implements HackathonService {
                 .prize(form.getPrizeFund())
                 .requiredSkills(skillService.getByIds(requiredSkills))
                 .deleted(false)
+                .longitude(form.getLongitude())
+                .latitude(form.getLatitude())
+                .registrationStartDate(registrationStartDate)
+                .registrationEndDate(registrationEndDate)
                 .build();
 
         if (form.getLogoId() != null) {
@@ -115,53 +126,62 @@ public class HackathonServiceImpl implements HackathonService {
      * Updates information about hackathon.
      * If string fields are not empty and are not null, fields will be updated
      *
-     * @throws com.hackanet.exceptions.ForbiddenException
-     *      if user is not an owner of the hackathon
-     *
-     * */
+     * @throws com.hackanet.exceptions.ForbiddenException if user is not an owner of the hackathon
+     */
     @CacheEvict(value = "hackathons", allEntries = true)
     @Override
     public Hackathon update(Long id, User user, HackathonUpdateForm form) {
         Hackathon hackathon = get(id);
         checkHackathonAccess(hackathon, user);
 
-        Date start = form.getStart();
-        Date end = form.getEnd();
-        if (start != null && end != null) {
-            if (start.after(end)) {
-                throw new BadRequestException("Start date is after end date");
-            }
+        Date start = new Date(form.getStart());
+        Date end = new Date(form.getEnd());
+        if (start.after(end)) {
+            throw new BadRequestException("Start date is after end date");
         }
+        if (start.before(new Date(System.currentTimeMillis()))) {
+            throw new BadRequestException("Start date is in the past");
+        }
+        hackathon.setStartDate(start);
+        hackathon.setEndDate(end);
+
         if (form.getLogo() != null) {
             FileInfo file = fileInfoService.get(form.getLogo());
             hackathon.setLogo(file);
         }
-        if (start != null) {
-            if (start.before(new Date(System.currentTimeMillis()))) {
-                throw new BadRequestException("Start date is in the past");
-            }
-            hackathon.setStartDate(start);
-        }
-        if (end != null)
-            hackathon.setEndDate(end);
 
         String name = form.getName();
-        if (!StringUtils.isBlank(name)) {
-            hackathon.setName(name.trim());
-            hackathon.setNameLc(form.getName().trim().toLowerCase());
-        }
-
-        String description = form.getDescription();
-        if (!StringUtils.isBlank(description))
-            hackathon.setDescription(description.trim());
+        hackathon.setName(name.trim());
+        hackathon.setNameLc(form.getName().trim().toLowerCase());
+        hackathon.setDescription(form.getDescription().trim());
 
         String country = StringUtils.capitalize(form.getCountry());
-        if (!StringUtils.isBlank(country))
-            hackathon.setCountry(country);
-
+        hackathon.setCountry(country);
         String city = StringUtils.capitalize(form.getCity());
-        if (!StringUtils.isBlank(city))
-            hackathon.setCity(city);
+        hackathon.setCity(city);
+
+        if (form.getLatitude() > 90 || form.getLatitude() < -90)
+            throw new BadRequestException("latitude must be >= -90 and <= 90");
+        hackathon.setLatitude(form.getLatitude());
+        if (form.getLongitude() > 180 || form.getLongitude() < -180)
+            throw new BadRequestException("longitude must be >= -180 and <= 180");
+        hackathon.setLongitude(form.getLongitude());
+
+        Long regStartDate = form.getRegistrationStartDate();
+        Long regEndDate = form.getRegistrationEndDate();
+        if (regStartDate != null && regEndDate != null) {
+            if (regStartDate > regEndDate)
+                throw new BadRequestException("Registration Start Date is after End Date");
+            if (regEndDate < System.currentTimeMillis())
+                throw new BadRequestException("Registration End Date is in the past");
+            hackathon.setRegistrationEndDate(epochToLocalDateTime(regEndDate));
+            hackathon.setRegistrationStartDate(epochToLocalDateTime(regStartDate));
+        } else {
+            if (regEndDate != null)
+                hackathon.setRegistrationEndDate(epochToLocalDateTime(regEndDate));
+            if (regStartDate != null)
+                hackathon.setRegistrationStartDate(epochToLocalDateTime(regStartDate));
+        }
 
         List<Long> requiredSkills = form.getRequiredSkills();
         if (requiredSkills != null && !requiredSkills.isEmpty()) {
@@ -193,6 +213,18 @@ public class HackathonServiceImpl implements HackathonService {
         }
         query.setMaxResults(form.getLimit());
         return query.getResultList();
+    }
+
+    @CacheEvict(value = "hackathons", allEntries = true)
+    @Override
+    public void updateUsersHackathonList(List<User> users, Hackathon hackathon, boolean add) {
+        Set<User> participants = hackathon.getParticipants();
+        if (Boolean.TRUE.equals(add))
+            participants.addAll(new HashSet<>(users));
+        else
+            participants.removeAll(new HashSet<>(users));
+        hackathon.setParticipants(participants);
+        hackathonRepository.save(hackathon);
     }
 
     private CriteriaQuery<Hackathon> getHackathonsListQuery(CriteriaBuilder criteriaBuilder, HackathonSearchForm form) {

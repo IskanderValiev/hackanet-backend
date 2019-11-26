@@ -1,11 +1,13 @@
 package com.hackanet.services.scheduler.email;
 
+import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.models.Team;
 import com.hackanet.models.User;
 import com.hackanet.services.EmailService;
 import com.hackanet.services.TeamService;
 import com.hackanet.services.UserService;
 import com.hackanet.services.scheduler.JobType;
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -18,6 +20,7 @@ import static com.hackanet.services.scheduler.JobDataMapKeys.*;
  * created by isko
  * on 11/10/19
  */
+@Slf4j
 public class EmailJob implements Job {
 
     @Autowired
@@ -36,9 +39,13 @@ public class EmailJob implements Job {
         User user = userService.get(userId);
         switch (jobType) {
             case HACKATHON_JOB_REVIEW_REQUEST:
-                Long teamId = (Long) jobDataMap.get(TEAM_ID);
-                Team team = teamService.get(teamId);
-                emailService.sendHackathonJobReviewRequestEmail(user, team);
+                try {
+                    Long teamId = (Long) jobDataMap.get(TEAM_ID);
+                    Team team = teamService.get(teamId);
+                    emailService.sendHackathonJobReviewRequestEmail(user, team);
+                } catch (NotFoundException ex) {
+                    log.error(ex.getMessage());
+                }
                 break;
         }
     }

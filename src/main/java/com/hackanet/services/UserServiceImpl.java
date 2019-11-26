@@ -43,10 +43,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.hackanet.security.utils.ProviderUtils.*;
@@ -185,7 +182,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getByIds(List<Long> ids) {
+    public Set<User> getByIds(List<Long> ids) {
         return userRepository.findAllByIdIn(ids);
     }
 

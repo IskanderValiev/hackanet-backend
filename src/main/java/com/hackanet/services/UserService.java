@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface UserService extends CrudService<User> {
     TokenDto register(UserRegistrationForm form);
@@ -20,7 +21,7 @@ public interface UserService extends CrudService<User> {
     Boolean exists(String email);
     Boolean existsByPhone(String phone);
     User get(String email);
-    List<User> getByIds(List<Long> ids);
+    Set<User> getByIds(List<Long> ids);
     List<User> userList(UserSearchForm form);
     void updateUsersHackathonList(User user, Hackathon hackathon, boolean add);
     TokenDto saveFromGoogle(Authentication principal);

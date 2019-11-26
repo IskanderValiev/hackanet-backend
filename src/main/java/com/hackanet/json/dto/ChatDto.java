@@ -6,6 +6,7 @@ import com.hackanet.models.enums.ChatType;
 import lombok.*;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Iskander Valiev
@@ -20,8 +21,8 @@ import java.util.List;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class ChatDto {
     private Long id;
-    private List<UserSimpleDto> participants;
+    private Set<UserSimpleDto> participants;
     private List<ChatMessageDto> messages;
-    private List<UserSimpleDto> admin;
+    private Set<UserSimpleDto> admin;
     private ChatType chatType;
 }

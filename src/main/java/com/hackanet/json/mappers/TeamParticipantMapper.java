@@ -10,6 +10,7 @@ import com.hackanet.services.SkillService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,7 +46,7 @@ public class TeamParticipantMapper {
         return build;
     }
 
-    public List<TeamParticipantDto> map(List<User> participants, Team team) {
+    public List<TeamParticipantDto> map(Collection<User> participants, Team team) {
         return participants.stream()
                 .map(participant -> map(participant, team))
                 .collect(Collectors.toList());
