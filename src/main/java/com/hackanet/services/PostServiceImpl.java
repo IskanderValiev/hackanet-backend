@@ -20,6 +20,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +51,7 @@ public class PostServiceImpl implements PostService {
                 .title(form.getTitle())
                 .content(form.getContent())
                 .owner(user)
-                .date(new Timestamp(System.currentTimeMillis()))
+                .date(LocalDateTime.now())
                 .build();
         if (form.getHackathon() != null) {
             Hackathon hackathon = hackathonService.get(form.getHackathon());

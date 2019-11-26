@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -27,7 +28,7 @@ public class Message {
     private String id;
     private Long senderId;
     private Long chatId;
-    private Timestamp timestamp;
+    private LocalDateTime timestamp;
     private String text;
     private List<Long> attachments;
 }

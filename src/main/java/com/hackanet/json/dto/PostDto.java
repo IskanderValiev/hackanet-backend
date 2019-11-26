@@ -8,6 +8,7 @@ import lombok.*;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -29,7 +30,7 @@ public class PostDto {
     private HackathonDto hackathonDto;
     private List<FileInfoDto> images;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
-    private Timestamp date;
+    private LocalDateTime date;
     private Long likesCount;
     private Long views;
 }
