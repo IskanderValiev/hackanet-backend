@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -25,6 +26,6 @@ public class MessageDto {
     private UserSimpleDto sender;
     private Long chatId;
     private String text;
-    private Timestamp timestamp;
+    private LocalDateTime timestamp;
     private List<FileInfoDto> attachments;
 }

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -70,7 +71,7 @@ public class ChatMessageServiceElasticsearchImpl {
         Message chatMessage = Message.builder()
                 .id(generateRandomString())
                 .chatId(form.getChatId())
-                .timestamp(new Timestamp(System.currentTimeMillis()))
+                .timestamp(LocalDateTime.now())
                 .text(text.trim())
                 .attachments(attachments)
                 .senderId(form.getSenderId())
