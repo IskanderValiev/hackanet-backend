@@ -16,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
 
 import javax.net.ssl.SSLContext;
-import javax.servlet.Filter;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;

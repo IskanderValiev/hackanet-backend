@@ -16,7 +16,7 @@ import java.util.List;
 @EqualsAndHashCode(of = "email", callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {"files","hackathons", "skills", "attendedHackathons", "image"})
+@ToString(exclude = {"files","hackathons", "skills", "attendedHackathons", "image", "chatsOwner"})
 @Getter
 @Setter
 @Builder

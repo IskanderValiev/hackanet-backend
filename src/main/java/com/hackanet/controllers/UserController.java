@@ -19,9 +19,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.List;
 
 /**
@@ -30,9 +32,11 @@ import java.util.List;
  * on 10/20/19
  */
 @RestController
-@RequestMapping("/users")
+@RequestMapping(UserController.ROOT)
 @Api(tags = "User Controller")
 public class UserController {
+
+    public static final String ROOT = "/users";
 
     private static final String REGISTER = "/register";
     private static final String LOGIN = "/login";
@@ -41,6 +45,10 @@ public class UserController {
     private static final String RESET_PASSWORD = "/password/reset";
     private static final String RESET_PASSWORD_REQUEST = RESET_PASSWORD + "/request";
     private static final String GET_NEW_ACCESS_TOKEN = "/token/refresh";
+    private static final String GOOGLE_LOGIN = LOGIN + "/oauth2/code/google";
+    private static final String FACEBOOK_LOGIN = LOGIN + "/oauth2/code/facebook";
+    private static final String GITHUB_LOGIN = LOGIN + "/oauth2/code/github";
+    public static final String SOCIAL_LOGIN = LOGIN + "/oauth2";
 
     @Autowired
     private UserService userService;
@@ -60,6 +68,17 @@ public class UserController {
     public ResponseEntity<TokenDto> login(@RequestBody @Valid UserLoginForm form) {
         TokenDto tokenDto = userService.login(form);
         return ResponseEntity.ok(tokenDto);
+    }
+
+    @GetMapping(GOOGLE_LOGIN)
+    public String google(Principal principal) {
+        System.out.println(principal.getName());
+        return "google";
+    }
+
+    @GetMapping(GITHUB_LOGIN)
+    public String github() {
+        return "github()";
     }
 
     @GetMapping(USER_PROFILE)
@@ -116,5 +135,11 @@ public class UserController {
     public ResponseEntity<TokenDto> getAccessToken(@AuthenticationPrincipal User user) {
         TokenDto tokenDto = userService.updateAccessToken(user);
         return ResponseEntity.ok(tokenDto);
+    }
+
+    @GetMapping(SOCIAL_LOGIN)
+    @PreAuthorize("isAuthenticated()")
+    public TokenDto me(OAuth2AuthenticationToken principal) {
+        return userService.saveFromSocialNetwork(principal);
     }
 }
