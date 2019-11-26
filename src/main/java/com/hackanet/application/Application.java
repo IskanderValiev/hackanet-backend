@@ -8,6 +8,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 
 /**
@@ -22,8 +24,10 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 @EnableCaching
 @ComponentScan("com.hackanet")
 @EnableJpaRepositories(basePackages = "com.hackanet.repositories")
+@EnableMongoRepositories(basePackages = "com.hackanet.repositories")
 @EnableElasticsearchRepositories(basePackages = "com.hackanet.repositories")
 @EntityScan(basePackages = "com.hackanet.models")
+@EnableScheduling
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableAspectJAutoProxy
 @SpringBootApplication

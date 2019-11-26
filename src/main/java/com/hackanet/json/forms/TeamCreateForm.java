@@ -27,7 +27,6 @@ public class TeamCreateForm {
     @ApiModelProperty(required = true)
     private List<Long> participantsIds;
     private Long hackathonId;
-    private Long teamLeader;
     private List<Long> skillsLookingFor;
     private TeamType teamType;
 

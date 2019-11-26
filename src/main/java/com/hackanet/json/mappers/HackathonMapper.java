@@ -5,6 +5,7 @@ import com.hackanet.models.FileInfo;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.Skill;
 import com.hackanet.models.User;
+import com.hackanet.utils.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.hackanet.utils.DateTimeUtil.localDateTimeToLong;
 
 /**
  * @author Iskander Valiev
@@ -44,8 +47,8 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
                 .id(from.getId())
                 .name(from.getName())
                 .description(from.getDescription())
-                .start(from.getStartDate())
-                .end(from.getEndDate())
+                .start(from.getStartDate().getTime())
+                .end(from.getEndDate().getTime())
                 .owner(userMapper.map(from.getOwner()))
                 .country(from.getCountry())
                 .currency(from.getCurrency().toString())
@@ -54,6 +57,8 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
                 .deleted(from.getDeleted())
                 .longitude(from.getLongitude())
                 .latitude(from.getLatitude())
+                .registrationStartDate(localDateTimeToLong(from.getRegistrationStartDate()))
+                .registrationEndDate(localDateTimeToLong(from.getRegistrationEndDate()))
                 .build();
         if (hackathon.getLogo() != null)
             hackathon.setLogo(fileMapper.map(from.getLogo()));

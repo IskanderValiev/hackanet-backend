@@ -98,12 +98,11 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Chat createForTeam(Set<User> participants) {
-        Set<User> members = new HashSet<>(participants);
+    public Chat createForTeam(User teamCreator) {
         Chat chat = Chat.builder()
                 .type(ChatType.TEAM_CHAT)
-                .participants(members)
-                .admins(participants)
+                .participants(Collections.singleton(teamCreator))
+                .admins(Collections.singleton(teamCreator))
                 .build();
         chat = chatRepository.save(chat);
         return chat;

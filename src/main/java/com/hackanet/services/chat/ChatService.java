@@ -14,6 +14,6 @@ public interface ChatService {
     List<Chat> getByUser(User user);
     Chat addOrRemoveUser(Long chatId, Long user, User currentUser, Boolean add);
     Chat addOrRemoveListOfUsers(Long chatId, List<User> users, User currentUser, Boolean add);
-    Chat createForTeam(Set<User> participants);
+    Chat createForTeam(User teamCreator);
     List<Chat> createForHackathon(Hackathon hackathon);
 }

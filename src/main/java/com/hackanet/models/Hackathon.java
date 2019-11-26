@@ -7,6 +7,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -34,7 +35,7 @@ public class Hackathon extends AbstractEntity {
     private Date startDate;
     @Column(name = "end_date", nullable = false)
     private Date endDate;
-//    @Column(nullable = false)
+    //    @Column(nullable = false)
     private Integer prize;
     @Enumerated(EnumType.STRING)
     private Currency currency;
@@ -58,6 +59,8 @@ public class Hackathon extends AbstractEntity {
     private List<Chat> chats;
     private Double longitude;
     private Double latitude;
+    private LocalDateTime registrationStartDate;
+    private LocalDateTime registrationEndDate;
 
     private Boolean deleted;
 

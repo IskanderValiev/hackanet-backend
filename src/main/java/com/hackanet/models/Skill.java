@@ -11,7 +11,6 @@ import javax.persistence.Table;
  * created by isko
  * on 10/20/19
  */
-@EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
 @Builder

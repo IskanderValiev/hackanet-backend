@@ -5,6 +5,7 @@ import com.hackanet.models.Hackathon;
 import com.hackanet.models.JoinToHackathonRequest;
 import com.hackanet.models.Team;
 import com.hackanet.models.User;
+import com.hackanet.models.enums.JoinType;
 import com.hackanet.models.enums.RequestStatus;
 
 import java.util.List;
@@ -16,4 +17,5 @@ public interface JoinToHackathonRequestService extends CrudService<JoinToHackath
     boolean isHackathonAttended(Hackathon hackathon, User user);
     JoinToHackathonRequest save(JoinToHackathonRequest request);
     JoinToHackathonRequest createForHackathonTeam(Team team);
+    JoinToHackathonRequest getByHackathonIdAndJoinTypeAndEntityIdAndStatus(Hackathon hackathon, Long entityId, JoinType joinType, RequestStatus status);
 }

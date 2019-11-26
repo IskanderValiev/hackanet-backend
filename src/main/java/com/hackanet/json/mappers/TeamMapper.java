@@ -28,6 +28,8 @@ public class TeamMapper implements Mapper<Team, TeamDto> {
                 .participants(teamParticipantMapper.map(from.getParticipants(), from))
                 .skillsLookingFor(skillMapper.map(from.getSkillsLookingFor()))
                 .teamType(from.getTeamType())
+                .lookingForHackers(Boolean.TRUE.equals(from.getLookingForHackers()))
+                .actual(Boolean.TRUE.equals(from.getActual()))
                 .build();
     }
 }
