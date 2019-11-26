@@ -13,9 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -29,6 +27,8 @@ import java.util.List;
 @RequestMapping(TeamController.ROOT + "/suggestions")
 public class TeamSuggestionController {
 
+    private static final String BY_HACKATHON = "/hackathons";
+
     @Autowired
     private TeamService teamService;
 
@@ -40,12 +40,25 @@ public class TeamSuggestionController {
             @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
                     required = true, dataType = "string", paramType = "header")
     })
-    @ApiOperation(value = "Change status")
+    @ApiOperation(value = "Get teams suggestions (DEPRECATED: it's better to use 'GET SUGGESTIONS BY HACKATHON' method)")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<TeamDto>> getSuggestions(@AuthenticationPrincipal User user) {
         List<Team> teams = teamService.getTeamsSuggestion(user);
         return ResponseEntity.ok(teamMapper.map(teams));
     }
 
+
+    @GetMapping(BY_HACKATHON)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    @ApiOperation(value = "Get teams suggestions by hackathonId (can be null)", nickname = "GET SUGGESTIONS BY HACKATHON")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<TeamDto>> getSuggestionsByHackathons(@RequestParam(required = false) Long id,
+                                                                    @AuthenticationPrincipal User user) {
+        List<Team> teams = teamService.getTeamsSuggestion(user, id);
+        return ResponseEntity.ok(teamMapper.map(teams));
+    }
 
 }

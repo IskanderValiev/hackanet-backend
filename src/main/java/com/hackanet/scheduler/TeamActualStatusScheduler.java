@@ -21,7 +21,7 @@ public class TeamActualStatusScheduler {
     @Autowired
     private TeamService teamService;
 
-    @Scheduled(cron = "0 20 16 * * *", zone = "Europe/Moscow")
+    @Scheduled(cron = "0 0 0 * * *", zone = "Europe/Moscow")
     public void setTeamActualStatusToFalse() {
         List<Team> teams = teamService.getByHackathonStartTime(LocalDate.now());
         teams.forEach(team -> {

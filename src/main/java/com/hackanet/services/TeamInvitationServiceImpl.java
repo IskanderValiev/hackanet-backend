@@ -40,6 +40,12 @@ public class TeamInvitationServiceImpl implements TeamInvitationService {
     @Autowired
     private SkillCombinationService skillCombinationService;
 
+    @Autowired
+    private HackathonService hackathonService;
+
+    @Autowired
+    private JoinToHackathonRequestService joinToHackathonRequestService;
+
     @Override
     public TeamInvitation createIfNotExists(User currentUser, Long userId, Long teamId) {
         Team team = teamService.get(teamId);

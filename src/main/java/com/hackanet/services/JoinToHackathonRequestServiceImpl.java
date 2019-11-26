@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
@@ -49,6 +50,10 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
     @Override
     public JoinToHackathonRequest createRequest(JoinToHackathonRequestCreateForm form, User user) {
         Hackathon hackathon = hackathonService.get(form.getHackathonId());
+        if (hackathon.getRegistrationEndDate().isBefore(LocalDateTime.now()))
+            throw new BadRequestException("Registration for the hackathon has already finished");
+        if (hackathon.getRegistrationStartDate().isAfter(LocalDateTime.now()))
+            throw new BadRequestException("Registration for the hackathon has not started yet");
         Date now = new Date(System.currentTimeMillis());
         if (now.after(hackathon.getStartDate()))
             throw new BadRequestException("Hackathon has already started or passed");
@@ -180,6 +185,11 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
                 .message(team.getName() + " want to take part in this hackathon")
                 .build();
         return requestRepository.save(request);
+    }
+
+    @Override
+    public JoinToHackathonRequest getByHackathonIdAndJoinTypeAndEntityIdAndStatus(Hackathon hackathon, Long entityId, JoinType joinType, RequestStatus status) {
+        return requestRepository.findByHackathonAndEntityIdAndJoinTypeAndStatus(hackathon, entityId, joinType, status);
     }
 
     private void throwExceptionIfRequestExistsByTeam(Team team) {

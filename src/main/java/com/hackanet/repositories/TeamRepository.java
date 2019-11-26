@@ -16,6 +16,7 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     List<Team> findTeamsByStartDateOfHackathon(@Param("startDate") LocalDate startDate);
 
     // TODO: 11/25/19 criteria api
+    @Deprecated
     @Query(nativeQuery = true, value = "select distinct t.*" +
             " from team t" +
             " inner join team_participants tp on t.id = tp.team_id" +

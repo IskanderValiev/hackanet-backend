@@ -3,6 +3,7 @@ package com.hackanet.services;
 import com.hackanet.json.forms.TeamCreateForm;
 import com.hackanet.json.forms.TeamSearchForm;
 import com.hackanet.json.forms.TeamUpdateForm;
+import com.hackanet.models.Hackathon;
 import com.hackanet.models.Team;
 import com.hackanet.models.User;
 
@@ -26,4 +27,5 @@ public interface TeamService extends CrudService<Team> {
     List<Team> getByHackathonStartTime(LocalDate startTime);
     void throwExceptionIfTeamIsNotActual(Team team);
     List<Team> getTeamsSuggestion(User user);
+    List<Team> getTeamsSuggestion(User user, Long hackathonId);
 }

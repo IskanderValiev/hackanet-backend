@@ -62,7 +62,13 @@ public class SkillCombinationServiceImpl implements SkillCombinationService {
                 .sorted(Comparator.comparing(AuxiliarySkillCombination::getProbability).reversed())
                 .map(AuxiliarySkillCombination::getSkillUsedWithId)
                 .collect(Collectors.toList());
-        return new ArrayList<>(skillService.getByIds(sortedList));
+
+        List<Skill> orderedByProbability = new ArrayList<>();
+        sortedList.forEach(id -> {
+            orderedByProbability.add(skillService.get(id));
+        });
+        return orderedByProbability;
+//        return new ArrayList<>(skillService.getByIds(sortedList));
     }
 
 

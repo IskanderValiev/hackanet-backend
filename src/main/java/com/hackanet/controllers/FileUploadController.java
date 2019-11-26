@@ -27,7 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/files")
 @Api(tags = "File Upload Controller")
-public class FIleUploadController {
+public class FileUploadController {
 
     private static final String UPLOAD = "/upload";
 

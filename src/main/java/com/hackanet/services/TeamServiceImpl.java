@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -134,12 +135,12 @@ public class TeamServiceImpl implements TeamService {
             team.setLookingForHackers(Boolean.TRUE.equals(form.getLookingForHackers()));
 
         /*
-        * if user is contained in participants but is not contained in members =>
-        * the user will be added in chat and team
-        *
-        * if user is contained in members but is not contained in participants =>
-        * the user will be removed from the chat and the team
-        * */
+         * if user is contained in participants but is not contained in members =>
+         * the user will be added in chat and team
+         *
+         * if user is contained in members but is not contained in participants =>
+         * the user will be removed from the chat and the team
+         * */
         // TODO: 11/24/19 delete
         List<Long> participants = form.getParticipants();
         if (participants != null && !participants.isEmpty()) {
@@ -226,6 +227,7 @@ public class TeamServiceImpl implements TeamService {
             throw new BadRequestException("Team is not actual anymore");
     }
 
+    @Deprecated
     @Override
     public List<Team> getTeamsSuggestion(User user) {
         user = userService.get(user.getEmail());
@@ -234,6 +236,48 @@ public class TeamServiceImpl implements TeamService {
             return teamRepository.findAllByLookingForHackersAndActual(true, true);
         List<Long> skillsIds = skills.stream().map(Skill::getId).collect(Collectors.toList());
         return teamRepository.findBySkills(skillsIds);
+    }
+
+
+    /**
+     * Get team suggestions for user.
+     * Works calculating the probability of usage the user's technology with technologies used in teams.
+     *
+     * @param user        - user to suggest teams for
+     * @param hackathonId - hackathonId search teams in
+     * @return list of teams which are looking for hackers, actual and are appropriate by user's skill
+     */
+    @Override
+    public List<Team> getTeamsSuggestion(@NotNull User user, Long hackathonId) {
+        user = userService.get(user.getId());
+        List<Skill> skills = skillCombinationService.mostRelevantSkills(user);
+        if (skills.isEmpty())
+            return teamRepository.findAllByLookingForHackersAndActual(true, true);
+        List<Long> skillsIds = skills.stream().map(Skill::getId).collect(Collectors.toList());
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Team> suggestions = getTeamSuggestionsListQuery(criteriaBuilder, skillsIds, hackathonId);
+        TypedQuery<Team> query = entityManager.createQuery(suggestions);
+        return query.getResultList();
+    }
+
+    private CriteriaQuery<Team> getTeamSuggestionsListQuery(CriteriaBuilder criteriaBuilder, List<Long> skillsIds, Long hackathonId) {
+        CriteriaQuery<Team> query = criteriaBuilder.createQuery(Team.class);
+        Root<Team> root = query.from(Team.class);
+        query.select(root);
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(criteriaBuilder.isTrue(root.get("actual")));
+        predicates.add(criteriaBuilder.isTrue(root.get("lookingForHackers")));
+        if (hackathonId != null) {
+            Join<Team, Hackathon> join = root.join("hackathon", JoinType.INNER);
+            join.on(criteriaBuilder.equal(join.get("id"), hackathonId));
+            predicates.add(join.getOn());
+        }
+        Join<Team, User> teamParticipantsJoin = root.join("participants", JoinType.INNER);
+        Join<User, Skill> userSkillJoin = teamParticipantsJoin.join("skills", JoinType.INNER);
+        userSkillJoin.on(userSkillJoin.get("id").in(skillsIds));
+        query.distinct(true);
+        query.where(criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()])));
+        return query;
     }
 
     private CriteriaQuery<Team> getTeamListQuery(CriteriaBuilder criteriaBuilder, TeamSearchForm form) {
