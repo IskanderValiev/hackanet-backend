@@ -2,7 +2,6 @@ package com.hackanet.security.config;
 
 import com.hackanet.json.mappers.CustomTokenResponseMapper;
 import com.hackanet.security.filters.JwtTokenAuthFilter;
-import com.hackanet.security.oauth2.custom.CustomAuthorizationRequestResolver;
 import com.hackanet.security.providers.JwtTokenAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -79,9 +78,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .oauth2Login()
                 .defaultSuccessUrl(ROOT + SOCIAL_LOGIN)
-                .failureUrl("/users/error");
-//                .tokenEndpoint()
-//                .accessTokenResponseClient(accessTokenResponseClient());
+                .failureUrl("/users/error")
+                .tokenEndpoint()
+                .accessTokenResponseClient(accessTokenResponseClient());
 
         http.csrf().disable();
     }
@@ -106,14 +105,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return source;
     }
 
-//    @Bean
-//    public OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient() {
-//        DefaultAuthorizationCodeTokenResponseClient accessTokenResponseClient = new DefaultAuthorizationCodeTokenResponseClient();
-//        OAuth2AccessTokenResponseHttpMessageConverter tokenResponseHttpMessageConverter = new OAuth2AccessTokenResponseHttpMessageConverter();
-//        tokenResponseHttpMessageConverter.setTokenResponseConverter(new CustomTokenResponseMapper());
-//        RestTemplate restTemplate = new RestTemplate(Arrays.asList(new FormHttpMessageConverter(), tokenResponseHttpMessageConverter));
-//        restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
-//        accessTokenResponseClient.setRestOperations(restTemplate);
-//        return accessTokenResponseClient;
-//    }
+    @Bean
+    public OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient() {
+        DefaultAuthorizationCodeTokenResponseClient accessTokenResponseClient = new DefaultAuthorizationCodeTokenResponseClient();
+        OAuth2AccessTokenResponseHttpMessageConverter tokenResponseHttpMessageConverter = new OAuth2AccessTokenResponseHttpMessageConverter();
+        tokenResponseHttpMessageConverter.setTokenResponseConverter(new CustomTokenResponseMapper());
+        RestTemplate restTemplate = new RestTemplate(Arrays.asList(new FormHttpMessageConverter(), tokenResponseHttpMessageConverter));
+        restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
+        accessTokenResponseClient.setRestOperations(restTemplate);
+        return accessTokenResponseClient;
+    }
 }

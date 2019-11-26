@@ -331,11 +331,14 @@ public class UserServiceImpl implements UserService {
     protected TokenDto saveFromLinkedIn(Map<String, Object> userDetails) {
         String name = (String) userDetails.get("localizedFirstName");
         String lastName = (String) userDetails.get("localizedLastName");
+        String email = (String) userDetails.get("email");
+        System.out.println("email: " + email);
 
         // TODO: 11/20/19 get email and save user if he does not exist with received email
         User user = User.builder()
                 .name(name)
                 .lastname(lastName)
+                .email(email)
                 .role(Role.USER)
                 .refreshTokenParam(new RandomString().nextString())
                 .accessTokenParam(new RandomString().nextString())
