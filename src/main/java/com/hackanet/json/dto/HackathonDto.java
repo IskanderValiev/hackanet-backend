@@ -41,4 +41,5 @@ public class HackathonDto {
     private Double longitude;
     private Long registrationStartDate;
     private Long registrationEndDate;
+    private List<PartnerDto> partners;
 }

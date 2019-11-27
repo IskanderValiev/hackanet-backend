@@ -13,6 +13,7 @@ import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.Currency;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -51,4 +52,5 @@ public class HackathonUpdateForm {
     private Double longitude;
     private Long registrationStartDate;
     private Long registrationEndDate;
+    private Set<Long> partners;
 }

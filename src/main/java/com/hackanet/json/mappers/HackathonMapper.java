@@ -1,10 +1,7 @@
 package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.*;
-import com.hackanet.models.FileInfo;
-import com.hackanet.models.Hackathon;
-import com.hackanet.models.Skill;
-import com.hackanet.models.User;
+import com.hackanet.models.*;
 import com.hackanet.utils.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,6 +38,9 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
     @Qualifier("skillMapper")
     private Mapper<Skill, SkillDto> skillMapper;
 
+    @Autowired
+    private PartnerMapper partnerMapper;
+
     @Override
     public HackathonDto map(Hackathon from) {
         HackathonDto hackathon = HackathonDto.builder()
@@ -68,6 +68,10 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
         Set<User> participants = from.getParticipants();
         if (participants != null) {
             hackathon.setParticipants(userSimpleMapper.map(new ArrayList<>(participants)));
+        }
+        Set<Partner> partners = from.getPartners();
+        if (partners != null) {
+            hackathon.setPartners(partnerMapper.map(from.getPartners()));
         }
         return hackathon;
     }

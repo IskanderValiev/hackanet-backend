@@ -20,7 +20,6 @@ import com.hackanet.repositories.UserTokenRepository;
 import com.hackanet.security.enums.Role;
 import com.hackanet.security.enums.TokenType;
 import com.hackanet.security.utils.PasswordUtil;
-import com.hackanet.security.utils.ProviderUtils;
 import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.utils.DateTimeUtil;
 import com.hackanet.utils.PhoneUtil;
@@ -47,7 +46,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.hackanet.security.utils.ProviderUtils.*;
-import static com.hackanet.security.utils.ProviderUtils.isGithub;
 import static com.hackanet.utils.StringUtils.generateRandomString;
 import static com.hackanet.utils.StringUtils.getJsonOfTokenDtoFromPrincipalName;
 

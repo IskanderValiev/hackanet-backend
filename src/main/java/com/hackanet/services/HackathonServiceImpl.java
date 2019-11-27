@@ -7,10 +7,7 @@ import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.HackathonCreateForm;
 import com.hackanet.json.forms.HackathonSearchForm;
 import com.hackanet.json.forms.HackathonUpdateForm;
-import com.hackanet.models.FileInfo;
-import com.hackanet.models.Hackathon;
-import com.hackanet.models.Skill;
-import com.hackanet.models.User;
+import com.hackanet.models.*;
 import com.hackanet.repositories.HackathonRepository;
 import com.hackanet.services.chat.ChatService;
 import com.hackanet.utils.DateTimeUtil;
@@ -56,6 +53,9 @@ public class HackathonServiceImpl implements HackathonService {
     @Autowired
     private ChatService chatService;
 
+    @Autowired
+    private PartnerService partnerService;
+
     @Cacheable(value = "hackathons")
     @Override
     @Transactional
@@ -83,6 +83,8 @@ public class HackathonServiceImpl implements HackathonService {
                 ? end.toLocalDate().minusDays(1).atTime(23, 59)
                 : epochToLocalDateTime(form.getRegistrationEndDate());
 
+        Set<Partner> partners = partnerService.getByIds(form.getPartners());
+
         Hackathon hackathon = Hackathon.builder()
                 .name(form.getName().trim())
                 .nameLc(form.getName().trim().toLowerCase())
@@ -100,6 +102,7 @@ public class HackathonServiceImpl implements HackathonService {
                 .latitude(form.getLatitude())
                 .registrationStartDate(registrationStartDate)
                 .registrationEndDate(registrationEndDate)
+                .partners(partners)
                 .build();
 
         if (form.getLogoId() != null) {
@@ -139,9 +142,9 @@ public class HackathonServiceImpl implements HackathonService {
         if (start.after(end)) {
             throw new BadRequestException("Start date is after end date");
         }
-        if (start.before(new Date(System.currentTimeMillis()))) {
-            throw new BadRequestException("Start date is in the past");
-        }
+//        if (start.before(new Date(System.currentTimeMillis()))) {
+//            throw new BadRequestException("Start date is in the past");
+//        }
         hackathon.setStartDate(start);
         hackathon.setEndDate(end);
 
@@ -186,6 +189,11 @@ public class HackathonServiceImpl implements HackathonService {
         List<Long> requiredSkills = form.getRequiredSkills();
         if (requiredSkills != null && !requiredSkills.isEmpty()) {
             hackathon.setRequiredSkills(skillService.getByIds(requiredSkills));
+        }
+
+        Set<Long> partners = form.getPartners();
+        if (partners != null && !partners.isEmpty()) {
+            hackathon.setPartners(partnerService.getByIds(partners));
         }
         hackathon = hackathonRepository.save(hackathon);
         return hackathon;

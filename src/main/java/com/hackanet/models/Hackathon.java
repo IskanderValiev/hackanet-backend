@@ -61,6 +61,8 @@ public class Hackathon extends AbstractEntity {
     private Double latitude;
     private LocalDateTime registrationStartDate;
     private LocalDateTime registrationEndDate;
+    @ManyToMany(mappedBy = "hackathons")
+    private Set<Partner> partners;
 
     private Boolean deleted;
 
@@ -78,5 +80,9 @@ public class Hackathon extends AbstractEntity {
 
     public Boolean getDeleted() {
         return Boolean.TRUE.equals(this.deleted);
+    }
+
+    public Set<Partner> getPartners() {
+        return partners == null ? Sets.newHashSet() : partners;
     }
 }

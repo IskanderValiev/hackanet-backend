@@ -11,6 +11,7 @@ import javax.validation.constraints.*;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Iskander Valiev
@@ -51,4 +52,5 @@ public class HackathonCreateForm {
     private Double longitude;
     private Long registrationStartDate;
     private Long registrationEndDate;
+    private Set<Long> partners;
 }
