@@ -91,4 +91,15 @@ public class SecurityUtils {
                 throw new ForbiddenException("You have no access to this team invitation");
         }
     }
+
+    public static void checkJobInvitationAccess(JobOffer invitation, User user, boolean asCompany) {
+        if (asCompany) {
+            if (!invitation.getCompany().getAdmin().equals(user)) {
+                throw new ForbiddenException("You have no access to this invitation as a company");
+            }
+        } else {
+            if (!invitation.getUser().equals(user))
+                throw new ForbiddenException("You have no access to this invitation as a user");
+        }
+    }
 }

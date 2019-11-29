@@ -1,6 +1,7 @@
 package com.hackanet.services.chat;
 
 import com.hackanet.json.forms.ChatMessageSaveForm;
+import com.hackanet.models.chat.Chat;
 import com.hackanet.models.chat.ChatMessage;
 import com.hackanet.repositories.chat.ChatMessageRepository;
 import com.hackanet.services.UserService;
@@ -11,12 +12,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 /**
  * @author Iskander Valiev
  * created by isko
  * on 10/24/19
  */
+@Deprecated
 @Service
 public class ChatMessageServiceImpl implements ChatMessageService {
 

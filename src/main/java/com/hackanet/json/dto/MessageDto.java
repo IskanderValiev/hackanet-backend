@@ -26,6 +26,6 @@ public class MessageDto {
     private UserSimpleDto sender;
     private Long chatId;
     private String text;
-    private LocalDateTime timestamp;
+    private Long timestamp;
     private List<FileInfoDto> attachments;
 }

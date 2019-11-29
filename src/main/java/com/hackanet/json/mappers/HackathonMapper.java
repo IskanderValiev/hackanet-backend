@@ -57,8 +57,6 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
                 .deleted(from.getDeleted())
                 .longitude(from.getLongitude())
                 .latitude(from.getLatitude())
-                .registrationStartDate(localDateTimeToLong(from.getRegistrationStartDate()))
-                .registrationEndDate(localDateTimeToLong(from.getRegistrationEndDate()))
                 .build();
         if (hackathon.getLogo() != null)
             hackathon.setLogo(fileMapper.map(from.getLogo()));
@@ -68,6 +66,12 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
         Set<User> participants = from.getParticipants();
         if (participants != null) {
             hackathon.setParticipants(userSimpleMapper.map(new ArrayList<>(participants)));
+        }
+        if (from.getRegistrationStartDate() != null) {
+            hackathon.setRegistrationStartDate(localDateTimeToLong(from.getRegistrationStartDate()));
+        }
+        if (from.getRegistrationEndDate() != null) {
+            hackathon.setRegistrationEndDate(localDateTimeToLong(from.getRegistrationEndDate()));
         }
         return hackathon;
     }

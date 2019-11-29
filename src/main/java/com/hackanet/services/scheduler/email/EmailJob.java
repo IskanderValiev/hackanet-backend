@@ -40,7 +40,7 @@ public class EmailJob implements Job {
         switch (jobType) {
             case HACKATHON_JOB_REVIEW_REQUEST:
                 try {
-                    Long teamId = (Long) jobDataMap.get(TEAM_ID);
+                    Long teamId = (Long) jobDataMap.get(ENTITY_ID);
                     Team team = teamService.get(teamId);
                     emailService.sendHackathonJobReviewRequestEmail(user, team);
                 } catch (NotFoundException ex) {

@@ -15,4 +15,5 @@ public interface CompanyService extends CrudService<Company> {
     Company updateApprovedStatus(Long id, Boolean approved);
     List<Company> getCompaniesList(CompanySearchForm form);
     Company createCompanyByName(String name, String country, String city);
+    Company getByAdmin(User admin);
 }

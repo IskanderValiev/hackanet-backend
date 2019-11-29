@@ -1,6 +1,7 @@
 package com.hackanet.services;
 
 import com.hackanet.application.AppConstants;
+import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.dto.CompanyOwnerTokenDto;
 import com.hackanet.json.forms.*;
@@ -151,6 +152,11 @@ public class CompanyServiceImpl implements CompanyService {
                 .approved(false)
                 .build();
         return companyRepository.save(company);
+    }
+
+    @Override
+    public Company getByAdmin(User admin) {
+        return companyRepository.findByAdmin(admin).orElseThrow(() -> new BadRequestException("The user is not a company owner."));
     }
 
     private CriteriaQuery<Company> getCompaniesListQuery(CriteriaBuilder criteriaBuilder, CompanySearchForm form) {

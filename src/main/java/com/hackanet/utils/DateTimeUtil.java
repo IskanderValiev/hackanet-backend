@@ -45,14 +45,18 @@ public class DateTimeUtil {
     public static Timestamp getAvailableTime(UserNotificationSettings settings, Timestamp timestamp) {
         if (settings.getDontDisturbTo() == null || settings.getDontDisturbFrom() == null)
             return timestamp;
-        LocalDateTime localDateTime = timestamp.toLocalDateTime();
+        LocalDateTime availableTime = getAvailableTimeForLocalDateTime(settings, timestamp.toLocalDateTime());
+        return Timestamp.valueOf(availableTime);
+    }
+
+    public static LocalDateTime getAvailableTimeForLocalDateTime(UserNotificationSettings settings, LocalDateTime localDateTime) {
         LocalTime localTime = localDateTime.toLocalTime();
         if (localTime.isBefore(settings.getDontDisturbTo()) && localTime.isAfter(settings.getDontDisturbFrom()))
-            return Timestamp.valueOf(localDateTime);
+            return localDateTime;
 
         LocalDateTime availableTimeInGMT = localDateTime.plusDays(1).withHour(settings.getDontDisturbTo().getHour()).withMinute(0).withSecond(0);
         LocalDateTime availableTimeInUTC = utcLocalTimeRelativeToZoneOffset(availableTimeInGMT.toLocalTime(), AppConstants.MOSCOW_ZONE_OFFSET).atDate(availableTimeInGMT.toLocalDate());
-        return Timestamp.valueOf(availableTimeInUTC);
+        return availableTimeInUTC;
     }
 
     private static LocalTime utcLocalTimeRelativeToZoneOffset(LocalTime localTime, ZoneOffset zoneOffset) {

@@ -2,11 +2,11 @@ package com.hackanet.services.chat;
 
 import com.hackanet.json.forms.ChatCreateForm;
 import com.hackanet.models.Hackathon;
+import com.hackanet.models.JobOffer;
 import com.hackanet.models.User;
 import com.hackanet.models.chat.Chat;
 
 import java.util.List;
-import java.util.Set;
 
 public interface ChatService {
     Chat create(ChatCreateForm form, User currentUser);
@@ -16,4 +16,5 @@ public interface ChatService {
     Chat addOrRemoveListOfUsers(Long chatId, List<User> users, User currentUser, Boolean add);
     Chat createForTeam(User teamCreator);
     List<Chat> createForHackathon(Hackathon hackathon);
+    Chat createForAcceptedJobInvitation(JobOffer jobOffer);
 }

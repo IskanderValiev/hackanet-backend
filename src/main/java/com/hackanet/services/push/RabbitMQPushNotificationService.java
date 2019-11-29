@@ -7,10 +7,7 @@ import com.google.common.collect.Multimap;
 //import com.hackanet.config.AMPQConfig;
 import com.hackanet.config.AMPQConfig;
 import com.hackanet.json.mappers.MessageMapper;
-import com.hackanet.models.JoinToTeamRequest;
-import com.hackanet.models.Team;
-import com.hackanet.models.User;
-import com.hackanet.models.UserPhoneToken;
+import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.chat.ChatSettings;
 import com.hackanet.push.ResolvedPush;
@@ -19,7 +16,6 @@ import com.hackanet.push.enums.PushType;
 import com.hackanet.services.UserService;
 import com.hackanet.services.chat.ChatService;
 import com.hackanet.services.chat.ChatSettingsService;
-import com.hackanet.utils.PushAvailabilityChecker;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.amqp.core.Message;
@@ -32,9 +28,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.hackanet.utils.PushAvailabilityChecker.isAvailableForAndroid;
-import static com.hackanet.utils.PushAvailabilityChecker.isAvailableForiOS;
 
 /**
  * @author Iskander Valiev
@@ -122,6 +115,15 @@ public class RabbitMQPushNotificationService implements MessageListener {
                 .toUserId(user.getId())
                 .type(PushType.JOIN_TO_TEAM_REQUEST_STATUS)
                 .payloadEntity(request)
+                .build();
+        rabbitTemplate.convertAndSend(AMPQConfig.QUEUE_NAME, buildMessage(msg));
+    }
+
+    public void sendJobInvitationNotification(User user, JobOffer jobOffer) {
+        PushNotificationMsg msg = PushNotificationMsg.builder()
+                .toUserId(user.getId())
+                .type(PushType.JOB_INVITATION)
+                .payloadEntity(jobOffer)
                 .build();
         rabbitTemplate.convertAndSend(AMPQConfig.QUEUE_NAME, buildMessage(msg));
     }
