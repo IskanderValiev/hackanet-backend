@@ -6,5 +6,5 @@ package com.hackanet.services.scheduler;
  * on 11/10/19
  */
 public enum JobType {
-    JOIN_TO_TEAM_REQUEST_STATUS, HACKATHON_JOB_REVIEW_REQUEST
+    JOIN_TO_TEAM_REQUEST_STATUS, HACKATHON_JOB_REVIEW_REQUEST, JOB_INVITATION
 }

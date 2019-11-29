@@ -1,12 +1,12 @@
 package com.hackanet.security.filters;
 
+import com.google.common.collect.Lists;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 // the filter is needed because server does not allow to access to server from external resources
@@ -16,7 +16,7 @@ public class CORSFilter implements Filter {
     // This is to be replaced with a list of domains allowed to access the server
     //You can include more than one origin here
     // TODO: 10/27/19 change this
-    private final List<String> allowedOrigins = Collections.singletonList("http://localhost:63342");
+    private final List<String> allowedOrigins = Lists.newArrayList("http://localhost:63342", "http://localhost:8081");
 
     public void destroy() {}
 

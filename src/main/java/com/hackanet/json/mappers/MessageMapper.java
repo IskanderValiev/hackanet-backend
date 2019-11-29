@@ -7,12 +7,15 @@ import com.hackanet.models.User;
 import com.hackanet.models.chat.Message;
 import com.hackanet.services.FileInfoService;
 import com.hackanet.services.UserService;
+import com.hackanet.utils.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.hackanet.utils.DateTimeUtil.*;
 
 /**
  * @author Iskander Valiev
@@ -41,7 +44,7 @@ public class MessageMapper {
         return MessageDto.builder()
                 .id(from.getId())
                 .text(from.getText())
-                .timestamp(from.getTimestamp())
+                .timestamp(localDateTimeToLong(from.getTimestamp()))
                 .attachments(files)
                 .chatId(from.getChatId())
                 .sender(userSimpleMapper.map(sender)).build();

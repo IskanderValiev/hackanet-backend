@@ -7,6 +7,7 @@ import com.hackanet.models.FileInfo;
 import com.hackanet.models.User;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.chat.Message;
+import com.hackanet.models.enums.LocalMessageText;
 import com.hackanet.repositories.chat.MessageRepository;
 import com.hackanet.services.FileInfoService;
 import com.hackanet.services.UserService;
@@ -118,5 +119,16 @@ public class ChatMessageServiceElasticsearchImpl {
         return elasticsearchTemplate.queryForList(criteriaQuery, Message.class).stream()
                 .sorted(Comparator.comparing(Message::getTimestamp))
                 .collect(Collectors.toList());
+    }
+
+    Message createAcceptJobInvitationMessage(Chat chat) {
+        Message message = Message.builder()
+                .chatId(chat.getId())
+                .timestamp(LocalDateTime.now())
+                .text(LocalMessageText.EN.getAcceptedJobOffer())
+                .build();
+        message = messageRepository.save(message);
+        rabbitMQPushNotificationService.sendNewMessageNotification(message);
+        return message;
     }
 }

@@ -1,10 +1,10 @@
 package com.hackanet.services.chat;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.ChatCreateForm;
 import com.hackanet.models.Hackathon;
+import com.hackanet.models.JobOffer;
 import com.hackanet.models.User;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.ChatType;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.hackanet.security.utils.SecurityUtils.checkChatAccessForOperation;
 
@@ -31,6 +30,8 @@ public class ChatServiceImpl implements ChatService {
     private ChatRepository chatRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private ChatMessageServiceElasticsearchImpl chatMessageServiceElasticsearch;
 
     @Override
     public Chat create(ChatCreateForm form, User currentUser) {
@@ -131,5 +132,21 @@ public class ChatServiceImpl implements ChatService {
         List<Chat> chats = new ArrayList<>();
         Collections.addAll(chats, newsChat, participantsChat);
         return chatRepository.saveAll(chats);
+    }
+
+    @Override
+    public Chat createForAcceptedJobInvitation(JobOffer jobOffer) {
+        Set<User> participants = new HashSet<>();
+        participants.add(jobOffer.getUser());
+        participants.add(jobOffer.getCompany().getAdmin());
+
+        Chat chat = Chat.builder()
+                .participants(participants)
+                .type(ChatType.PRIVATE)
+                .build();
+
+        chat = chatRepository.save(chat);
+        chatMessageServiceElasticsearch.createAcceptJobInvitationMessage(chat);
+        return chat;
     }
 }
