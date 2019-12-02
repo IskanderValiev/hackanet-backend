@@ -58,7 +58,7 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
                 .longitude(from.getLongitude())
                 .latitude(from.getLatitude())
                 .build();
-        if (hackathon.getLogo() != null)
+        if (from.getLogo() != null)
             hackathon.setLogo(fileMapper.map(from.getLogo()));
         List<Skill> requiredSkills = from.getRequiredSkills();
         if (requiredSkills != null)

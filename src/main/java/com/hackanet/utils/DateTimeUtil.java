@@ -3,6 +3,7 @@ package com.hackanet.utils;
 import com.hackanet.application.AppConstants;
 import com.hackanet.models.UserNotificationSettings;
 
+import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.*;
@@ -89,7 +90,7 @@ public class DateTimeUtil {
         return now.isBefore(from) & now.isAfter(to);
     }
 
-    public static Long getAvailableTimeFotNotifications(UserNotificationSettings settings) {
+    public static Long getAvailableTimeForNotifications(UserNotificationSettings settings) {
         LocalTime now = LocalTime.now();
         long nowInMills = (now.getSecond() * 1000);
         if (settings.getDontDisturbFrom() == null || settings.getDontDisturbTo() == null) {

@@ -42,7 +42,6 @@ public class Hackathon extends AbstractEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "hackathon")
     private List<FileInfo> fileInfo;
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "logo_id")
     private FileInfo logo;
     @ManyToOne(fetch = FetchType.LAZY)
     private User owner;

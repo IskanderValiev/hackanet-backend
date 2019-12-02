@@ -26,11 +26,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
 import static com.hackanet.utils.DateTimeUtil.*;
+import static java.lang.System.currentTimeMillis;
 
 /**
  * @author Iskander Valiev
@@ -139,7 +141,7 @@ public class HackathonServiceImpl implements HackathonService {
         if (start.after(end)) {
             throw new BadRequestException("Start date is after end date");
         }
-        if (start.before(new Date(System.currentTimeMillis()))) {
+        if (start.before(new Date(currentTimeMillis()))) {
             throw new BadRequestException("Start date is in the past");
         }
         hackathon.setStartDate(start);
@@ -169,19 +171,16 @@ public class HackathonServiceImpl implements HackathonService {
 
         Long regStartDate = form.getRegistrationStartDate();
         Long regEndDate = form.getRegistrationEndDate();
-        if (regStartDate != null && regEndDate != null) {
-            if (regStartDate > regEndDate)
-                throw new BadRequestException("Registration Start Date is after End Date");
-            if (regEndDate < System.currentTimeMillis())
-                throw new BadRequestException("Registration End Date is in the past");
-            hackathon.setRegistrationEndDate(epochToLocalDateTime(regEndDate));
-            hackathon.setRegistrationStartDate(epochToLocalDateTime(regStartDate));
-        } else {
-            if (regEndDate != null)
-                hackathon.setRegistrationEndDate(epochToLocalDateTime(regEndDate));
-            if (regStartDate != null)
-                hackathon.setRegistrationStartDate(epochToLocalDateTime(regStartDate));
-        }
+        if (regStartDate > regEndDate)
+            throw new BadRequestException("Registration Start Date is after End Date");
+        if (regEndDate < System.currentTimeMillis())
+            throw new BadRequestException("Registration End Date is in the past");
+        if (new Timestamp(regStartDate).after(start))
+            throw new BadRequestException("Registration Start Date must be before hackathon start date");
+        if (new Timestamp(regEndDate).after(end))
+            throw new BadRequestException("Registration End Date must be before hackathon end date");
+        hackathon.setRegistrationEndDate(epochToLocalDateTime(regEndDate));
+        hackathon.setRegistrationStartDate(epochToLocalDateTime(regStartDate));
 
         List<Long> requiredSkills = form.getRequiredSkills();
         if (requiredSkills != null && !requiredSkills.isEmpty()) {
@@ -253,7 +252,7 @@ public class HackathonServiceImpl implements HackathonService {
         }
         Date from = form.getFrom();
         if (from == null)
-            from = new Date(System.currentTimeMillis());
+            from = new Date(currentTimeMillis());
         predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("startDate"), from));
         Date to = form.getTo();
         if (to != null) {

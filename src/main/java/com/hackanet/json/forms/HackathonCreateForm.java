@@ -8,8 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.*;
-import java.sql.Date;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**

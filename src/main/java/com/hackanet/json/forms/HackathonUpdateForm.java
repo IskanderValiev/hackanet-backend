@@ -49,6 +49,8 @@ public class HackathonUpdateForm {
     private Double latitude;
     @NotNull
     private Double longitude;
+    @NotNull
     private Long registrationStartDate;
+    @NotNull
     private Long registrationEndDate;
 }

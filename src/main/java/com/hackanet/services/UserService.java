@@ -38,4 +38,5 @@ public interface UserService extends CrudService<User> {
     UserToken getByUserId(Long userId);
     boolean userTokenExpired(UserToken token, boolean isRefreshToken);
     TokenDto getTokenDtoFromString(String string);
+    User get(User jwtData);
 }

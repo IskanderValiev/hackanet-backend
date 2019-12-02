@@ -547,6 +547,11 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public User get(User jwtData) {
+        return get(jwtData.getId());
+    }
+
     private String getTokenValue(User user, TokenType type) {
         return Jwts.builder()
                 .claim("role", user.getRole().toString())

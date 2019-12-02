@@ -49,6 +49,7 @@ public class UserController {
     private static final String FACEBOOK_LOGIN = LOGIN + "/oauth2/code/facebook";
     private static final String GITHUB_LOGIN = LOGIN + "/oauth2/code/github";
     public static final String SOCIAL_LOGIN = LOGIN + "/oauth2";
+    private static final String ME = "/me";
 
     @Autowired
     private UserService userService;
@@ -141,5 +142,16 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public TokenDto me(OAuth2AuthenticationToken principal) {
         return userService.saveFromSocialNetwork(principal);
+    }
+
+    @GetMapping(ME)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserDto> me(@AuthenticationPrincipal User currentUser) {
+        User user = userService.get(currentUser);
+        return ResponseEntity.ok(userMapper.map(user));
     }
 }
