@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Iskander Valiev
@@ -50,6 +51,9 @@ public class UserController {
     private static final String GITHUB_LOGIN = LOGIN + "/oauth2/code/github";
     public static final String SOCIAL_LOGIN = LOGIN + "/oauth2";
     private static final String ME = "/me";
+    private static final String CONNECTIONS = "/connections";
+    private static final String USER_CONNECTIONS = USER_PROFILE + CONNECTIONS;
+    private static final String ONE_CONNECTION = CONNECTIONS + "/{connectionId}";
 
     @Autowired
     private UserService userService;
@@ -153,5 +157,27 @@ public class UserController {
     public ResponseEntity<UserDto> me(@AuthenticationPrincipal User currentUser) {
         User user = userService.get(currentUser);
         return ResponseEntity.ok(userMapper.map(user));
+    }
+
+    @GetMapping(USER_CONNECTIONS)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = false, dataType = "string", paramType = "header")
+    })
+    public ResponseEntity<List<UserDto>> getConnections(@PathVariable Long id) {
+        Set<User> connections = userService.getConnections(id);
+        return ResponseEntity.ok(userMapper.map(connections));
+    }
+
+    @DeleteMapping(ONE_CONNECTION)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> deleteConnection(@PathVariable("connectionId") Long connectionId,
+                                                   @AuthenticationPrincipal User user) {
+        userService.deleteConnection(user, connectionId);
+        return ResponseEntity.ok("OK");
     }
 }
