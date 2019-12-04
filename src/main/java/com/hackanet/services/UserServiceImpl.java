@@ -90,6 +90,8 @@ public class UserServiceImpl implements UserService {
     private UserTokenRepository userTokenRepository;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private ConnectionInvitationService connectionInvitationService;
 
     @Override
     @Transactional
@@ -550,6 +552,59 @@ public class UserServiceImpl implements UserService {
     @Override
     public User get(User jwtData) {
         return get(jwtData.getId());
+    }
+
+    @Override
+    public void addConnection(User user, User userToAdd) {
+        Set<User> usersToSave = new HashSet<>();
+        Set<User> connections = user.getConnections();
+        if (!connections.contains(userToAdd)) {
+            connections.add(userToAdd);
+            user.setConnections(connections);
+            usersToSave.add(user);
+        }
+
+        Set<User> userToAddConnections = userToAdd.getConnections();
+        if (!userToAddConnections.contains(user)) {
+            userToAddConnections.add(user);
+            userToAdd.setConnections(userToAddConnections);
+            usersToSave.add(userToAdd);
+        }
+        userRepository.saveAll(usersToSave);
+    }
+
+    @Override
+    @Transactional
+    public void deleteConnection(User user, User userToDelete) {
+        Set<User> usersToSave = new HashSet<>();
+        Set<User> connections = user.getConnections();
+        if (connections.contains(userToDelete)) {
+            connections.remove(userToDelete);
+            user.setConnections(connections);
+            usersToSave.add(user);
+        }
+
+        Set<User> userToDeleteConnections = userToDelete.getConnections();
+        if (userToDeleteConnections.contains(user)) {
+            userToDeleteConnections.remove(user);
+            userToDelete.setConnections(userToDeleteConnections);
+            usersToSave.add(userToDelete);
+        }
+        connectionInvitationService.delete(user.getId(), userToDelete.getId());
+        userRepository.saveAll(usersToSave);
+    }
+
+    @Override
+    public void deleteConnection(User user, Long connectionId) {
+        User connectionUser = get(connectionId);
+        user = get(user.getId());
+        deleteConnection(user, connectionUser);
+    }
+
+    @Override
+    public Set<User> getConnections(Long userId) {
+        User user = get(userId);
+        return user.getConnections();
     }
 
     private String getTokenValue(User user, TokenType type) {

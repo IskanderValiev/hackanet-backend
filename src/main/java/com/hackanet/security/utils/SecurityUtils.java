@@ -102,4 +102,14 @@ public class SecurityUtils {
                 throw new ForbiddenException("You have no access to this invitation as a user");
         }
     }
+
+    public static void checkConnectionInvitationAccess(ConnectionInvitation invitation, User user, boolean asOwner) {
+        if (asOwner) {
+            if (!invitation.getUser().equals(user))
+                throw new ForbiddenException("You have no access to this connection invitation as a owner");
+        } else {
+            if (!invitation.getInvitedUser().equals(user))
+                throw new ForbiddenException("You have no access to this connection invitation as an invited user");
+        }
+    }
 }
