@@ -3,16 +3,23 @@ package com.hackanet.controllers;
 import com.hackanet.json.dto.MessageDto;
 import com.hackanet.json.forms.ChatMessageSaveForm;
 import com.hackanet.json.mappers.MessageMapper;
+import com.hackanet.models.User;
+import com.hackanet.models.chat.Chat;
 import com.hackanet.models.chat.Message;
+import com.hackanet.security.utils.SimpMessageHeaderAccessorUtils;
 import com.hackanet.services.chat.ChatMessageServiceElasticsearchImpl;
+import com.hackanet.services.chat.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
+
+import static com.hackanet.security.utils.SecurityUtils.checkChatAccess;
 
 /**
  * @author Iskander Valiev
@@ -28,6 +35,10 @@ public class ChatMessageController {
     private MessageMapper messageMapper;
     @Autowired
     private ChatMessageServiceElasticsearchImpl messageService;
+    @Autowired
+    private ChatService chatService;
+    @Autowired
+    private SimpMessageHeaderAccessorUtils simpMessageHeaderAccessorUtils;
 
     /**
      *
@@ -39,10 +50,10 @@ public class ChatMessageController {
     @MessageMapping("/chat/{id}/send")
     @SendTo("/chat/{id}")
     public MessageDto sendMessage(@Payload ChatMessageSaveForm form,
-                                  @DestinationVariable Long id) {
+                                  @DestinationVariable Long id,
+                                  SimpMessageHeaderAccessor accessor) {
+        chatService.checkChatAccessByChatId(id, accessor);
         form.setChatId(id);
-//        ChatMessage chatMessage = chatMessageService.saveMessage(form);
-//        return chatMessageMapper.map(chatMessage);
         Message message = messageService.saveMessage(form);
         return messageMapper.map(message);
     }
@@ -50,7 +61,9 @@ public class ChatMessageController {
     @MessageMapping("/chat/{id}/connect")
     @SendTo("/chat/{id}")
     public List<MessageDto> getMessages(@DestinationVariable Long id,
-                                     @Payload String connect) {
+                                        @Payload String connect,
+                                        SimpMessageHeaderAccessor accessor) {
+        chatService.checkChatAccessByChatId(id, accessor);
         List<Message> messages = messageService.getByChatId(id);
         return messageMapper.map(messages);
     }

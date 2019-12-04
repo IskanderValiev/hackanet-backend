@@ -37,10 +37,12 @@ public interface UserService extends CrudService<User> {
     TokenDto updateAccessToken(User user);
     UserToken getByUserId(Long userId);
     boolean userTokenExpired(UserToken token, boolean isRefreshToken);
+    boolean userTokenExpired(User user, boolean isRefreshToken);
     TokenDto getTokenDtoFromString(String string);
     User get(User jwtData);
     void addConnection(User user, User userToAdd);
     void deleteConnection(User user, User userToDelete);
     void deleteConnection(User user, Long connectionId);
     Set<User> getConnections(Long userId);
+    User getUserByJwtToken(String token);
 }

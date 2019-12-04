@@ -5,6 +5,7 @@ import com.hackanet.models.Hackathon;
 import com.hackanet.models.JobOffer;
 import com.hackanet.models.User;
 import com.hackanet.models.chat.Chat;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 
 import java.util.List;
 
@@ -17,4 +18,5 @@ public interface ChatService {
     Chat createForTeam(User teamCreator);
     List<Chat> createForHackathon(Hackathon hackathon);
     Chat createForAcceptedJobInvitation(JobOffer jobOffer);
+    void checkChatAccessByChatId(Long chatId, SimpMessageHeaderAccessor simpMessageHeaderAccessor);
 }

@@ -9,7 +9,7 @@ var headers = {
     login: 'mylogin',
     passcode: 'mypasscode',
     // additional header
-    'Authorization': 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiQURNSU4iLCJlbWFpbCI6Imlza2FuZC52YWxpZXZAeWFuZGV4LnJ1Iiwic3ViIjoiMSJ9.XPbjyLPS_AHCtjbk9xEteRI_ruOtWSiCedR6O9HSKoKY1ZuXXdyfBDA2ere6diN4ice27ZG0w4WgX_1SmhQikg'
+    'Authorization': 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiQURNSU4iLCJlbWFpbCI6Imlza2FuZC52YWxpZXZAeWFuZGV4LnJ1IiwidG9rZW5QYXJhbSI6IkVqYzhQcGwxQnE1RVA1ZlZQVEtJUyIsInRva2VuLXR5cGUiOiJBQ0NFU1MiLCJzdWIiOiIxIn0.ggsFqnQE9LFxkdTEk9V-bQMuK8BcgADJTcw9vqoghi3xwvNcY-T82Nch15MJWrMZBzZEdA-rNEvKDT9eQB_NGA'
 };
 function connect(event) {
     name = document.querySelector('#name').value.trim();
@@ -33,7 +33,7 @@ function onError() {
 function connectionSuccess() {
     k = 0;
     stompClient.send("/chat/3/connect", headers, "connected");
-    stompClient.subscribe('/chat/3', onMessageReceived);
+    stompClient.subscribe('/chat/3', onMessageReceived, headers);
 }
 
 function sendMessage(event) {

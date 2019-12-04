@@ -9,8 +9,11 @@ import com.hackanet.models.User;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.ChatType;
 import com.hackanet.repositories.chat.ChatRepository;
+import com.hackanet.security.utils.SecurityUtils;
+import com.hackanet.security.utils.SimpMessageHeaderAccessorUtils;
 import com.hackanet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +35,8 @@ public class ChatServiceImpl implements ChatService {
     private UserService userService;
     @Autowired
     private ChatMessageServiceElasticsearchImpl chatMessageServiceElasticsearch;
+    @Autowired
+    private SimpMessageHeaderAccessorUtils simpMessageHeaderAccessorUtils;
 
     @Override
     public Chat create(ChatCreateForm form, User currentUser) {
@@ -148,5 +153,13 @@ public class ChatServiceImpl implements ChatService {
         chat = chatRepository.save(chat);
         chatMessageServiceElasticsearch.createAcceptJobInvitationMessage(chat);
         return chat;
+    }
+
+    @Override
+    @Transactional
+    public void checkChatAccessByChatId(Long chatId, SimpMessageHeaderAccessor accessor) {
+        User authenticatedUser = simpMessageHeaderAccessorUtils.getAuthenticatedUser(accessor);
+        Chat chat = get(chatId);
+        SecurityUtils.checkChatAccess(chat, authenticatedUser);
     }
 }

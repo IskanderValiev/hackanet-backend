@@ -38,9 +38,6 @@ public class MessageInterceptor implements ChannelInterceptor {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
         MultiValueMap<String, String> multiValueMap = headers.get(StompHeaderAccessor.NATIVE_HEADERS, MultiValueMap.class);
-//        for(Map.Entry<String, List<String>> head : multiValueMap.entrySet()){
-//            System.out.println(head.getKey() + "#" + head.getValue());
-//        }
             if (multiValueMap != null) {
                 List<String> authList = multiValueMap.get("Authorization");
                 String authHeader = authList != null && !authList.isEmpty() ? authList.get(0) : "";
@@ -56,6 +53,7 @@ public class MessageInterceptor implements ChannelInterceptor {
                     token = authHeader.substring(prefix.length());
                     authentication = new JwtTokenAuthentication(token);
                     securityContext.setAuthentication(provider.authenticate(authentication));
+                    accessor.setUser(securityContext.getAuthentication());
                 }
             }
         return message;

@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "user_tokens")
 public class UserToken extends AbstractEntity {
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     private User user;
     @Column(nullable = false)
     private LocalDateTime accessTokenExpiresAt;

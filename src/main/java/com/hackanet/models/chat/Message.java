@@ -1,5 +1,9 @@
 package com.hackanet.models.chat;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.joda.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.joda.ser.LocalDateTimeSerializer;
 import lombok.*;
 import org.springframework.data.elasticsearch.annotations.Document;
 
@@ -28,7 +32,7 @@ public class Message {
     private String id;
     private Long senderId;
     private Long chatId;
-    private LocalDateTime timestamp;
+    private Long timestamp;
     private String text;
     private List<Long> attachments;
 }

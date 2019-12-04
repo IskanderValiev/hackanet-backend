@@ -44,7 +44,7 @@ public class MessageMapper {
         return MessageDto.builder()
                 .id(from.getId())
                 .text(from.getText())
-                .timestamp(localDateTimeToLong(from.getTimestamp()))
+                .timestamp(from.getTimestamp())
                 .attachments(files)
                 .chatId(from.getChatId())
                 .sender(userSimpleMapper.map(sender)).build();

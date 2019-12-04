@@ -25,6 +25,7 @@ import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.utils.DateTimeUtil;
 import com.hackanet.utils.PhoneUtil;
 import com.hackanet.utils.RandomString;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
@@ -540,6 +541,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean userTokenExpired(User user, boolean isRefreshToken) {
+        // FIXME: 12/4/19 fix
+        UserToken token = userTokenRepository.findByUserId(user.getId());
+        if (token != null)
+            return userTokenExpired(token, isRefreshToken);
+        throw new ForbiddenException("There is no token for this user");
+    }
+
+    @Override
     public TokenDto getTokenDtoFromString(String principalName) {
         principalName = getJsonOfTokenDtoFromPrincipalName(principalName);
         try {
@@ -605,6 +615,22 @@ public class UserServiceImpl implements UserService {
     public Set<User> getConnections(Long userId) {
         User user = get(userId);
         return user.getConnections();
+    }
+
+    @Override
+    public User getUserByJwtToken(String token) {
+        if (token.startsWith(jwtConfig.getPrefix())) {
+            String prefix = jwtConfig.getPrefix() + " ";
+            token = token.substring(prefix.length());
+        }
+
+        Claims body = Jwts.parser()
+                .setSigningKey(jwtConfig.getSecret())
+                .parseClaimsJws(token)
+                .getBody();
+
+        long userId = Long.parseLong(body.get("sub").toString());
+        return get(userId);
     }
 
     private String getTokenValue(User user, TokenType type) {

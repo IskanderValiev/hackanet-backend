@@ -12,6 +12,7 @@ import com.hackanet.repositories.chat.MessageRepository;
 import com.hackanet.services.FileInfoService;
 import com.hackanet.services.UserService;
 import com.hackanet.services.push.RabbitMQPushNotificationService;
+import com.hackanet.utils.DateTimeUtil;
 import com.hackanet.utils.SwearWordsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
@@ -72,7 +73,7 @@ public class ChatMessageServiceElasticsearchImpl {
         Message chatMessage = Message.builder()
                 .id(generateRandomString())
                 .chatId(form.getChatId())
-                .timestamp(LocalDateTime.now())
+                .timestamp(System.currentTimeMillis())
                 .text(text.trim())
                 .attachments(attachments)
                 .senderId(form.getSenderId())
@@ -124,7 +125,7 @@ public class ChatMessageServiceElasticsearchImpl {
     Message createAcceptJobInvitationMessage(Chat chat) {
         Message message = Message.builder()
                 .chatId(chat.getId())
-                .timestamp(LocalDateTime.now())
+                .timestamp(System.currentTimeMillis())
                 .text(LocalMessageText.EN.getAcceptedJobOffer())
                 .build();
         message = messageRepository.save(message);
