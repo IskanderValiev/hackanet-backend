@@ -63,7 +63,8 @@ public class ConnectionInvitationController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ConnectionInvitationDto>> getByInvitedUser(@AuthenticationPrincipal User user) {
         Set<ConnectionInvitation> connectionInvitations = connectionInvitationService.getByInvitedUser(user.getId());
-        return ResponseEntity.ok(connectionInvitationMapper.map(connectionInvitations));
+        List<ConnectionInvitationDto> map = connectionInvitationMapper.map(connectionInvitations);
+        return ResponseEntity.ok(map);
     }
 
     @GetMapping(INVITE)
@@ -73,9 +74,9 @@ public class ConnectionInvitationController {
     })
     @ApiOperation("Get all invitations by invited user")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> getByInvitedUser(@AuthenticationPrincipal User user,
+    public ResponseEntity<ConnectionInvitationDto> getByInvitedUser(@AuthenticationPrincipal User user,
                                                    @RequestParam("invitedUserId") Long id) {
-        connectionInvitationService.sendInvitation(user, id);
-        return ResponseEntity.ok("OK");
+        ConnectionInvitation invitation = connectionInvitationService.sendInvitation(user, id);
+        return ResponseEntity.ok(connectionInvitationMapper.map(invitation));
     }
 }
