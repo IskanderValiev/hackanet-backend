@@ -1,5 +1,6 @@
 package com.hackanet.services;
 
+import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.models.ConnectionInvitation;
 import com.hackanet.models.User;
@@ -30,7 +31,10 @@ public class ConnectionInvitationServiceImpl implements ConnectionInvitationServ
 
     @Override
     public ConnectionInvitation sendInvitation(User user, Long invitedUser) {
-        ConnectionInvitation invitation = ConnectionInvitation.builder()
+        ConnectionInvitation invitation = connectionInvitationRepository.findByUserIdAndInvitedUserId(user.getId(), invitedUser);
+        if (invitation != null)
+            return invitation;
+        invitation = ConnectionInvitation.builder()
                 .user(user)
                 .invitedUser(userService.get(invitedUser))
                 .status(ConnectionInvitationStatus.NEW)

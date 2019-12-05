@@ -54,6 +54,7 @@ public class UserController {
     private static final String CONNECTIONS = "/connections";
     private static final String USER_CONNECTIONS = USER_PROFILE + CONNECTIONS;
     private static final String ONE_CONNECTION = CONNECTIONS + "/{connectionId}";
+    private static final String CONNECTIONS_SUGGESTIONS = CONNECTIONS + "/suggestions";
 
     @Autowired
     private UserService userService;
@@ -179,5 +180,16 @@ public class UserController {
                                                    @AuthenticationPrincipal User user) {
         userService.deleteConnection(user, connectionId);
         return ResponseEntity.ok("OK");
+    }
+
+    @GetMapping(CONNECTIONS_SUGGESTIONS)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<UserDto>> getConnectionSuggestions(@AuthenticationPrincipal User user) {
+        Set<User> connectionsSuggestions = userService.getConnectionsSuggestions(user);
+        return ResponseEntity.ok(userMapper.map(connectionsSuggestions));
     }
 }

@@ -5,6 +5,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.hackanet.application.AppConstants;
 import com.hackanet.application.Patterns;
+import com.hackanet.components.Profiling;
 import com.hackanet.config.JwtConfig;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.ForbiddenException;
@@ -20,7 +21,6 @@ import com.hackanet.repositories.UserTokenRepository;
 import com.hackanet.security.enums.Role;
 import com.hackanet.security.enums.TokenType;
 import com.hackanet.security.utils.PasswordUtil;
-import com.hackanet.security.utils.ProviderUtils;
 import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.utils.DateTimeUtil;
 import com.hackanet.utils.PhoneUtil;
@@ -31,6 +31,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
@@ -39,15 +42,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.hackanet.security.utils.ProviderUtils.*;
-import static com.hackanet.security.utils.ProviderUtils.isGithub;
 import static com.hackanet.utils.StringUtils.generateRandomString;
 import static com.hackanet.utils.StringUtils.getJsonOfTokenDtoFromPrincipalName;
 
@@ -555,6 +559,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Caching (evict = {
+                @CacheEvict(key = "#user.id", value = "connections-suggestions"),
+                @CacheEvict(key = "#userToAdd.id", value = "connections-suggestions")
+        }
+    )
     public void addConnection(User user, User userToAdd) {
         Set<User> usersToSave = new HashSet<>();
         Set<User> connections = user.getConnections();
@@ -575,6 +584,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @Caching (evict = {
+            @CacheEvict(key = "#user.id", value = "connections-suggestions"),
+            @CacheEvict(key = "#userToDelete.id", value = "connections-suggestions")
+        }
+    )
     public void deleteConnection(User user, User userToDelete) {
         Set<User> usersToSave = new HashSet<>();
         Set<User> connections = user.getConnections();
@@ -605,6 +619,17 @@ public class UserServiceImpl implements UserService {
     public Set<User> getConnections(Long userId) {
         User user = get(userId);
         return user.getConnections();
+    }
+
+    @Override
+    @Cacheable(key = "#user.id", value = "connections-suggestions")
+    public Set<User> getConnectionsSuggestions(User user) {
+        String query = "select us.* from users us where us.id in (select cn.connection_id from connections cn where cn.user_id in (select c.connection_id from connections c where c.user_id = :id))";
+        Query nativeQuery = entityManager
+                .createNativeQuery(query, User.class)
+                .setParameter("id", user.getId());
+        List<User> resultList = nativeQuery.getResultList();
+        return resultList.stream().filter(u -> !u.getId().equals(user.getId())).collect(Collectors.toSet());
     }
 
     private String getTokenValue(User user, TokenType type) {
