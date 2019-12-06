@@ -1,6 +1,7 @@
 package com.hackanet.services.chat;
 
 import com.hackanet.exceptions.BadRequestException;
+import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.ChatMessageSaveForm;
 import com.hackanet.json.forms.MessageSearchForm;
 import com.hackanet.models.FileInfo;
@@ -12,6 +13,7 @@ import com.hackanet.repositories.chat.MessageRepository;
 import com.hackanet.services.FileInfoService;
 import com.hackanet.services.UserService;
 import com.hackanet.services.push.RabbitMQPushNotificationService;
+import com.hackanet.services.scheduler.JobRunner;
 import com.hackanet.utils.SwearWordsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
@@ -51,7 +53,7 @@ public class ChatMessageServiceElasticsearchImpl {
     @Autowired
     private FileInfoService fileInfoService;
     @Autowired
-    private RabbitMQPushNotificationService rabbitMQPushNotificationService;
+    private JobRunner jobRunner;
 
     @Transactional
     public Message saveMessage(ChatMessageSaveForm form) {
@@ -78,7 +80,7 @@ public class ChatMessageServiceElasticsearchImpl {
                 .senderId(form.getSenderId())
                 .build();
         chatMessage = messageRepository.save(chatMessage);
-        rabbitMQPushNotificationService.sendNewMessageNotification(chatMessage);
+        jobRunner.addNewMessageNotification(null, chatMessage);
         return chatMessage;
     }
 
@@ -128,7 +130,11 @@ public class ChatMessageServiceElasticsearchImpl {
                 .text(LocalMessageText.EN.getAcceptedJobOffer())
                 .build();
         message = messageRepository.save(message);
-        rabbitMQPushNotificationService.sendNewMessageNotification(message);
+        jobRunner.addNewMessageNotification(null, message);
         return message;
+    }
+
+    public Message getById(String id) {
+        return messageRepository.findById(id).orElseThrow(() -> new NotFoundException("Message with id = " + id + " not found"));
     }
 }

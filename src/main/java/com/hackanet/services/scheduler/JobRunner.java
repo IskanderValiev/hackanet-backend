@@ -1,10 +1,14 @@
 package com.hackanet.services.scheduler;
 
 import com.hackanet.models.*;
+import com.hackanet.models.chat.Chat;
+import com.hackanet.models.chat.Message;
+import com.hackanet.services.UserServiceImpl;
 import com.hackanet.services.scheduler.email.EmailJob;
 import com.hackanet.services.scheduler.phone.PhonePushJob;
 import com.hackanet.utils.DateTimeUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,38 +31,54 @@ public class JobRunner {
     @Autowired
     private Scheduler scheduler;
 
-    public void addHackathonJobReviewRequestJobToTeamLeader(UserNotificationSettings settings, User user, Team team) {
+    public void addHackathonJobReviewRequestJobToTeamLeader(@Nullable UserNotificationSettings settings, User user, Team team) {
         Hackathon hackathon = team.getHackathon();
         Timestamp timestamp = new Timestamp(hackathon.getEndDate().getTime());
-        timestamp = DateTimeUtil.addDaysAndHoursToTimestamp(timestamp, 1, 0);
-        Timestamp executionTime = DateTimeUtil.getAvailableTime(settings, timestamp);
-        JobDataMap jobDataMap = new JobDataMap();
-        jobDataMap.put(JobDataMapKeys.USER_ID, user.getId());
-        jobDataMap.put(JobDataMapKeys.ENTITY_ID, team.getId());
-        jobDataMap.put(JobDataMapKeys.JOB_TYPE, JobType.HACKATHON_JOB_REVIEW_REQUEST);
-        JobDetail emailJobDetail = createDurableJob(jobDataMap, EmailJob.class);
-        Trigger trigger = createTimeTrigger(executionTime, emailJobDetail);
-        log.info("Trigger's execution time is {}", executionTime.toString());
-        try {
-            scheduler.scheduleJob(emailJobDetail, trigger);
-        } catch (SchedulerException e) {
-            log.debug("User email job scheduling failed", e);
-        }
+        this.addJob(settings, user.getId(), hackathon.getId(), JobType.HACKATHON_JOB_REVIEW_REQUEST, timestamp.getTime());
     }
 
-    public void addJobInvitationJobNotification(UserNotificationSettings settings, JobOffer jobOffer) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime availableTime = DateTimeUtil.getAvailableTimeForLocalDateTime(settings, now);
+    public void addJobInvitationJobNotification(@Nullable UserNotificationSettings settings, JobOffer jobOffer) {
+        this.addJob(settings, jobOffer.getUser().getId(), jobOffer.getId(), JobType.JOB_INVITATION, null);
+    }
+
+    public void addConnectionInvitationNotification(@Nullable UserNotificationSettings settings, ConnectionInvitation connectionInvitation) {
+        this.addJob(settings, connectionInvitation.getInvitedUser().getId(), connectionInvitation.getId(), JobType.CONNECTION_INVITATION, null);
+    }
+
+    public void addTeamInvitationNotification(@Nullable UserNotificationSettings settings, TeamInvitation teamInvitation) {
+        this.addJob(settings, teamInvitation.getUser().getId(), teamInvitation.getId(), JobType.TEAM_INVITATION , null);
+    }
+
+    public void addTeamInvitationChangedStatusNotification(@Nullable UserNotificationSettings settings, TeamInvitation teamInvitation) {
+        this.addJob(settings, teamInvitation.getTeam().getTeamLeader().getId(), teamInvitation.getId(), JobType.TEAM_INVITATION_CHANGED_STATUS, null);
+    }
+
+    public void addNewMessageNotification(@Nullable UserNotificationSettings settings, Message message) {
+        this.addJob(null, message.getSenderId(), message.getId(), JobType.NEW_MESSAGE, null);
+    }
+
+    public void addNewPostNotification(@Nullable UserNotificationSettings settings, Post post) {
+        // TODO: 12/6/19 send notification about new post to users who subscribes the hackathon
+    }
+
+    private void addJob(@Nullable UserNotificationSettings settings, Long userId, Object entityId, JobType jobType, @Nullable Long preferredExecutionTime) {
+        if (preferredExecutionTime == null) {
+            preferredExecutionTime = System.currentTimeMillis();
+        }
+        Timestamp executionTime = new Timestamp(preferredExecutionTime);
+        if (settings != null) {
+            executionTime = DateTimeUtil.getAvailableTime(settings, executionTime);
+        }
         JobDataMap jobDataMap = new JobDataMap();
-        jobDataMap.put(JobDataMapKeys.USER_ID, settings.getUser().getId());
-        jobDataMap.put(JobDataMapKeys.ENTITY_ID, jobOffer.getId());
-        jobDataMap.put(JobDataMapKeys.JOB_TYPE, JobType.JOB_INVITATION);
+        jobDataMap.put(JobDataMapKeys.USER_ID, userId);
+        jobDataMap.put(JobDataMapKeys.ENTITY_ID, entityId);
+        jobDataMap.put(JobDataMapKeys.JOB_TYPE, jobType);
         JobDetail pushJob = createDurableJob(jobDataMap, PhonePushJob.class);
-        Trigger trigger = createTimeTrigger(Timestamp.valueOf(availableTime), pushJob);
+        Trigger trigger = createTimeTrigger(executionTime, pushJob);
         try {
             scheduler.scheduleJob(pushJob, trigger);
         } catch (SchedulerException e) {
-            log.debug("Job invitation push job failed");
+            log.error("Push job with type = " + jobType.toString() + " has failed. Reason: " + e.getMessage());
         }
     }
 }

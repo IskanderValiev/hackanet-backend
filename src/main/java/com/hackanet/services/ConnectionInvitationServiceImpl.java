@@ -7,6 +7,7 @@ import com.hackanet.models.User;
 import com.hackanet.models.enums.ConnectionInvitationStatus;
 import com.hackanet.repositories.ConnectionInvitationRepository;
 import com.hackanet.security.utils.SecurityUtils;
+import com.hackanet.services.scheduler.JobRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,9 @@ public class ConnectionInvitationServiceImpl implements ConnectionInvitationServ
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private JobRunner jobRunner;
+
     @Override
     public ConnectionInvitation sendInvitation(User user, Long invitedUser) {
         ConnectionInvitation invitation = connectionInvitationRepository.findByUserIdAndInvitedUserId(user.getId(), invitedUser);
@@ -50,6 +54,7 @@ public class ConnectionInvitationServiceImpl implements ConnectionInvitationServ
 
         if (ConnectionInvitationStatus.ACCEPTED.equals(status)) {
             userService.addConnection(invitation.getUser(), invitation.getInvitedUser());
+            jobRunner.addConnectionInvitationNotification(null, invitation);
         } else if (ConnectionInvitationStatus.REJECTED.equals(status)) {
             userService.deleteConnection(invitation.getUser(), invitation.getInvitedUser());
         }

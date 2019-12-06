@@ -13,6 +13,7 @@ import com.hackanet.models.chat.ChatSettings;
 import com.hackanet.push.ResolvedPush;
 import com.hackanet.push.enums.ClientType;
 import com.hackanet.push.enums.PushType;
+import com.hackanet.services.ConnectionInvitationService;
 import com.hackanet.services.UserService;
 import com.hackanet.services.chat.ChatService;
 import com.hackanet.services.chat.ChatSettingsService;
@@ -71,6 +72,9 @@ public class RabbitMQPushNotificationService implements MessageListener {
     @Autowired
     private ChatSettingsService chatSettingsService;
 
+    @Autowired
+    private ConnectionInvitationService connectionInvitationService;
+
     public void sendNewMessageNotification(@NotNull com.hackanet.models.chat.Message message) {
         Chat chat = chatService.get(message.getChatId());
         List<User> participants = chat.getParticipants().stream()
@@ -81,13 +85,7 @@ public class RabbitMQPushNotificationService implements MessageListener {
             // do not send notification if muted has been set false
             ChatSettings chatSettings = chatSettingsService.getOrCreateForUser(participant, chat.getId());
             if (!chatSettings.getMuted()) {
-                PushNotificationMsg msg = PushNotificationMsg.builder()
-                        .toUserId(participant.getId())
-                        .fromUserId(message.getSenderId())
-                        .payloadEntity(messageMapper.map(message))
-                        .type(PushType.NEW_MESSAGE)
-                        .build();
-                rabbitTemplate.convertAndSend(AMPQConfig.QUEUE_NAME, buildMessage(msg));
+                this.buildPushNotificationMsgAndSendToQueue(participant, message, PushType.NEW_MESSAGE);
             }
         });
     }
@@ -102,30 +100,27 @@ public class RabbitMQPushNotificationService implements MessageListener {
     }
 
     public void sendHackathonJobReviewRequestNotification(User user, Team team) {
-        PushNotificationMsg msg = PushNotificationMsg.builder()
-                .toUserId(user.getId())
-                .type(PushType.HACKATHON_JOB_REVIEW_REQUEST)
-                .payloadEntity(team)
-                .build();
-        rabbitTemplate.convertAndSend(AMPQConfig.QUEUE_NAME, buildMessage(msg));
+        this.buildPushNotificationMsgAndSendToQueue(user, team, PushType.HACKATHON_JOB_REVIEW_REQUEST);
     }
 
     public void sendJoinToTeamRequestUpdatedStatusNotification(User user , JoinToTeamRequest request) {
-        PushNotificationMsg msg = PushNotificationMsg.builder()
-                .toUserId(user.getId())
-                .type(PushType.JOIN_TO_TEAM_REQUEST_STATUS)
-                .payloadEntity(request)
-                .build();
-        rabbitTemplate.convertAndSend(AMPQConfig.QUEUE_NAME, buildMessage(msg));
+        this.buildPushNotificationMsgAndSendToQueue(user, request, PushType.JOIN_TO_TEAM_REQUEST_STATUS);
     }
 
     public void sendJobInvitationNotification(User user, JobOffer jobOffer) {
-        PushNotificationMsg msg = PushNotificationMsg.builder()
-                .toUserId(user.getId())
-                .type(PushType.JOB_INVITATION)
-                .payloadEntity(jobOffer)
-                .build();
-        rabbitTemplate.convertAndSend(AMPQConfig.QUEUE_NAME, buildMessage(msg));
+        this.buildPushNotificationMsgAndSendToQueue(user, jobOffer, PushType.JOB_INVITATION);
+    }
+
+    public void sendConnectionInvitationNotification(User user, ConnectionInvitation connectionInvitation) {
+        this.buildPushNotificationMsgAndSendToQueue(user, connectionInvitation, PushType.CONNECTION_INVITATION);
+    }
+
+    public void sendTeamInvitationNotification(User user, TeamInvitation teamInvitation) {
+        this.buildPushNotificationMsgAndSendToQueue(user, teamInvitation, PushType.TEAM_INVITATION);
+    }
+
+    public void sendTeamInvitationUpdatedStatus(User user, TeamInvitation teamInvitation) {
+        this.buildPushNotificationMsgAndSendToQueue(user, teamInvitation, PushType.TEAM_INVITATION_CHANGED_STATUS);
     }
 
     private Message buildMessage(PushNotificationMsg msgEntity) {
@@ -183,5 +178,14 @@ public class RabbitMQPushNotificationService implements MessageListener {
             }
             log.error("Error on push notification message receive or send", e);
         }
+    }
+
+    private void buildPushNotificationMsgAndSendToQueue(User user, Object entity, PushType pushType) {
+        PushNotificationMsg msg = PushNotificationMsg.builder()
+                .toUserId(user.getId())
+                .type(pushType)
+                .payloadEntity(entity)
+                .build();
+        rabbitTemplate.convertAndSend(AMPQConfig.QUEUE_NAME, buildMessage(msg));
     }
 }

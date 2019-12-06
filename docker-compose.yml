@@ -1,0 +1,14 @@
+version: '3.1'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: bQmdPlf2SrC3POH
+
+  hackanet-backend:
+    image: hackanet
+    restart: always
+    ports:
+      - 8080:8080

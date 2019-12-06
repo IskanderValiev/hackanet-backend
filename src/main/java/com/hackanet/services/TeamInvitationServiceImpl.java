@@ -7,6 +7,7 @@ import com.hackanet.models.User;
 import com.hackanet.models.enums.TeamInvitationStatus;
 import com.hackanet.repositories.TeamInvitationRepository;
 import com.hackanet.services.chat.ChatService;
+import com.hackanet.services.scheduler.JobRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +47,9 @@ public class TeamInvitationServiceImpl implements TeamInvitationService {
     @Autowired
     private JoinToHackathonRequestService joinToHackathonRequestService;
 
+    @Autowired
+    private JobRunner jobRunner;
+
     @Override
     public TeamInvitation createIfNotExists(User currentUser, Long userId, Long teamId) {
         Team team = teamService.get(teamId);
@@ -62,7 +66,9 @@ public class TeamInvitationServiceImpl implements TeamInvitationService {
                 .time(LocalDateTime.now())
                 .status(TeamInvitationStatus.WAITING)
                 .build();
-        return repository.save(invitation);
+        invitation = repository.save(invitation);
+        jobRunner.addTeamInvitationNotification(null, invitation);
+        return invitation;
     }
 
     @Override
@@ -91,7 +97,9 @@ public class TeamInvitationServiceImpl implements TeamInvitationService {
             skillCombinationService.updateIfUserJoinedToTeam(user, team);
         }
         invitation.setStatus(status);
-        return repository.save(invitation);
+        invitation = repository.save(invitation);
+        jobRunner.addTeamInvitationChangedStatusNotification(null, invitation);
+        return invitation;
     }
 
     @Override
