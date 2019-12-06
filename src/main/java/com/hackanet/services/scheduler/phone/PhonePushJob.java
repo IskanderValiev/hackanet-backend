@@ -1,11 +1,9 @@
 package com.hackanet.services.scheduler.phone;
 
-import com.hackanet.models.JobOffer;
-import com.hackanet.models.Team;
-import com.hackanet.models.User;
-import com.hackanet.services.JobOfferService;
-import com.hackanet.services.TeamService;
-import com.hackanet.services.UserService;
+import com.hackanet.models.*;
+import com.hackanet.models.chat.Message;
+import com.hackanet.services.*;
+import com.hackanet.services.chat.ChatMessageServiceElasticsearchImpl;
 import com.hackanet.services.push.RabbitMQPushNotificationService;
 import com.hackanet.services.scheduler.JobType;
 import org.quartz.*;
@@ -24,12 +22,27 @@ public class PhonePushJob implements Job {
 
     @Autowired
     private UserService userService;
+
     @Autowired
     private TeamService teamService;
+
     @Autowired
     private RabbitMQPushNotificationService rabbitMQPushNotificationService;
+
     @Autowired
     private JobOfferService jobOfferService;
+
+    @Autowired
+    private ChatMessageServiceElasticsearchImpl chatMessageServiceElasticsearch;
+
+    @Autowired
+    private ConnectionInvitationService connectionInvitationService;
+
+    @Autowired
+    private TeamInvitationService teamInvitationService;
+
+    @Autowired
+    private JoinToTeamRequestService joinToTeamRequestService;
 
     /**
      *
@@ -51,8 +64,34 @@ public class PhonePushJob implements Job {
                 break;
             case JOB_INVITATION:
                 Long invitationId = (Long) jobDataMap.get(ENTITY_ID);
-                JobOffer invitation = jobOfferService.get(invitationId);
-
+                JobOffer jobOffer = jobOfferService.get(invitationId);
+                rabbitMQPushNotificationService.sendJobInvitationNotification(user, jobOffer);
+                break;
+            case NEW_MESSAGE:
+                String messageId = (String) jobDataMap.get(ENTITY_ID);
+                Message message = chatMessageServiceElasticsearch.getById(messageId);
+                rabbitMQPushNotificationService.sendNewMessageNotification(message);
+                break;
+            case CONNECTION_INVITATION:
+                Long connectionInvitationId = (Long) jobDataMap.get(ENTITY_ID);
+                ConnectionInvitation connectionInvitation = connectionInvitationService.get(connectionInvitationId);
+                rabbitMQPushNotificationService.sendConnectionInvitationNotification(user, connectionInvitation);
+                break;
+            case TEAM_INVITATION:
+                Long teamInvitationId = (Long) jobDataMap.get(ENTITY_ID);
+                TeamInvitation teamInvitation = teamInvitationService.get(teamInvitationId);
+                rabbitMQPushNotificationService.sendTeamInvitationNotification(user, teamInvitation);
+                break;
+            case TEAM_INVITATION_CHANGED_STATUS:
+                teamInvitationId = (Long) jobDataMap.get(ENTITY_ID);
+                teamInvitation = teamInvitationService.get(teamInvitationId);
+                rabbitMQPushNotificationService.sendTeamInvitationUpdatedStatus(user, teamInvitation);
+                break;
+            case JOIN_TO_TEAM_REQUEST_STATUS:
+                Long joinToTeamRequestId = (Long) jobDataMap.get(ENTITY_ID);
+                JoinToTeamRequest request = joinToTeamRequestService.get(joinToTeamRequestId);
+                rabbitMQPushNotificationService.sendJoinToTeamRequestUpdatedStatusNotification(user, request);
+                break;
         }
 
     }
