@@ -12,6 +12,7 @@ import com.hackanet.models.User;
 import com.hackanet.models.enums.PostImportance;
 import com.hackanet.repositories.PostRepository;
 import com.hackanet.security.utils.SecurityUtils;
+import com.hackanet.services.scheduler.JobRunner;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,8 @@ public class PostServiceImpl implements PostService {
     private UserService userService;
     @Autowired
     private EntityManager entityManager;
+    @Autowired
+    private JobRunner jobRunner;
 
     @Override
     public Post add(PostCreateForm form, User user) {
@@ -64,6 +67,7 @@ public class PostServiceImpl implements PostService {
             post.setImportance(PostImportance.WAITING);
         else post.setImportance(PostImportance.NOT_IMPORTANT);
         post = postRepository.save(post);
+        jobRunner.addNewPostNotification(null, post);
         return post;
     }
 

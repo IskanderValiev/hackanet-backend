@@ -44,6 +44,9 @@ public class PhonePushJob implements Job {
     @Autowired
     private JoinToTeamRequestService joinToTeamRequestService;
 
+    @Autowired
+    private PostService postService;
+
     /**
      *
      * the method is invoked once the trigger fires
@@ -91,6 +94,11 @@ public class PhonePushJob implements Job {
                 Long joinToTeamRequestId = (Long) jobDataMap.get(ENTITY_ID);
                 JoinToTeamRequest request = joinToTeamRequestService.get(joinToTeamRequestId);
                 rabbitMQPushNotificationService.sendJoinToTeamRequestUpdatedStatusNotification(user, request);
+                break;
+            case NEW_POST:
+                Long postId = (Long) jobDataMap.get(ENTITY_ID);
+                Post post = postService.get(postId);
+                rabbitMQPushNotificationService.sendNewPostNotification(user, post);
                 break;
         }
 
