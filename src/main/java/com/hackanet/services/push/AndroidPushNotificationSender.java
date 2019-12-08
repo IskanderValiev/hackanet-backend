@@ -69,9 +69,11 @@ public class AndroidPushNotificationSender implements PushNotificationSender {
         httpPost.setHeader("Accept", "application/json");
         httpPost.setHeader("Content-type", "application/json");
         try {
-            StringEntity stringEntity = new StringEntity(objectMapper.writeValueAsString(body));
+            String str = objectMapper.writeValueAsString(body);
+            StringEntity stringEntity = new StringEntity(str, "UTF-8");
             httpPost.setEntity(stringEntity);
             log.info("Sending push to ANDROID {}", stringEntity);
+            log.info("Push notification body: {}", str);
             try (CloseableHttpResponse execute = httpClient.execute(httpPost)) {
                 if (execute.getStatusLine().getStatusCode() != 200) {
                     log.error("Push notification send error. Reason: " + execute.getStatusLine().getReasonPhrase());

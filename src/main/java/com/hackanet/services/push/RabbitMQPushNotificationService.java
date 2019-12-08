@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-//import com.hackanet.config.AMPQConfig;
 import com.hackanet.config.AMPQConfig;
 import com.hackanet.json.mappers.MessageMapper;
 import com.hackanet.models.*;
@@ -13,11 +12,20 @@ import com.hackanet.models.chat.ChatSettings;
 import com.hackanet.push.ResolvedPush;
 import com.hackanet.push.enums.ClientType;
 import com.hackanet.push.enums.PushType;
+import com.hackanet.push.payload.PostPushPayload;
 import com.hackanet.services.ConnectionInvitationService;
 import com.hackanet.services.UserService;
 import com.hackanet.services.chat.ChatService;
 import com.hackanet.services.chat.ChatSettingsService;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.context.spi.AbstractCurrentSessionContext;
+import org.hibernate.context.spi.CurrentSessionContext;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.query.Query;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
@@ -26,9 +34,15 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
+
+//import com.hackanet.config.AMPQConfig;
 
 /**
  * @author Iskander Valiev
@@ -74,6 +88,9 @@ public class RabbitMQPushNotificationService implements MessageListener {
 
     @Autowired
     private ConnectionInvitationService connectionInvitationService;
+
+    @Autowired
+    private EntityManagerFactory entityManagerFactory;
 
     public void sendNewMessageNotification(@NotNull com.hackanet.models.chat.Message message) {
         Chat chat = chatService.get(message.getChatId());
@@ -121,6 +138,23 @@ public class RabbitMQPushNotificationService implements MessageListener {
 
     public void sendTeamInvitationUpdatedStatus(User user, TeamInvitation teamInvitation) {
         this.buildPushNotificationMsgAndSendToQueue(user, teamInvitation, PushType.TEAM_INVITATION_CHANGED_STATUS);
+    }
+
+    public void sendNewPostNotification(User user, Post post) {
+        log.info("Sending a new post notification to user with id={}", user.getId());
+        SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
+        Session session = sessionFactory.openSession();
+        NativeQuery<Hackathon> nativeQuery = session.createNativeQuery("select h.* from hackanet_db.public.hackathons h inner join hackanet_db.public.posts p on h.id = p.hackathon_id where p.id = :postId", Hackathon.class);
+        nativeQuery.setParameter("postId", post.getId());
+
+        PostPushPayload payload = PostPushPayload.builder()
+                .hackathonName(nativeQuery.getSingleResult().getName())
+                .build();
+        payload.setId(post.getId());
+
+        this.buildPushNotificationMsgAndSendToQueue(user, payload, PushType.NEW_POST);
+        session.clear();
+        session.close();
     }
 
     private Message buildMessage(PushNotificationMsg msgEntity) {
@@ -180,7 +214,7 @@ public class RabbitMQPushNotificationService implements MessageListener {
         }
     }
 
-    private void buildPushNotificationMsgAndSendToQueue(User user, Object entity, PushType pushType) {
+    private /*<T extends PushPayloadEntity>*/ void buildPushNotificationMsgAndSendToQueue(User user, Object entity, PushType pushType) {
         PushNotificationMsg msg = PushNotificationMsg.builder()
                 .toUserId(user.getId())
                 .type(pushType)

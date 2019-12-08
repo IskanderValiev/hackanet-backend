@@ -3,6 +3,7 @@ package com.hackanet.services.scheduler;
 import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.chat.Message;
+import com.hackanet.services.SubscriptionService;
 import com.hackanet.services.UserServiceImpl;
 import com.hackanet.services.scheduler.email.EmailJob;
 import com.hackanet.services.scheduler.phone.PhonePushJob;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.hackanet.utils.JobUtils.createDurableJob;
 import static com.hackanet.utils.JobUtils.createTimeTrigger;
@@ -30,6 +32,9 @@ public class JobRunner {
 
     @Autowired
     private Scheduler scheduler;
+
+    @Autowired
+    private SubscriptionService subscriptionService;
 
     public void addHackathonJobReviewRequestJobToTeamLeader(@Nullable UserNotificationSettings settings, User user, Team team) {
         Hackathon hackathon = team.getHackathon();
@@ -59,6 +64,10 @@ public class JobRunner {
 
     public void addNewPostNotification(@Nullable UserNotificationSettings settings, Post post) {
         // TODO: 12/6/19 send notification about new post to users who subscribes the hackathon
+        Hackathon hackathon = post.getHackathon();
+        List<User> subscriptions = subscriptionService.getAllSubscribersByHackathonId(hackathon.getId());
+        subscriptions.forEach(user ->
+                this.addJob(null, user.getId(), post.getId(), JobType.NEW_POST, null));
     }
 
     private void addJob(@Nullable UserNotificationSettings settings, Long userId, Object entityId, JobType jobType, @Nullable Long preferredExecutionTime) {
