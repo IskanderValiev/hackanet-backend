@@ -23,12 +23,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
 import static com.hackanet.utils.DateTimeUtil.*;
@@ -224,6 +226,16 @@ public class HackathonServiceImpl implements HackathonService {
             participants.removeAll(new HashSet<>(users));
         hackathon.setParticipants(participants);
         hackathonRepository.save(hackathon);
+    }
+
+    @Override
+    public List<Hackathon> getFriendsHackathons(User user) {
+        String query = "select h.* from hackathons h inner join hackathon_participants_table hpt on h.id = hpt.hackathon_id where hpt.user_id in (select c.connection_id from connections c where c.user_id = :userId) and h.id not in (select hpts.hackathon_id from hackathon_participants_table hpts where hpts.user_id = :userId);";
+        Query nativeQuery = entityManager
+                .createNativeQuery(query, Hackathon.class)
+                .setParameter("userId", user.getId());
+        List<Hackathon> resultList = nativeQuery.getResultList();
+        return resultList;
     }
 
     private CriteriaQuery<Hackathon> getHackathonsListQuery(CriteriaBuilder criteriaBuilder, HackathonSearchForm form) {

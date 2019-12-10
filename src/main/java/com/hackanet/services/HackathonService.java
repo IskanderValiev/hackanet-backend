@@ -15,4 +15,5 @@ public interface HackathonService extends CrudService<Hackathon> {
     void delete(Long id, User user);
     List<Hackathon> hackathonList(HackathonSearchForm form);
     void updateUsersHackathonList(List<User> users, Hackathon hackathon, boolean add);
+    List<Hackathon> getFriendsHackathons(User user);
 }
