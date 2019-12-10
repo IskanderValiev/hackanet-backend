@@ -41,6 +41,7 @@ public class HackathonController {
     static final String HACKATHON = "/{id}";
     private static final String LIST = "/list";
     private static final String VIEWS = HACKATHON + "/views";
+    private static final String FRIENDS = "/friends";
 
     @Autowired
     private HackathonService hackathonService;
@@ -131,5 +132,17 @@ public class HackathonController {
                                               @RequestParam Date to,
                                               @PathVariable Long id) {
         return ResponseEntity.ok(hackathonProfileViewService.countsOfUniqueViewInPeriod(user, id, from, to));
+    }
+
+    @GetMapping(FRIENDS)
+    @ApiOperation(value = "Get friends hackathons")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<HackathonDto>> getFriendsHackathons(@AuthenticationPrincipal User user) {
+        List<Hackathon> hackathons = hackathonService.getFriendsHackathons(user);
+        return ResponseEntity.ok(mapper.map(hackathons));
     }
 }
