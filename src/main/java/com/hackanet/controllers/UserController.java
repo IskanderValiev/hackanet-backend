@@ -88,9 +88,14 @@ public class UserController {
     }
 
     @GetMapping(USER_PROFILE)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = false, dataType = "string", paramType = "header")
+    })
     @ApiOperation("Get information about user")
-    public ResponseEntity<UserDto> getInfo(@PathVariable("id") Long id) {
-        User user = userService.get(id);
+    public ResponseEntity<UserDto> getInfo(@PathVariable("id") Long id,
+                                           @AuthenticationPrincipal User currentUser) {
+        User user = userService.getUserInfo(id, currentUser);
         return ResponseEntity.ok(userMapper.map(user));
     }
 

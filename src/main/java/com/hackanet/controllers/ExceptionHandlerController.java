@@ -1,9 +1,6 @@
 package com.hackanet.controllers;
 
-import com.hackanet.exceptions.BadRequestException;
-import com.hackanet.exceptions.ForbiddenException;
-import com.hackanet.exceptions.NotFoundException;
-import com.hackanet.exceptions.UnauthorizedException;
+import com.hackanet.exceptions.*;
 import com.hackanet.json.dto.ExceptionDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +22,7 @@ public class ExceptionHandlerController {
     }
 
     @ResponseBody
-    @ExceptionHandler(ForbiddenException.class)
+    @ExceptionHandler({ForbiddenException.class, BlackListException.class})
     public ResponseEntity<ExceptionDto> handleForbidden(ForbiddenException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ExceptionDto.of(ex.getMessage()));
     }

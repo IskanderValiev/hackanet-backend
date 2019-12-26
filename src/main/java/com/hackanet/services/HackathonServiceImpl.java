@@ -238,6 +238,11 @@ public class HackathonServiceImpl implements HackathonService {
         return resultList;
     }
 
+    @Override
+    public List<Hackathon> getHackathonsListByUser(User user) {
+        return hackathonRepository.findByParticipantsContaining(user);
+    }
+
     private CriteriaQuery<Hackathon> getHackathonsListQuery(CriteriaBuilder criteriaBuilder, HackathonSearchForm form) {
         CriteriaQuery<Hackathon> query = criteriaBuilder.createQuery(Hackathon.class);
         Root<Hackathon> root = query.from(Hackathon.class);
@@ -262,11 +267,12 @@ public class HackathonServiceImpl implements HackathonService {
             join.on(join.get("id").in(form.getSkills()));
             predicates.add(join.getOn());
         }
-        Date from = form.getFrom();
-        if (from == null)
-            from = new Date(currentTimeMillis());
+
+        long fromInMillis = form.getFrom() == null ? currentTimeMillis() : form.getFrom();
+        Date from = new Date(fromInMillis);
         predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("startDate"), from));
-        Date to = form.getTo();
+
+        Date to = form.getTo() == null ? null : new Date(form.getTo());
         if (to != null) {
             predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("endDate"), to));
         }

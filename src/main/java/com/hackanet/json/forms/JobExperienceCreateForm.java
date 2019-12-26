@@ -21,9 +21,9 @@ public class JobExperienceCreateForm {
     @NotNull
     private Long companyId;
     @NotNull
-    private Date from;
+    private Long from;
     @NotNull
-    private Date to;
+    private Long to;
     private String description;
     private List<Long> technologies;
 }

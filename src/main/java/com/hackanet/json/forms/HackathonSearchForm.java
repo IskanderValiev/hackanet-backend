@@ -22,8 +22,8 @@ public class HackathonSearchForm {
     private String name;
     private String country;
     private String city;
-    private Date from;
-    private Date to;
+    private Long from;
+    private Long to;
     private List<Long> skills;
     private Integer limit;
     private Integer page;

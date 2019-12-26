@@ -20,6 +20,6 @@ import java.sql.Timestamp;
 public class ChatMessageDto {
     private Long id;
     private UserSimpleDto sender;
-    private Timestamp messageTime;
+    private Long messageTime;
     private String text;
 }

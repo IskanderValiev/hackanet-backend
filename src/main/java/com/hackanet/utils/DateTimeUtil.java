@@ -3,7 +3,6 @@ package com.hackanet.utils;
 import com.hackanet.application.AppConstants;
 import com.hackanet.models.UserNotificationSettings;
 
-import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.*;
@@ -24,9 +23,7 @@ public class DateTimeUtil {
 
     public static long localTimeToLong(LocalTime localTime) {
         LocalDate localDate = LocalDate.of(1970, Month.JANUARY, 1);
-        LocalDateTime localDateTime = localTime.atDate(localDate);
-        long mills = localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        return mills;
+        return localDateTimeToLong(localTime.atDate(localDate));
     }
 
     public static long localDateTimeToLong(LocalDateTime localDateTime) {

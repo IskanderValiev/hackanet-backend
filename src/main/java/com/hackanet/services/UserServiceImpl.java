@@ -52,6 +52,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.hackanet.security.utils.ProviderUtils.*;
+import static com.hackanet.security.utils.SecurityUtils.checkUserProfileForViewing;
+import static com.hackanet.utils.DateTimeUtil.localDateTimeToLong;
 import static com.hackanet.utils.StringUtils.generateRandomString;
 import static com.hackanet.utils.StringUtils.getJsonOfTokenDtoFromPrincipalName;
 
@@ -120,6 +122,7 @@ public class UserServiceImpl implements UserService {
                 .lookingForTeam(Boolean.FALSE)
                 .accessTokenParam(new RandomString().nextString())
                 .refreshTokenParam(new RandomString().nextString())
+                .image(fileInfoService.get(AppConstants.DEFAULT_PROFILE_IMAGE_ID))
                 .build();
 
         if (form.getSkills() != null && !form.getSkills().isEmpty())
@@ -156,9 +159,9 @@ public class UserServiceImpl implements UserService {
             final String prefix = jwtConfig.getPrefix() + " ";
             return TokenDto.builder()
                     .accessToken(prefix + value)
-                    .accessTokenExpiresAt(token.getAccessTokenExpiresAt())
+                    .accessTokenExpiresAt(localDateTimeToLong(token.getAccessTokenExpiresAt()))
                     .refreshToken(token.getRefreshToken())
-                    .refreshTokenExpiresAt(token.getRefreshTokenExpiresAt())
+                    .refreshTokenExpiresAt(localDateTimeToLong(token.getRefreshTokenExpiresAt()))
                     .userId(user.getId())
                     .role(user.getRole().toString())
                     .build();
@@ -180,6 +183,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public User get(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> NotFoundException.forUser(email));
+    }
+
+    @Override
+    public User getUserInfo(Long id, User currentUser) {
+        User user = get(id);
+        if (currentUser == null)
+            return user;
+        checkUserProfileForViewing(user, currentUser);
+        return user;
     }
 
     @Override
@@ -379,8 +391,10 @@ public class UserServiceImpl implements UserService {
         if (!StringUtils.isBlank(form.getCountry()))
             user.setCountry(form.getCountry());
 
-        if (form.getImage() != null)
-            user.setImage(fileInfoService.get(form.getImage()));
+        if (form.getImage() == null) {
+            form.setImage(AppConstants.DEFAULT_PROFILE_IMAGE_ID);
+        }
+        user.setImage(fileInfoService.get(form.getImage()));
 
         if (form.getSkills() != null)
             user.setSkills(skillService.getByIds(form.getSkills()));
@@ -516,10 +530,10 @@ public class UserServiceImpl implements UserService {
         return TokenDto.builder()
                 .userId(user.getId())
                 .role(updateAccessTokenUser.getRole().toString())
-                .refreshTokenExpiresAt(userToken.getRefreshTokenExpiresAt())
+                .refreshTokenExpiresAt(localDateTimeToLong(userToken.getRefreshTokenExpiresAt()))
                 .refreshToken(userToken.getRefreshToken())
                 .accessToken(jwtConfig.getPrefix() + " " + value)
-                .accessTokenExpiresAt(userToken.getAccessTokenExpiresAt())
+                .accessTokenExpiresAt(localDateTimeToLong(userToken.getAccessTokenExpiresAt()))
                 .build();
     }
 
@@ -702,8 +716,8 @@ public class UserServiceImpl implements UserService {
                 .userId(user.getId())
                 .refreshToken(userToken.getRefreshToken())
                 .accessToken(getTokenValue(user, TokenType.ACCESS))
-                .refreshTokenExpiresAt(userToken.getRefreshTokenExpiresAt())
-                .accessTokenExpiresAt(userToken.getAccessTokenExpiresAt())
+                .refreshTokenExpiresAt(localDateTimeToLong(userToken.getRefreshTokenExpiresAt()))
+                .accessTokenExpiresAt(localDateTimeToLong(userToken.getAccessTokenExpiresAt()))
                 .role(user.getRole().toString())
                 .build();
     }

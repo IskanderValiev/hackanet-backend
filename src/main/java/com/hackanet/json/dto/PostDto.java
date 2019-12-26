@@ -30,7 +30,7 @@ public class PostDto {
     private HackathonDto hackathonDto;
     private List<FileInfoDto> images;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime date;
+    private Long date;
     private Long likesCount;
     private Long views;
 }
