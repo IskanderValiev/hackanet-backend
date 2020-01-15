@@ -113,7 +113,7 @@ public class UserController {
                     required = true, dataType = "string", paramType = "header")
     })
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UserDto> update(@RequestBody UserUpdateForm form,
+    public ResponseEntity<UserDto> update(@Valid @RequestBody UserUpdateForm form,
                                           @AuthenticationPrincipal User currentUser,
                                           @PathVariable Long id) {
         User user = userService.update(id, currentUser, form);

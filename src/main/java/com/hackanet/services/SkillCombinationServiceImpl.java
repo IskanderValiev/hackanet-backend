@@ -64,9 +64,8 @@ public class SkillCombinationServiceImpl implements SkillCombinationService {
                 .collect(Collectors.toList());
 
         List<Skill> orderedByProbability = new ArrayList<>();
-        sortedList.forEach(id -> {
-            orderedByProbability.add(skillService.get(id));
-        });
+        // FIXME: 12/27/19 think of better way to add ordered list
+        sortedList.forEach(id -> orderedByProbability.add(skillService.get(id)));
         return orderedByProbability;
 //        return new ArrayList<>(skillService.getByIds(sortedList));
     }

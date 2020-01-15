@@ -5,7 +5,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.hackanet.application.AppConstants;
 import com.hackanet.application.Patterns;
-import com.hackanet.components.Profiling;
 import com.hackanet.config.JwtConfig;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.ForbiddenException;
@@ -307,11 +306,7 @@ public class UserServiceImpl implements UserService {
         UserToken token = getOrCreateTokenIfNotExists(user);
 
         String avatarUrl = (String) userDetails.get("avatar_url");
-        FileInfo fileInfo = FileInfo.builder()
-                .previewLink(avatarUrl)
-                .user(user)
-                .build();
-        fileInfoService.save(fileInfo);
+        fileInfoService.createAndSave(user, avatarUrl);
         return buildTokenDtoByUser(user, token);
     }
 
@@ -347,7 +342,6 @@ public class UserServiceImpl implements UserService {
         String name = (String) userDetails.get("localizedFirstName");
         String lastName = (String) userDetails.get("localizedLastName");
         String email = (String) userDetails.get("email");
-        System.out.println("email: " + email);
 
         // TODO: 11/20/19 get email and save user if he does not exist with received email
         User user = User.builder()
@@ -358,10 +352,7 @@ public class UserServiceImpl implements UserService {
                 .refreshTokenParam(new RandomString().nextString())
                 .accessTokenParam(new RandomString().nextString())
                 .build();
-
-        user = userRepository.save(user);
-
-
+        userRepository.save(user);
         return new TokenDto();
     }
 
@@ -373,34 +364,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(@NotNull Long id, @NotNull User currentUser, @NotNull UserUpdateForm form) {
         User user = get(id);
-
         SecurityUtils.checkProfileAccess(currentUser, user);
-
-        if (!StringUtils.isBlank(form.getName()))
-            user.setName(form.getName());
-
-        if (!StringUtils.isBlank(form.getLastname()))
-            user.setLastname(form.getLastname());
-
-        if (!StringUtils.isBlank(form.getAbout()))
-            user.setAbout(form.getAbout());
-
-        if (!StringUtils.isBlank(form.getCity()))
-            user.setAbout(form.getCity());
-
-        if (!StringUtils.isBlank(form.getCountry()))
-            user.setCountry(form.getCountry());
+        user.setName(form.getName());
+        user.setLastname(form.getLastname());
+        user.setAbout(form.getAbout());
+        user.setAbout(form.getCity());
+        user.setCountry(form.getCountry());
+        user.setLookingForTeam(Boolean.TRUE.equals(form.getLookingForTeam()));
 
         if (form.getImage() == null) {
             form.setImage(AppConstants.DEFAULT_PROFILE_IMAGE_ID);
         }
         user.setImage(fileInfoService.get(form.getImage()));
 
-        if (form.getSkills() != null)
+        if (form.getSkills() != null) {
             user.setSkills(skillService.getByIds(form.getSkills()));
-
-        if (form.getLookingForTeam() != null) {
-            user.setLookingForTeam(form.getLookingForTeam());
         }
         user = userRepository.save(user);
         return user;

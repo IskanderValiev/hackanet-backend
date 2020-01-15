@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @ControllerAdvice
 public class ExceptionHandlerController {
     @ResponseBody
-    @ExceptionHandler(BadRequestException.class)
+    @ExceptionHandler({BadRequestException.class, IllegalArgumentException.class})
     public ResponseEntity<ExceptionDto> handleBadRequest(BadRequestException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionDto.of(ex.getMessage()));
     }

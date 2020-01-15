@@ -1,8 +1,10 @@
 package com.hackanet.utils;
 
 import com.hackanet.application.AppConstants;
+import com.hackanet.json.forms.HackathonCreateForm;
 import com.hackanet.models.UserNotificationSettings;
 
+import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.*;
@@ -99,5 +101,22 @@ public class DateTimeUtil {
         if (now.isAfter(fromLT) && now.isBefore(toLT))
             return nowInMills;
         return (long) (fromLT.toSecondOfDay() * 1000);
+    }
+
+    public static Date now() {
+        return new Date(System.currentTimeMillis());
+    }
+
+    public static LocalDateTime getRegistrationLocalDateTimeFromForm(HackathonCreateForm form, boolean start) {
+        if (start) {
+            return form.getRegistrationStartDate() == null
+                    ? LocalDateTime.now()
+                    : epochToLocalDateTime(form.getRegistrationStartDate());
+        } else {
+            Date end = new Date(form.getEnd());
+            return form.getRegistrationEndDate() == null
+                    ? end.toLocalDate().minusDays(1).atTime(23, 59)
+                    : epochToLocalDateTime(form.getRegistrationEndDate());
+        }
     }
 }
