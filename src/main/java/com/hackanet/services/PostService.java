@@ -14,9 +14,8 @@ import java.util.List;
  * created by isko
  * on 10/22/19
  */
-public interface PostService extends CrudService<Post> {
+public interface PostService extends CrudService<Post>, FormValidatorService {
     Post add(PostCreateForm  form, User user);
-    Post update(Long id, User user, PostUpdateForm form);
     List<Post> getByHackathon(Long hackathon);
     List<Post> getByUser(Long user);
     void delete(Long id, User user);

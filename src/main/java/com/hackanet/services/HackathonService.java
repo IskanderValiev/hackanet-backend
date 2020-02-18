@@ -8,10 +8,9 @@ import com.hackanet.models.User;
 
 import java.util.List;
 
-public interface HackathonService extends CrudService<Hackathon> {
+public interface HackathonService extends ManageableService<Hackathon>, FormValidatorService {
     Hackathon save(User user, HackathonCreateForm form);
     Hackathon save(Hackathon hackathon);
-    Hackathon update(Long id, User user, HackathonUpdateForm form);
     void delete(Long id, User user);
     List<Hackathon> hackathonList(HackathonSearchForm form);
     void updateUsersHackathonList(List<User> users, Hackathon hackathon, boolean add);

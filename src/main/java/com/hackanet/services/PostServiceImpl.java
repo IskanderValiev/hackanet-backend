@@ -1,10 +1,9 @@
 package com.hackanet.services;
 
 import com.hackanet.application.AppConstants;
+import com.hackanet.exceptions.BadFormTypeException;
 import com.hackanet.exceptions.NotFoundException;
-import com.hackanet.json.forms.PostCreateForm;
-import com.hackanet.json.forms.PostSearchForm;
-import com.hackanet.json.forms.PostUpdateForm;
+import com.hackanet.json.forms.*;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.Post;
 import com.hackanet.models.PostLike;
@@ -20,12 +19,9 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.apache.commons.lang.StringUtils.isBlank;
 
 /**
  * @author Iskander Valiev
@@ -33,7 +29,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
  * on 10/22/19
  */
 @Service
-public class PostServiceImpl implements PostService {
+public class PostServiceImpl extends AbstractManageableService<Post> implements PostService {
 
     @Autowired
     private PostRepository postRepository;
@@ -50,35 +46,34 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Post add(PostCreateForm form, User user) {
-        Post post = Post.builder()
-                .title(form.getTitle())
-                .content(form.getContent())
-                .owner(user)
-                .date(LocalDateTime.now())
-                .build();
+        Post post = buildFromForm(form, user);
         if (form.getHackathon() != null) {
             Hackathon hackathon = hackathonService.get(form.getHackathon());
             SecurityUtils.checkHackathonAccess(hackathon, user);
             post.setHackathon(hackathon);
         }
-        if (form.getImages() != null && !form.getImages().isEmpty())
+        if (form.getImages() != null && !form.getImages().isEmpty()) {
             post.setImages(fileInfoService.getByIdsIn(form.getImages()));
-        if (Boolean.TRUE.equals(form.getSendImportanceRequest()))
+        }
+        if (Boolean.TRUE.equals(form.getSendImportanceRequest())) {
             post.setImportance(PostImportance.WAITING);
-        else post.setImportance(PostImportance.NOT_IMPORTANT);
+        } else {
+            post.setImportance(PostImportance.NOT_IMPORTANT);
+        }
         post = postRepository.save(post);
         jobRunner.addNewPostNotification(null, post);
         return post;
     }
 
     @Override
-    public Post update(Long id, User user, PostUpdateForm form) {
+    public Post update(Long id, User user, UpdateForm updateForm) {
+        validateUpdateForm(updateForm);
+        PostUpdateForm form = (PostUpdateForm) updateForm;
+
         Post post = get(id);
         SecurityUtils.checkPostAccess(post, user);
-        if (!isBlank(form.getTitle()))
-            post.setTitle(form.getTitle());
-        if (!isBlank(form.getContent()))
-            post.setContent(form.getContent());
+        post.setTitle(form.getTitle());
+        post.setContent(form.getContent());
         if (form.getHackathon() != null) {
             post.setHackathon(hackathonService.get(form.getHackathon()));
         }
@@ -107,6 +102,11 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public List<Post> getAll() {
+        return postRepository.findAll();
+    }
+
+    @Override
     public void delete(Long id, User user) {
         Post post = get(id);
         SecurityUtils.checkPostAccess(post, user);
@@ -128,7 +128,9 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<Post> postList(PostSearchForm form) {
-        if (form.getLimit() == null) form.setLimit(AppConstants.DEFAULT_LIMIT);
+        if (form.getLimit() == null) {
+            form.setLimit(AppConstants.DEFAULT_LIMIT);
+        }
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Post> postsListQuery = getPostsListQuery(criteriaBuilder, form);
         TypedQuery<Post> query = entityManager.createQuery(postsListQuery);
@@ -175,4 +177,27 @@ public class PostServiceImpl implements PostService {
         return query;
     }
 
+    private Post buildFromForm(PostCreateForm form, User user) {
+        Post post = Post.builder()
+                .title(form.getTitle())
+                .content(form.getContent())
+                .owner(user)
+                .date(LocalDateTime.now())
+                .build();
+        return post;
+    }
+
+    @Override
+    public void validateCreateForm(CreateForm form) {
+        if (!(form instanceof PostCreateForm)) {
+            throw new BadFormTypeException(form.getClass().getName() + " is not a post create form");
+        }
+    }
+
+    @Override
+    public void validateUpdateForm(UpdateForm form) {
+        if (!(form instanceof PostUpdateForm)) {
+            throw new BadFormTypeException(form.getClass().getName() + " is not a post update form");
+        }
+    }
 }

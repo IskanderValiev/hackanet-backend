@@ -1,9 +1,12 @@
 package com.hackanet.services;
 
+import com.hackanet.annotations.NotFormatted;
 import com.hackanet.application.AppConstants;
+import com.hackanet.exceptions.BadFormTypeException;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.dto.CompanyOwnerTokenDto;
+import com.hackanet.json.dto.TokenDto;
 import com.hackanet.json.forms.*;
 import com.hackanet.models.Company;
 import com.hackanet.models.Hackathon;
@@ -11,7 +14,7 @@ import com.hackanet.models.Skill;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.CompanyType;
 import com.hackanet.repositories.CompanyRepository;
-import org.apache.commons.lang.StringUtils;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +23,14 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import javax.validation.constraints.NotNull;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.hackanet.security.utils.SecurityUtils.checkCompanyAccess;
+import static com.hackanet.utils.StringUtils.formatTitle;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.lowerCase;
 
 /**
@@ -32,7 +39,7 @@ import static org.apache.commons.lang.StringUtils.lowerCase;
  * on 11/7/19
  */
 @Service
-public class CompanyServiceImpl implements CompanyService {
+public class CompanyServiceImpl extends AbstractManageableService<Company> implements CompanyService {
 
     @Autowired
     private CompanyRepository companyRepository;
@@ -44,6 +51,8 @@ public class CompanyServiceImpl implements CompanyService {
     private FileInfoService fileInfoService;
     @Autowired
     private EntityManager entityManager;
+    @Autowired
+    private UserTokenService userTokenService;
 
     @Override
     public Company get(@NotNull Long id) {
@@ -51,69 +60,40 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Transactional
-    @Override
-    public CompanyOwnerTokenDto registerCompany(@NotNull CompanyCreateForm form) {
-        User user = userService.createForCompany(form);
-
-        Company company = Company.builder()
-                .admin(user)
-                .country(form.getCountry())
-                .name(form.getName())
-                .description(form.getDescription())
-                .city(form.getCity())
-                .type(form.getCompanyType())
-                .build();
-
+    public CompanyOwnerTokenDto registerCompany(CompanyCreateForm form) {
+        Company company = getFromForm(form);
         List<Long> technologies = form.getTechnologies();
-        if (technologies != null && !technologies.isEmpty()) {
+        if (isNotEmpty(technologies)) {
             company.setTechnologies(skillService.getByIds(technologies));
         }
-
         Long imageId = form.getLogoId();
         if (imageId != null) {
             company.setLogo(fileInfoService.get(imageId));
         }
-
         company = companyRepository.save(company);
-
-        return CompanyOwnerTokenDto.builder()
-                .companyId(company.getId())
-                .tokenDto(userService.login(UserLoginForm.builder()
-                        .email(user.getEmail())
-                        .password(form.getPassword()).build()))
-                .build();
+        return getCompanyToken(form.getPassword(), company.getAdmin(), company.getId());
     }
 
     @Override
-    public Company update(Long id, User user, CompanyUpdateForm form) {
+    public Company update(Long id, User user, UpdateForm form) {
+        validateUpdateForm(form);
         Company company = get(id);
         checkCompanyAccess(company, user);
 
-        String name = form.getName();
-        if (StringUtils.isBlank(name)) {
-            name = name.trim();
-            company.setName(name);
-        }
+        CompanyUpdateForm updateForm = (CompanyUpdateForm) form;
+//        String name = updateForm.getName();
+//        company.setName(name.trim());
+//        String city = updateForm.getCity();
+//        city = city.trim();
+//        company.setCity(capitalize(city));
+//        String country = updateForm.getCountry();
+//        company.setCountry(capitalize(country.trim()));
+//        CompanyType companyType = updateForm.getType();
+//        company.setType(companyType);
+        fillUpData(updateForm, company);
 
-        String city = form.getCity();
-        if (StringUtils.isBlank(city)) {
-            city = city.trim();
-            company.setCity(StringUtils.capitalize(city));
-        }
-
-        String country = form.getCountry();
-        if (StringUtils.isBlank(country)) {
-            country = country.trim();
-            company.setCountry(StringUtils.capitalize(country));
-        }
-
-        CompanyType companyType = form.getCompanyType();
-        if (companyType != null) {
-            company.setType(companyType);
-        }
-
-        List<Long> technologies = form.getTechnologies();
-        if (technologies != null && !technologies.isEmpty()) {
+        List<Long> technologies = updateForm.getTechnologies();
+        if (isNotEmpty(technologies)) {
             company.setTechnologies(skillService.getByIds(technologies));
         }
         return companyRepository.save(company);
@@ -166,15 +146,15 @@ public class CompanyServiceImpl implements CompanyService {
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(criteriaBuilder.isTrue(root.get("approved")));
         String name = form.getName();
-        if (!StringUtils.isBlank(name)) {
+        if (!isBlank(name)) {
             Expression<String> nameInLc = criteriaBuilder.lower(root.get("name"));
             predicates.add(criteriaBuilder.like(nameInLc, "%" + lowerCase(name.trim()) + "%"));
         }
-        if (!StringUtils.isBlank(form.getCity())) {
+        if (!isBlank(form.getCity())) {
             String city = form.getCity().trim().toLowerCase();
             predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("city")), "%" + lowerCase(city) + "%"));
         }
-        if (!StringUtils.isBlank(form.getCountry())) {
+        if (!isBlank(form.getCountry())) {
             String country = form.getCountry().trim().toLowerCase();
             predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("country")), "%" + lowerCase(country) + "%"));
         }
@@ -187,5 +167,42 @@ public class CompanyServiceImpl implements CompanyService {
         query.distinct(true);
         query.where(criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()])));
         return query;
+    }
+
+    @Override
+    public void validateCreateForm(CreateForm form) {
+        if (!(form instanceof CompanyCreateForm))
+            throw new BadFormTypeException("The form is not company create form");
+    }
+
+    @Override
+    public void validateUpdateForm(UpdateForm form) {
+        if (!(form instanceof CompanyUpdateForm))
+            throw new BadFormTypeException("The form is not company update form");
+    }
+
+    private TokenDto getTokenForAdmin(String password, User user) {
+        return userService.login(UserLoginForm.builder()
+                .email(user.getEmail())
+                .password(password)
+                .build());
+    }
+
+    private CompanyOwnerTokenDto getCompanyToken(String password, User user, Long companyId) {
+        TokenDto token = getTokenForAdmin(password, user);
+        return userTokenService.convert(token, companyId);
+    }
+
+    private Company getFromForm(CompanyCreateForm form) {
+        User user = userService.createForCompany(form);
+        Company company = Company.builder()
+                .admin(user)
+                .country(form.getCountry())
+                .name(form.getName())
+                .description(form.getDescription())
+                .city(form.getCity())
+                .type(form.getCompanyType())
+                .build();
+        return company;
     }
 }

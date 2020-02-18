@@ -27,35 +27,48 @@ import java.util.*;
 public class Hackathon extends AbstractEntity {
     @Column(nullable = false)
     private String name;
-    @Column(name = "name_lc")
-    private String nameLc;
+
     @Column(name = "description", nullable = false, length = 1024)
     private String description;
+
     @Column(name = "start_date", nullable = false)
     private Date startDate;
+
     @Column(name = "end_date", nullable = false)
     private Date endDate;
-    //    @Column(nullable = false)
-    private Integer prize;
+
+    // TODO: 2/13/20 nullable?
+    @Column(name = "prize_fund")
+    private Integer prizeFund;
+
     @Enumerated(EnumType.STRING)
     private Currency currency;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "hackathon")
     private List<FileInfo> fileInfo;
+
     @OneToOne(fetch = FetchType.LAZY)
     private FileInfo logo;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private User owner;
+
     @Column(nullable = false)
     private String country;
+
     @Column(nullable = false)
     private String city;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "hackathon_skills_table", joinColumns = @JoinColumn(name = "hackathon_id"))
     private List<Skill> requiredSkills;
+
     @ManyToMany(mappedBy = "attendedHackathons")
     private Set<User> participants;
+
     @OneToMany(mappedBy = "hackathon")
     private List<Chat> chats;
+
     private Double longitude;
     private Double latitude;
     private LocalDateTime registrationStartDate;

@@ -9,6 +9,7 @@ import com.hackanet.models.JobExperience;
 import com.hackanet.models.Portfolio;
 import com.hackanet.models.User;
 import com.hackanet.repositories.JobExperienceRepository;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import java.sql.Date;
 import java.util.List;
 
 import static com.hackanet.security.utils.SecurityUtils.*;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 /**
  * @author Iskander Valiev
@@ -53,7 +55,7 @@ public class JobExperienceServiceImpl implements JobExperienceService {
                 .build();
 
         List<Long> technologies = form.getTechnologies();
-        if (technologies != null && !technologies.isEmpty()) {
+        if (isNotEmpty(technologies)) {
             jobExperience.setTechnologiesUsed(skillService.getByIds(technologies));
         }
 
@@ -64,7 +66,6 @@ public class JobExperienceServiceImpl implements JobExperienceService {
     public void delete(User user, Long id) {
         JobExperience jobExperience = get(id);
         Portfolio portfolio = jobExperience.getPortfolio();
-
         checkPortfolioAccess(portfolio, user);
         jobExperienceRepository.delete(jobExperience);
     }

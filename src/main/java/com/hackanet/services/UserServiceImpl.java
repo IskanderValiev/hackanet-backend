@@ -3,37 +3,24 @@ package com.hackanet.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.hackanet.application.AppConstants;
-import com.hackanet.application.Patterns;
-import com.hackanet.components.Profiling;
-import com.hackanet.config.JwtConfig;
 import com.hackanet.exceptions.BadRequestException;
-import com.hackanet.exceptions.ForbiddenException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.dto.TokenDto;
 import com.hackanet.json.forms.*;
 import com.hackanet.models.*;
 import com.hackanet.push.enums.ClientType;
-import com.hackanet.repositories.PasswordChangeRequestRepository;
 import com.hackanet.repositories.UserPhoneTokenRepository;
 import com.hackanet.repositories.UserRepository;
 import com.hackanet.repositories.UserTokenRepository;
 import com.hackanet.security.enums.Role;
-import com.hackanet.security.enums.TokenType;
 import com.hackanet.security.utils.PasswordUtil;
 import com.hackanet.security.utils.SecurityUtils;
-import com.hackanet.utils.DateTimeUtil;
 import com.hackanet.utils.PhoneUtil;
 import com.hackanet.utils.RandomString;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
@@ -42,14 +29,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.hackanet.security.utils.ProviderUtils.*;
 import static com.hackanet.utils.StringUtils.generateRandomString;
@@ -62,18 +48,15 @@ import static com.hackanet.utils.StringUtils.getJsonOfTokenDtoFromPrincipalName;
  */
 @Service
 @Slf4j
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, SocialNetworkAuthService {
 
     // FIXME: 10/21/19 change the value
     private static final Integer DEFAULT_LIMIT = 10;
-    private static final Integer PASSWORD_REQUEST_EXPIRED_TIME = 15;
 
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private PasswordUtil passwordUtil;
-    @Autowired
-    private JwtConfig jwtConfig;
     @Autowired
     private EntityManager entityManager;
     @Autowired
@@ -85,8 +68,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private EmailService emailService;
     @Autowired
-    private PasswordChangeRequestRepository passwordChangeRequestRepository;
-    @Autowired
     private PortfolioService portfolioService;
     @Autowired
     private UserNotificationSettingsService userNotificationSettingsService;
@@ -95,32 +76,16 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private ConnectionInvitationService connectionInvitationService;
+    private UserTokenService userTokenService;
 
     @Override
     @Transactional
     public TokenDto register(UserRegistrationForm form) {
         String email = form.getEmail().toLowerCase();
-        String password = form.getPassword();
-        if (exists(email))
-            throw new BadRequestException("User with such email already exists");
+        throwIfExistsByEmail(email);
         String phone = PhoneUtil.formatPhone(form.getPhone());
-        if (existsByPhone(phone))
-            throw new BadRequestException("User with such phone already exists");
-        User user = User.builder()
-                .email(email)
-                .hashedPassword(passwordUtil.hash(password))
-                .phone(PhoneUtil.formatPhone(form.getPhone().trim()))
-                .name(form.getName())
-                .lastname(form.getLastname())
-                .city(form.getCity())
-                .country(form.getCountry())
-                .about(form.getAbout())
-                .role(Role.USER)
-                .lookingForTeam(Boolean.FALSE)
-                .accessTokenParam(new RandomString().nextString())
-                .refreshTokenParam(new RandomString().nextString())
-                .build();
+        throwIfExistsByPhone(phone);
+        User user = getUser(form);
 
         if (form.getSkills() != null && !form.getSkills().isEmpty())
             user.setSkills(skillService.getByIds(form.getSkills()));
@@ -129,8 +94,7 @@ public class UserServiceImpl implements UserService {
         userNotificationSettingsService.getOrCreateDefaultsSettingsForUser(user);
         portfolioService.getByUserId(user.getId());
         emailService.sendWelcomeEmail(user);
-        UserToken token = getOrCreateTokenIfNotExists(user);
-        return buildTokenDtoByUser(user, token);
+        return userTokenService.getTokenByUser(user);
     }
 
     @Override
@@ -138,30 +102,18 @@ public class UserServiceImpl implements UserService {
     public TokenDto login(UserLoginForm form) {
         String email = form.getEmail().toLowerCase();
         String password = form.getPassword();
-
         User user = get(email);
 
         if (passwordUtil.matches(password, user.getHashedPassword())) {
-            String value = getTokenValue(user, TokenType.ACCESS);
-
             UserToken token = userTokenRepository.findByUserId(user.getId());
             if (token == null) {
-                token = getOrCreateTokenIfNotExists(user);
+                token = userTokenService.getOrCreateTokenIfNotExists(user);
             }
-            if (userTokenExpired(token, true)) {
+            if (userTokenService.userTokenExpired(token, true)) {
                 user.setRefreshTokenParam(new RandomString().nextString());
                 userRepository.save(user);
             }
-
-            final String prefix = jwtConfig.getPrefix() + " ";
-            return TokenDto.builder()
-                    .accessToken(prefix + value)
-                    .accessTokenExpiresAt(token.getAccessTokenExpiresAt())
-                    .refreshToken(token.getRefreshToken())
-                    .refreshTokenExpiresAt(token.getRefreshTokenExpiresAt())
-                    .userId(user.getId())
-                    .role(user.getRole().toString())
-                    .build();
+            return userTokenService.buildTokenDtoByUser(user, token);
         } else throw new BadRequestException("Login/Password is incorrect");
     }
 
@@ -224,16 +176,14 @@ public class UserServiceImpl implements UserService {
         User user;
         if (exists) {
             user = get(email.toLowerCase());
-            UserToken userToken = getOrCreateTokenIfNotExists(user);
-            return buildTokenDtoByUser(user, userToken);
+            UserToken userToken = userTokenService.getOrCreateTokenIfNotExists(user);
+            return userTokenService.buildTokenDtoByUser(user, userToken);
         }
-
 //            map.get("email_verified"); in case we need to change user status
         FileInfo fileInfo = FileInfo.builder()
                 .name(generateRandomString())
                 .previewLink((String) userDetails.get("picture"))
                 .build();
-
         fileInfoService.save(fileInfo);
 
         user = User.builder()
@@ -247,9 +197,9 @@ public class UserServiceImpl implements UserService {
                 .accessTokenParam(new RandomString().nextString())
                 .build();
         user = userRepository.save(user);
-        UserToken userToken = getOrCreateTokenIfNotExists(user);
+        UserToken userToken = userTokenService.getOrCreateTokenIfNotExists(user);
         emailService.sendWelcomeEmail(user);
-        return buildTokenDtoByUser(user, userToken);
+        return userTokenService.buildTokenDtoByUser(user, userToken);
     }
 
     @Override
@@ -267,16 +217,14 @@ public class UserServiceImpl implements UserService {
             boolean exists = exists(email.toLowerCase());
             if (exists) {
                 User user = get(email.toLowerCase());
-                UserToken userToken = getOrCreateTokenIfNotExists(user);
-                return buildTokenDtoByUser(user, userToken);
+                return userTokenService.getTokenByUser(user);
             }
             userBuilder.email(email);
         } else if (!StringUtils.isBlank(login)) {
             boolean exists = exists(login.toLowerCase());
             if (exists) {
                 User user = get(login.toLowerCase());
-                UserToken userToken = getOrCreateTokenIfNotExists(user);
-                return buildTokenDtoByUser(user, userToken);
+                return userTokenService.getTokenByUser(user);
             }
             userBuilder.email(login);
         } else throw new BadRequestException("Email and login are null or empty.");
@@ -292,7 +240,7 @@ public class UserServiceImpl implements UserService {
                 .country((String) userDetails.get("location"));
 
         User user = userRepository.save(userBuilder.build());
-        UserToken token = getOrCreateTokenIfNotExists(user);
+        UserToken token = userTokenService.getOrCreateTokenIfNotExists(user);
 
         String avatarUrl = (String) userDetails.get("avatar_url");
         FileInfo fileInfo = FileInfo.builder()
@@ -300,7 +248,7 @@ public class UserServiceImpl implements UserService {
                 .user(user)
                 .build();
         fileInfoService.save(fileInfo);
-        return buildTokenDtoByUser(user, token);
+        return userTokenService.buildTokenDtoByUser(user, token);
     }
 
     @Override
@@ -335,8 +283,6 @@ public class UserServiceImpl implements UserService {
         String name = (String) userDetails.get("localizedFirstName");
         String lastName = (String) userDetails.get("localizedLastName");
         String email = (String) userDetails.get("email");
-        System.out.println("email: " + email);
-
         // TODO: 11/20/19 get email and save user if he does not exist with received email
         User user = User.builder()
                 .name(name)
@@ -346,11 +292,8 @@ public class UserServiceImpl implements UserService {
                 .refreshTokenParam(new RandomString().nextString())
                 .accessTokenParam(new RandomString().nextString())
                 .build();
-
         user = userRepository.save(user);
-
-
-        return new TokenDto();
+        return userTokenService.getTokenByUser(user);
     }
 
     @Transactional
@@ -361,33 +304,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(@NotNull Long id, @NotNull User currentUser, @NotNull UserUpdateForm form) {
         User user = get(id);
-
         SecurityUtils.checkProfileAccess(currentUser, user);
-
-        if (!StringUtils.isBlank(form.getName()))
-            user.setName(form.getName());
-
-        if (!StringUtils.isBlank(form.getLastname()))
-            user.setLastname(form.getLastname());
-
-        if (!StringUtils.isBlank(form.getAbout()))
-            user.setAbout(form.getAbout());
-
-        if (!StringUtils.isBlank(form.getCity()))
-            user.setAbout(form.getCity());
-
-        if (!StringUtils.isBlank(form.getCountry()))
-            user.setCountry(form.getCountry());
-
-        if (form.getImage() != null)
-            user.setImage(fileInfoService.get(form.getImage()));
-
-        if (form.getSkills() != null)
-            user.setSkills(skillService.getByIds(form.getSkills()));
-
-        if (form.getLookingForTeam() != null) {
-            user.setLookingForTeam(form.getLookingForTeam());
-        }
+        user.setName(form.getName());
+        user.setLastname(form.getLastname());
+        user.setAbout(form.getAbout());
+        user.setAbout(form.getCity());
+        user.setCountry(form.getCountry());
+        user.setImage(fileInfoService.get(form.getImage()));
+        user.setSkills(skillService.getByIds(form.getSkills()));
+        user.setLookingForTeam(form.getLookingForTeam());
         user = userRepository.save(user);
         return user;
     }
@@ -398,85 +323,6 @@ public class UserServiceImpl implements UserService {
         List<UserPhoneToken> availableTokens = userPhoneTokenRepository.findAllByUserId(userId);
         availableTokens.forEach(it -> multimap.put(it.getDeviceType(), it));
         return multimap;
-    }
-
-    @Override
-    public void passwordResetRequest(String email) {
-        if (StringUtils.isBlank(email)) throw new BadRequestException("Email is empty or null");
-
-        RandomString randomString = new RandomString(21);
-        String code = randomString.nextString();
-        Optional<PasswordChangeRequest> optional = passwordChangeRequestRepository.findByCode(code);
-        if (optional.isPresent()) {
-            do {
-                log.warn("Password change request with such code already exists. Generating new code.");
-                code = randomString.nextString();
-                optional = passwordChangeRequestRepository.findByCode(code);
-            } while (optional.isPresent());
-        }
-
-        email = email.trim().toLowerCase();
-        User user = get(email);
-
-        PasswordChangeRequest request = passwordChangeRequestRepository.findAllByUserIdAndUsed(user.getId(), false);
-        if (request == null) {
-            request = PasswordChangeRequest.builder()
-                    .code(code)
-                    .createdDate(LocalDateTime.now())
-                    .used(Boolean.FALSE)
-                    .userId(user.getId())
-                    .build();
-            passwordChangeRequestRepository.save(request);
-        } else {
-            LocalDateTime now = LocalDateTime.now();
-            long minutes = DateTimeUtil.getDifferenceBetweenLocalDateTimes(request.getCreatedDate(), now);
-            if (minutes > PASSWORD_REQUEST_EXPIRED_TIME) {
-                request.setCode(code);
-                request.setUsed(Boolean.FALSE);
-                request.setCreatedDate(now);
-                passwordChangeRequestRepository.save(request);
-            }
-        }
-        emailService.sendPasswordResetEmail(user, request);
-    }
-
-    @Override
-    @Transactional
-    public void changePassword(String code, String newPassword, String email) {
-        if (StringUtils.isBlank(code))
-            throw new BadRequestException("Code is empty or null");
-
-        if (StringUtils.isBlank(email))
-            throw new BadRequestException("Email is empty");
-
-        boolean matches = Pattern.matches(Patterns.VALID_PASSWORD_REGEX, newPassword.trim());
-        if (!matches)
-            throw new BadRequestException("Password is invalid");
-
-        PasswordChangeRequest passwordRequest = passwordChangeRequestRepository.findByCode(code)
-                .orElseThrow(() -> new NotFoundException("Password change request not found"));
-
-        if (Boolean.TRUE.equals(passwordRequest.getUsed()))
-            throw new BadRequestException("The password change request has been already used");
-
-        LocalDateTime now = LocalDateTime.now();
-        long minutes = DateTimeUtil.getDifferenceBetweenLocalDateTimes(passwordRequest.getCreatedDate(), now);
-        if (minutes > PASSWORD_REQUEST_EXPIRED_TIME) {
-            throw new BadRequestException("Password reset request has expired");
-        }
-
-        User user = get(passwordRequest.getUserId());
-        if (passwordUtil.matches(newPassword, user.getHashedPassword()))
-            throw new BadRequestException("You can't use old password as a new one");
-        if (!user.getEmail().equals(email)) {
-            throw new BadRequestException("Emails are not the same");
-        }
-
-        user.setHashedPassword(passwordUtil.hash(newPassword));
-        userRepository.save(user);
-
-        passwordRequest.setUsed(Boolean.TRUE);
-        passwordChangeRequestRepository.save(passwordRequest);
     }
 
     @Override
@@ -496,53 +342,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    @Override
-    @Transactional
-    public TokenDto updateAccessToken(User user) {
-        UserToken userToken = userTokenRepository.findByUserId(user.getId());
-
-        if (userTokenExpired(userToken, true))
-            throw new ForbiddenException("Refresh token has expired");
-
-        userToken.setAccessTokenExpiresAt(LocalDateTime.now().plusHours(AppConstants.ACCESS_TOKEN_EXPIRING_TIME_IN_HOURS));
-        userTokenRepository.save(userToken);
-
-        User updateAccessTokenUser = get(user.getId());
-        updateAccessTokenUser.setAccessTokenParam(new RandomString().nextString());
-        updateAccessTokenUser = userRepository.save(updateAccessTokenUser);
-
-        String value = getTokenValue(updateAccessTokenUser, TokenType.ACCESS);
-
-        return TokenDto.builder()
-                .userId(user.getId())
-                .role(updateAccessTokenUser.getRole().toString())
-                .refreshTokenExpiresAt(userToken.getRefreshTokenExpiresAt())
-                .refreshToken(userToken.getRefreshToken())
-                .accessToken(jwtConfig.getPrefix() + " " + value)
-                .accessTokenExpiresAt(userToken.getAccessTokenExpiresAt())
-                .build();
-    }
-
-    @Override
-    public UserToken getByUserId(Long userId) {
-        return userTokenRepository.findByUserId(userId);
-    }
-
-    /**
-     * checks if the token has expired
-     *
-     * @param token          to check
-     * @param isRefreshToken type of token
-     * @return true if token has expired
-     */
-    @Override
-    public boolean userTokenExpired(@NotNull UserToken token, boolean isRefreshToken) {
-        if (isRefreshToken)
-            return LocalDateTime.now().isAfter(token.getRefreshTokenExpiresAt());
-        else
-            return LocalDateTime.now().isAfter(token.getAccessTokenExpiresAt());
-    }
-
+    @Deprecated
     @Override
     public TokenDto getTokenDtoFromString(String principalName) {
         principalName = getJsonOfTokenDtoFromPrincipalName(principalName);
@@ -558,88 +358,14 @@ public class UserServiceImpl implements UserService {
         return get(jwtData.getId());
     }
 
-    @Override
-    @Caching (evict = {
-                @CacheEvict(key = "#user.id", value = "connections-suggestions"),
-                @CacheEvict(key = "#userToAdd.id", value = "connections-suggestions")
-        }
-    )
-    public void addConnection(User user, User userToAdd) {
-        Set<User> usersToSave = new HashSet<>();
-        Set<User> connections = user.getConnections();
-        if (!connections.contains(userToAdd)) {
-            connections.add(userToAdd);
-            user.setConnections(connections);
-            usersToSave.add(user);
-        }
-
-        Set<User> userToAddConnections = userToAdd.getConnections();
-        if (!userToAddConnections.contains(user)) {
-            userToAddConnections.add(user);
-            userToAdd.setConnections(userToAddConnections);
-            usersToSave.add(userToAdd);
-        }
-        userRepository.saveAll(usersToSave);
+    private void throwIfExistsByEmail(String email) {
+        if (exists(email))
+            throw new BadRequestException("User with such email already exists");
     }
 
-    @Override
-    @Transactional
-    @Caching (evict = {
-            @CacheEvict(key = "#user.id", value = "connections-suggestions"),
-            @CacheEvict(key = "#userToDelete.id", value = "connections-suggestions")
-        }
-    )
-    public void deleteConnection(User user, User userToDelete) {
-        Set<User> usersToSave = new HashSet<>();
-        Set<User> connections = user.getConnections();
-        if (connections.contains(userToDelete)) {
-            connections.remove(userToDelete);
-            user.setConnections(connections);
-            usersToSave.add(user);
-        }
-
-        Set<User> userToDeleteConnections = userToDelete.getConnections();
-        if (userToDeleteConnections.contains(user)) {
-            userToDeleteConnections.remove(user);
-            userToDelete.setConnections(userToDeleteConnections);
-            usersToSave.add(userToDelete);
-        }
-        connectionInvitationService.delete(user.getId(), userToDelete.getId());
-        userRepository.saveAll(usersToSave);
-    }
-
-    @Override
-    public void deleteConnection(User user, Long connectionId) {
-        User connectionUser = get(connectionId);
-        user = get(user.getId());
-        deleteConnection(user, connectionUser);
-    }
-
-    @Override
-    public Set<User> getConnections(Long userId) {
-        User user = get(userId);
-        return user.getConnections();
-    }
-
-    @Override
-    @Cacheable(key = "#user.id", value = "connections-suggestions")
-    public Set<User> getConnectionsSuggestions(User user) {
-        String query = "select us.* from users us where us.id in (select cn.connection_id from connections cn where cn.user_id in (select c.connection_id from connections c where c.user_id = :id))";
-        Query nativeQuery = entityManager
-                .createNativeQuery(query, User.class)
-                .setParameter("id", user.getId());
-        List<User> resultList = nativeQuery.getResultList();
-        return resultList.stream().filter(u -> !u.getId().equals(user.getId())).collect(Collectors.toSet());
-    }
-
-    private String getTokenValue(User user, TokenType type) {
-        return Jwts.builder()
-                .claim("role", user.getRole().toString())
-                .claim("email", user.getEmail())
-                .claim("tokenParam", TokenType.REFRESH.equals(type) ? user.getRefreshTokenParam() : user.getAccessTokenParam())
-                .claim("token-type", type.toString())
-                .setSubject(user.getId().toString())
-                .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecret()).compact();
+    private void throwIfExistsByPhone(String phone) {
+        if (existsByPhone(phone))
+            throw new BadRequestException("User with such phone already exists");
     }
 
     private CriteriaQuery<User> getUsersListQuery(CriteriaBuilder criteriaBuilder, UserSearchForm form) {
@@ -684,27 +410,20 @@ public class UserServiceImpl implements UserService {
         return query;
     }
 
-    private UserToken getOrCreateTokenIfNotExists(User user) {
-        UserToken userToken = userTokenRepository.findByUserId(user.getId());
-        if (userToken != null) return userToken;
-
-        userToken = UserToken.builder()
-                .user(user)
-                .accessTokenExpiresAt(LocalDateTime.now().plusHours(AppConstants.ACCESS_TOKEN_EXPIRING_TIME_IN_HOURS))
-                .refreshTokenExpiresAt(LocalDateTime.now().plusDays(AppConstants.REFRESH_TOKEN_EXPIRING_TIME_IN_DAYS))
-                .refreshToken(getTokenValue(user, TokenType.REFRESH))
-                .build();
-        return userTokenRepository.save(userToken);
-    }
-
-    private TokenDto buildTokenDtoByUser(User user, UserToken userToken) {
-        return TokenDto.builder()
-                .userId(user.getId())
-                .refreshToken(userToken.getRefreshToken())
-                .accessToken(getTokenValue(user, TokenType.ACCESS))
-                .refreshTokenExpiresAt(userToken.getRefreshTokenExpiresAt())
-                .accessTokenExpiresAt(userToken.getAccessTokenExpiresAt())
-                .role(user.getRole().toString())
+    private User getUser(UserRegistrationForm form) {
+        return User.builder()
+                .email(form.getEmail().toLowerCase())
+                .hashedPassword(passwordUtil.hash(form.getPassword()))
+                .phone(PhoneUtil.formatPhone(form.getPhone().trim()))
+                .name(form.getName())
+                .lastname(form.getLastname())
+                .city(form.getCity())
+                .country(form.getCountry())
+                .about(form.getAbout())
+                .role(Role.USER)
+                .lookingForTeam(Boolean.FALSE)
+                .accessTokenParam(new RandomString().nextString())
+                .refreshTokenParam(new RandomString().nextString())
                 .build();
     }
 }

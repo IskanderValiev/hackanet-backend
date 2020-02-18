@@ -31,6 +31,9 @@ public class ConnectionInvitationServiceImpl implements ConnectionInvitationServ
     private UserService userService;
 
     @Autowired
+    private ConnectionService connectionService;
+
+    @Autowired
     private JobRunner jobRunner;
 
     @Override
@@ -53,10 +56,10 @@ public class ConnectionInvitationServiceImpl implements ConnectionInvitationServ
         checkConnectionInvitationAccess(invitation, user, false);
 
         if (ConnectionInvitationStatus.ACCEPTED.equals(status)) {
-            userService.addConnection(invitation.getUser(), invitation.getInvitedUser());
+            connectionService.addConnection(invitation.getUser(), invitation.getInvitedUser());
             jobRunner.addConnectionInvitationNotification(null, invitation);
         } else if (ConnectionInvitationStatus.REJECTED.equals(status)) {
-            userService.deleteConnection(invitation.getUser(), invitation.getInvitedUser());
+            connectionService.deleteConnection(invitation.getUser(), invitation.getInvitedUser());
         }
         invitation.setStatus(status);
         return connectionInvitationRepository.save(invitation);

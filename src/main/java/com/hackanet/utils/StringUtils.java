@@ -15,6 +15,11 @@ import java.util.UUID;
  */
 public class StringUtils {
 
+    public static String formatTitle(String s) {
+        s = org.apache.commons.lang.StringUtils.trimToEmpty(s);
+        return org.apache.commons.lang.StringUtils.capitalize(s);
+    }
+
     public static String generateRandomString() {
         return UUID.randomUUID().toString();
     }
@@ -24,7 +29,7 @@ public class StringUtils {
         return arr.length > 1;
     }
 
-    public static void throwExceptionIfStringContainsBadWords(String input, String fieldName) {
+    public static void badWordFilter(String input, String fieldName) {
         if (SwearWordsFilter.containsBadWords(input))
             throw new BadRequestException(fieldName + " contains bad words");
     }

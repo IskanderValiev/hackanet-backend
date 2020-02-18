@@ -72,10 +72,9 @@ public class AmazonUploadService implements UploadService {
     * */
     @Transactional
     public FileInfo uploadFile(User user, MultipartFile multipartFile) {
-        String fileUrl = "";
         File file = FileUtil.convertMultipartToFile(multipartFile);
         String filename = multipartFile.getOriginalFilename();
-        fileUrl = config.getEndpointUrl() + "/" + config.getBucketName() + "/" + filename;
+        String fileUrl = config.getEndpointUrl() + "/" + config.getBucketName() + "/" + filename;
         uploadFileToS3bucket(filename, file);
         file.delete();
 

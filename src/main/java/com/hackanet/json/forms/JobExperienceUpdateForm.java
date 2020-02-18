@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Data
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class JobExperienceUpdateForm {
+public class JobExperienceUpdateForm extends UpdateForm {
     @NotNull
     private Long companyId;
     @NotNull

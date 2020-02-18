@@ -1,6 +1,7 @@
 package com.hackanet.utils;
 
 import com.hackanet.application.AppConstants;
+import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.models.UserNotificationSettings;
 
 import java.sql.Date;
@@ -9,6 +10,8 @@ import java.sql.Timestamp;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.TimeZone;
+
+import static java.lang.System.currentTimeMillis;
 
 /**
  * @author Iskander Valiev
@@ -102,5 +105,39 @@ public class DateTimeUtil {
         if (now.isAfter(fromLT) && now.isBefore(toLT))
             return nowInMills;
         return (long) (fromLT.toSecondOfDay() * 1000);
+    }
+
+    public static LocalDateTime getRegistrationDate(Long date, boolean start, Date end) {
+        LocalDateTime retVal;
+        if (start) {
+            retVal = date == null
+                    ? LocalDateTime.now()
+                    : epochToLocalDateTime(date);
+            return retVal;
+        }
+        retVal = date == null
+                ? end.toLocalDate().minusDays(1).atTime(23, 59)
+                : epochToLocalDateTime(date);
+        return retVal;
+    }
+
+    public static void validateRegistrationDates(Long regStartDate, Long regEndDate, Date start, Date end) {
+        if (regStartDate > regEndDate)
+            throw new BadRequestException("Registration Start Date is after End Date");
+        if (regEndDate < System.currentTimeMillis())
+            throw new BadRequestException("Registration End Date is in the past");
+        if (new Timestamp(regStartDate).after(start))
+            throw new BadRequestException("Registration Start Date must be before hackathon start date");
+        if (new Timestamp(regEndDate).after(end))
+            throw new BadRequestException("Registration End Date must be before hackathon end date");
+    }
+
+    public static void validateHackathonDates(Date start, Date end) {
+        if (start.after(end)) {
+            throw new BadRequestException("Start date is after end date");
+        }
+        if (start.before(new Date(currentTimeMillis()))) {
+            throw new BadRequestException("Start date is in the past");
+        }
     }
 }

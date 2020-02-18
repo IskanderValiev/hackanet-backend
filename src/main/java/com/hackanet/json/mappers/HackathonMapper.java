@@ -5,7 +5,6 @@ import com.hackanet.models.FileInfo;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.Skill;
 import com.hackanet.models.User;
-import com.hackanet.utils.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.hackanet.utils.DateTimeUtil.localDateTimeToLong;
 
@@ -52,7 +50,7 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
                 .owner(userMapper.map(from.getOwner()))
                 .country(from.getCountry())
                 .currency(from.getCurrency().toString())
-                .prizeFund(from.getPrize())
+                .prizeFund(from.getPrizeFund())
                 .city(from.getCity())
                 .deleted(from.getDeleted())
                 .longitude(from.getLongitude())

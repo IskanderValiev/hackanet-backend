@@ -28,4 +28,5 @@ public interface TeamService extends CrudService<Team> {
     void throwExceptionIfTeamIsNotActual(Team team);
     List<Team> getTeamsSuggestion(User user);
     List<Team> getTeamsSuggestion(User user, Long hackathonId);
+    boolean teamContainsUser(Team team, Long userId);
 }

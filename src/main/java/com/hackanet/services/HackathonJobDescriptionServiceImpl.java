@@ -34,8 +34,8 @@ public class HackathonJobDescriptionServiceImpl implements HackathonJobDescripti
         Team team = teamService.get(form.getTeamId());
 
         Long userId = form.getUserId();
-        List<Long> collect = team.getParticipants().stream().map(User::getId).filter(id -> Objects.equals(id, userId)).collect(Collectors.toList());
-        if (collect.isEmpty())
+        boolean contains = teamService.teamContainsUser(team, userId);
+        if (!contains)
             throw new BadRequestException("The user is not in the team");
 
         HackathonJobDescription hackathonJobDescription = HackathonJobDescription.builder()

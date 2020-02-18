@@ -26,7 +26,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hackanet.utils.StringUtils.throwExceptionIfStringContainsBadWords;
+import static com.hackanet.utils.StringUtils.badWordFilter;
 
 /**
  * @author Iskander Valiev
@@ -41,24 +41,34 @@ public class TeamServiceImpl implements TeamService {
 
     @Autowired
     private TeamRepository teamRepository;
+
     @Autowired
     private UserService userService;
+
     @Autowired
     private HackathonService hackathonService;
+
     @Autowired
     private ChatService chatService;
+
     @Autowired
     private SkillService skillService;
+
     @Autowired
     private EntityManager entityManager;
+
     @Autowired
     private JobRunner jobRunner;
+
     @Autowired
     private UserNotificationSettingsService userNotificationSettingsService;
+
     @Autowired
     private JoinToHackathonRequestService joinToHackathonRequestService;
+
     @Autowired
     private SkillCombinationService skillCombinationService;
+
     @Autowired
     private TeamInvitationService teamInvitationService;
 
@@ -75,35 +85,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     @Transactional
     public Team createTeam(User user, TeamCreateForm form) {
-        String name = form.getName().trim();
-        throwExceptionIfStringContainsBadWords(name, "name");
-
-        Set<User> participants = userService.getByIds(form.getParticipantsIds());
-        participants.add(user);
-        Chat chat = chatService.createForTeam(user);
-        List<Long> skillsLookingForIds = form.getSkillsLookingFor();
-        List<Skill> skillsLookingFor = new ArrayList<>();
-        if (skillsLookingForIds != null && !skillsLookingForIds.isEmpty())
-            skillsLookingFor = skillService.getByIds(skillsLookingForIds);
-
-        Team team = Team.builder()
-                .name(name)
-                .chat(chat)
-                .participants(Collections.singletonList(user))
-                .teamLeader(user)
-                .skillsLookingFor(skillsLookingFor)
-                .teamType(form.getTeamType())
-                .actual(true)
-                .build();
-
-        if (TeamType.HACKATHON.equals(form.getTeamType())) {
-            if (form.getHackathonId() == null)
-                throw new BadRequestException("hackathonId must not be null if " + TeamType.class.getName() + " is " + TeamType.HACKATHON.toString());
-            Hackathon hackathon = hackathonService.get(form.getHackathonId());
-            if (hackathon.getStartDate().before(new Date()))
-                throw new BadRequestException("The hackathons has already started");
-            team.setHackathon(hackathon);
-        }
+        Team team = build(form, user);
         final Team savedTeam = teamRepository.save(team);
         joinToHackathonRequestService.createForHackathonTeam(team);
 
@@ -111,9 +93,10 @@ public class TeamServiceImpl implements TeamService {
         if (Boolean.TRUE.equals(settings.getPushEnabled())) {
             jobRunner.addHackathonJobReviewRequestJobToTeamLeader(settings, user, team);
         }
-        participants.stream()
-                .filter(p -> !p.equals(user))
-                .forEach(p -> teamInvitationService.createIfNotExists(user, p.getId(), savedTeam.getId()));
+
+        Set<User> participants = userService.getByIds(form.getParticipantsIds());
+        participants.add(user);
+        teamInvitationService.sendInvitations(participants, user, savedTeam);
         skillCombinationService.createByTeam(team);
         return team;
     }
@@ -127,7 +110,7 @@ public class TeamServiceImpl implements TeamService {
 
         String name = form.getName();
         if (!StringUtils.isBlank(name)) {
-            throwExceptionIfStringContainsBadWords(name.trim(), "name");
+            badWordFilter(name.trim(), "name");
             team.setName(name.trim());
         }
 
@@ -260,6 +243,16 @@ public class TeamServiceImpl implements TeamService {
         return query.getResultList();
     }
 
+    @Override
+    public boolean teamContainsUser(Team team, Long userId) {
+        List<Long> collect = team.getParticipants()
+                .stream()
+                .map(User::getId)
+                .filter(id -> Objects.equals(id, userId))
+                .collect(Collectors.toList());
+        return !collect.isEmpty();
+    }
+
     private CriteriaQuery<Team> getTeamSuggestionsListQuery(CriteriaBuilder criteriaBuilder, List<Long> skillsIds, Long hackathonId) {
         CriteriaQuery<Team> query = criteriaBuilder.createQuery(Team.class);
         Root<Team> root = query.from(Team.class);
@@ -304,5 +297,37 @@ public class TeamServiceImpl implements TeamService {
         query.distinct(true);
         query.where(criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()])));
         return query;
+    }
+
+    private Team build(TeamCreateForm form, User user) {
+        String name = form.getName().trim();
+        badWordFilter(name, "name");
+
+        Chat chat = chatService.createForTeam(user);
+        List<Long> skillsLookingForIds = form.getSkillsLookingFor();
+        List<Skill> skillsLookingFor = new ArrayList<>();
+        if (skillsLookingForIds != null && !skillsLookingForIds.isEmpty()) {
+            skillsLookingFor = skillService.getByIds(skillsLookingForIds);
+        }
+
+        Team team = Team.builder()
+                .name(name)
+                .chat(chat)
+                .participants(Collections.singletonList(user))
+                .teamLeader(user)
+                .skillsLookingFor(skillsLookingFor)
+                .teamType(form.getTeamType())
+                .actual(true)
+                .build();
+
+        if (TeamType.HACKATHON.equals(form.getTeamType())) {
+            if (form.getHackathonId() == null)
+                throw new BadRequestException("hackathonId must not be null if " + TeamType.class.getName() + " is " + TeamType.HACKATHON.toString());
+            Hackathon hackathon = hackathonService.get(form.getHackathonId());
+            if (hackathon.getStartDate().before(new Date()))
+                throw new BadRequestException("The hackathons has already started");
+            team.setHackathon(hackathon);
+        }
+        return team;
     }
 }

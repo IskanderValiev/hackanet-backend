@@ -21,14 +21,16 @@ import java.util.List;
 @Setter
 @Builder
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class PostCreateForm {
+public class PostCreateForm extends CreateForm {
     @NotNull
     @NotEmpty
     private String title;
+
     @NotNull
     @NotEmpty
     @Length(max = 1024)
     private String content;
+
     private List<Long> images;
     private Long hackathon;
     private Boolean sendImportanceRequest;

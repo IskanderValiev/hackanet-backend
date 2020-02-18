@@ -20,9 +20,12 @@ import java.util.List;
 public class Portfolio extends AbstractEntity {
     @OneToOne(fetch = FetchType.LAZY)
     private User user;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "portfolio")
     private List<JobExperience> jobExperience;
+
     @OneToMany(mappedBy = "portfolio")
     private List<HackathonJobDescription> hackathonJobDescriptions;
+
     private Boolean visibleForCompanies = Boolean.TRUE;
 }
