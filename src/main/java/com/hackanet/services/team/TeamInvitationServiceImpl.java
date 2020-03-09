@@ -1,11 +1,15 @@
-package com.hackanet.services;
+package com.hackanet.services.team;
 
 import com.hackanet.exceptions.NotFoundException;
-import com.hackanet.models.Team;
-import com.hackanet.models.TeamInvitation;
+import com.hackanet.models.team.Team;
+import com.hackanet.models.team.TeamInvitation;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.TeamInvitationStatus;
 import com.hackanet.repositories.TeamInvitationRepository;
+import com.hackanet.services.HackathonService;
+import com.hackanet.services.JoinToHackathonRequestService;
+import com.hackanet.services.SkillCombinationService;
+import com.hackanet.services.UserService;
 import com.hackanet.services.chat.ChatService;
 import com.hackanet.services.scheduler.JobRunner;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,8 +107,7 @@ public class TeamInvitationServiceImpl implements TeamInvitationService {
 
     @Override
     public void sendInvitations(Set<User> participants, User user, Team team) {
-        participants.stream()
-                .filter(p -> !p.equals(user))
+        participants
                 .forEach(p -> createIfNotExists(user, p.getId(), team.getId()));
     }
 

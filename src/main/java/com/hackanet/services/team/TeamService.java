@@ -1,11 +1,11 @@
-package com.hackanet.services;
+package com.hackanet.services.team;
 
 import com.hackanet.json.forms.TeamCreateForm;
 import com.hackanet.json.forms.TeamSearchForm;
 import com.hackanet.json.forms.TeamUpdateForm;
-import com.hackanet.models.Hackathon;
-import com.hackanet.models.Team;
+import com.hackanet.models.team.Team;
 import com.hackanet.models.User;
+import com.hackanet.services.CrudService;
 
 import java.time.LocalDate;
 import java.util.List;

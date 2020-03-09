@@ -1,6 +1,6 @@
 package com.hackanet.repositories;
 
-import com.hackanet.models.JoinToTeamRequest;
+import com.hackanet.models.team.JoinToTeamRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

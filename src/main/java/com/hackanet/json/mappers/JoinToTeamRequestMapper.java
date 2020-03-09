@@ -1,7 +1,7 @@
 package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.JoinToTeamRequestDto;
-import com.hackanet.models.JoinToTeamRequest;
+import com.hackanet.models.team.JoinToTeamRequest;
 import com.hackanet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

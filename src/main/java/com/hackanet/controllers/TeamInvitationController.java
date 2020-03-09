@@ -1,12 +1,11 @@
 package com.hackanet.controllers;
 
 import com.hackanet.json.dto.TeamInvitationDto;
-import com.hackanet.json.forms.TeamInvitationCreateForm;
 import com.hackanet.json.mappers.TeamInvitationMapper;
-import com.hackanet.models.TeamInvitation;
+import com.hackanet.models.team.TeamInvitation;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.TeamInvitationStatus;
-import com.hackanet.services.TeamInvitationService;
+import com.hackanet.services.team.TeamInvitationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -18,7 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 /**

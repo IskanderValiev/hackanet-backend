@@ -1,6 +1,6 @@
 package com.hackanet.repositories;
 
-import com.hackanet.models.Team;
+import com.hackanet.models.team.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -4,16 +4,15 @@ import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.UserReviewCreateForm;
 import com.hackanet.models.ReviewStatistic;
-import com.hackanet.models.Team;
+import com.hackanet.models.team.Team;
 import com.hackanet.models.User;
 import com.hackanet.models.UserReview;
 import com.hackanet.repositories.UserReviewRepository;
+import com.hackanet.services.team.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.hackanet.security.utils.SecurityUtils.checkUserReviewAccess;

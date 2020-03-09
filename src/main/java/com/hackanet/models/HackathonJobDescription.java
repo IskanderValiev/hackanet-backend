@@ -1,9 +1,9 @@
 package com.hackanet.models;
 
+import com.hackanet.models.team.Team;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.List;
 
 /**
  * @author Iskander Valiev

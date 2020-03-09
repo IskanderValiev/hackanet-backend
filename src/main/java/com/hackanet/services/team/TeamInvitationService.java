@@ -1,9 +1,10 @@
-package com.hackanet.services;
+package com.hackanet.services.team;
 
-import com.hackanet.models.Team;
-import com.hackanet.models.TeamInvitation;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.TeamInvitationStatus;
+import com.hackanet.models.team.Team;
+import com.hackanet.models.team.TeamInvitation;
+import com.hackanet.services.CrudService;
 
 import java.util.List;
 import java.util.Set;

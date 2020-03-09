@@ -5,7 +5,7 @@ import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.JoinToHackathonRequestCreateForm;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.JoinToHackathonRequest;
-import com.hackanet.models.Team;
+import com.hackanet.models.team.Team;
 import com.hackanet.models.User;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.JoinType;
@@ -13,6 +13,7 @@ import com.hackanet.models.enums.RequestStatus;
 import com.hackanet.models.enums.TeamType;
 import com.hackanet.repositories.JoinToHackathonRequestRepository;
 import com.hackanet.services.chat.ChatService;
+import com.hackanet.services.team.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -174,7 +175,7 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
     public JoinToHackathonRequest createForHackathonTeam(Team team) {
         throwExceptionIfRequestExistsByTeam(team);
         if (!TeamType.HACKATHON.equals(team.getTeamType()))
-            throw new RuntimeException("TeamType is not " + TeamType.HACKATHON.toString());
+            throw new BadRequestException("TeamType is not " + TeamType.HACKATHON.toString());
 
         JoinToHackathonRequest request = JoinToHackathonRequest.builder()
                 .joinType(JoinType.TEAM)

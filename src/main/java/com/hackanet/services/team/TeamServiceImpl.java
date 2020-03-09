@@ -1,4 +1,4 @@
-package com.hackanet.services;
+package com.hackanet.services.team;
 
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
@@ -8,8 +8,10 @@ import com.hackanet.json.forms.TeamUpdateForm;
 import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.TeamType;
+import com.hackanet.models.team.Team;
 import com.hackanet.repositories.TeamRepository;
 import com.hackanet.security.utils.SecurityUtils;
+import com.hackanet.services.*;
 import com.hackanet.services.chat.ChatService;
 import com.hackanet.services.scheduler.JobRunner;
 import lombok.extern.slf4j.Slf4j;
@@ -72,6 +74,9 @@ public class TeamServiceImpl implements TeamService {
     @Autowired
     private TeamInvitationService teamInvitationService;
 
+    @Autowired
+    private TeamMemberService teamMemberService;
+
     @Override
     public Team save(Team team) {
         return teamRepository.save(team);
@@ -94,9 +99,10 @@ public class TeamServiceImpl implements TeamService {
             jobRunner.addHackathonJobReviewRequestJobToTeamLeader(settings, user, team);
         }
 
+        // TODO: 3/3/20 replace with team members service
         Set<User> participants = userService.getByIds(form.getParticipantsIds());
-        participants.add(user);
         teamInvitationService.sendInvitations(participants, user, savedTeam);
+        teamMemberService.addTeamMember(user, savedTeam);
         skillCombinationService.createByTeam(team);
         return team;
     }
