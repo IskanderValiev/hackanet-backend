@@ -112,4 +112,16 @@ public class SecurityUtils {
                 throw new ForbiddenException("You have no access to this connection invitation as an invited user");
         }
     }
+
+    public static void checkCommentAccess(Comment comment, User user) {
+        if (!comment.getUser().equals(user)) {
+            throw new ForbiddenException("You have no access to this comment");
+        }
+    }
+
+    public static void checkCommentLikeAccess(CommentLike like, User user) {
+        if (!like.getUser().equals(user)) {
+            throw new ForbiddenException("You have no access to this like");
+        }
+    }
 }
