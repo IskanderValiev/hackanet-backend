@@ -4,31 +4,18 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
 
-import javax.validation.constraints.Max;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
 
 /**
  * @author Iskander Valiev
  * created by isko
- * on 11/20/19
+ * on 3/9/20
  */
 @Data
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class UserReviewCreateForm {
-
+public class CommentUpdateForm {
+    @NotEmpty
     @NotNull
-    private Long reviewedUserId;
-
-    @Max(5)
-    @Positive
-    @NotNull
-    private Integer mark;
-
-    private String reviewMessage;
-
-    @NotNull
-    private Long teamId;
-
-    private Boolean anonymously = false;
+    private String text;
 }

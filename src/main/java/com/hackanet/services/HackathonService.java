@@ -5,6 +5,7 @@ import com.hackanet.json.forms.HackathonSearchForm;
 import com.hackanet.json.forms.HackathonUpdateForm;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.User;
+import com.hackanet.models.chat.Chat;
 
 import java.util.List;
 
@@ -15,4 +16,6 @@ public interface HackathonService extends ManageableService<Hackathon>, FormVali
     List<Hackathon> hackathonList(HackathonSearchForm form);
     void updateUsersHackathonList(List<User> users, Hackathon hackathon, boolean add);
     List<Hackathon> getFriendsHackathons(User user);
+    List<Hackathon> getHackathonsListByUser(User user);
+    void setChats(List<Chat> chats, Hackathon hackathon);
 }

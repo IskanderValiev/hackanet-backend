@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @ControllerAdvice
 public class ExceptionHandlerController {
     @ResponseBody
-    @ExceptionHandler({BadRequestException.class, BadFormTypeException.class})
+    @ExceptionHandler({BadRequestException.class, IllegalArgumentException.class, BadFormTypeException.class})
     public ResponseEntity<ExceptionDto> handleBadRequest(BadRequestException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionDto.of(ex.getMessage()));
     }
 
     @ResponseBody
-    @ExceptionHandler(ForbiddenException.class)
+    @ExceptionHandler({ForbiddenException.class, BlackListException.class})
     public ResponseEntity<ExceptionDto> handleForbidden(ForbiddenException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ExceptionDto.of(ex.getMessage()));
     }

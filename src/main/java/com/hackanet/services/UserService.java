@@ -19,6 +19,7 @@ public interface UserService extends CrudService<User> {
     Boolean exists(String email);
     Boolean existsByPhone(String phone);
     User get(String email);
+    User getUserInfo(Long id, User currentUser);
     Set<User> getByIds(List<Long> ids);
     List<User> userList(UserSearchForm form);
     void updateUsersHackathonList(User user, Hackathon hackathon, boolean add);

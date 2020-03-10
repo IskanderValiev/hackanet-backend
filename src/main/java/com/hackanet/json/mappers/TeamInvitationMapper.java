@@ -1,6 +1,9 @@
 package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.TeamInvitationDto;
+import com.hackanet.json.dto.TeamSimpleDto;
+import com.hackanet.models.TeamInvitation;
+import com.hackanet.utils.DateTimeUtil;
 import com.hackanet.models.team.TeamInvitation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,7 +26,7 @@ public class TeamInvitationMapper implements Mapper<TeamInvitation, TeamInvitati
     public TeamInvitationDto map(TeamInvitation from) {
         return TeamInvitationDto.builder()
                 .id(from.getId())
-                .localDateTime(from.getTime())
+                .localDateTime(DateTimeUtil.localDateTimeToLong(from.getTime()))
                 .teamSimpleDto(teamSimpleMapper.map(from.getTeam()))
                 .userSimpleDto(userSimpleMapper.map(from.getUser()))
                 .status(from.getStatus())

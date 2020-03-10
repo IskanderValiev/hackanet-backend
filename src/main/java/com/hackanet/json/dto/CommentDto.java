@@ -2,24 +2,28 @@ package com.hackanet.json.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
 
-import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * @author Iskander Valiev
  * created by isko
- * on 10/24/19
+ * on 3/9/20
  */
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
 @Builder
+@Data
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class ChatMessageDto {
+public class CommentDto {
+
     private Long id;
-    private UserSimpleDto sender;
-    private Long messageTime;
-    private String text;
+
+    private UserSimpleDto user;
+
+    private Long postId;
+
+    private Long date;
+
+    private List<CommentLikeDto> likes;
 }

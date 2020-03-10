@@ -21,8 +21,6 @@ public class UserNotificationSettingsDto {
     private Long userId;
     private Boolean emailEnabled;
     private Boolean pushEnabled;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
-    private LocalTime dontDisturbFrom;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
-    private LocalTime dontDisturbTo;
+    private Long dontDisturbFrom;
+    private Long dontDisturbTo;
 }

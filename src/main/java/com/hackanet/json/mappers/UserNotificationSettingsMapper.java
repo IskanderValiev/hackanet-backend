@@ -2,7 +2,10 @@ package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.UserNotificationSettingsDto;
 import com.hackanet.models.UserNotificationSettings;
+import com.hackanet.utils.DateTimeUtil;
 import org.springframework.stereotype.Component;
+
+import static com.hackanet.utils.DateTimeUtil.localTimeToLong;
 
 /**
  * @author Iskander Valiev
@@ -18,8 +21,8 @@ public class UserNotificationSettingsMapper implements  Mapper<UserNotificationS
                 .userId(from.getUser().getId())
                 .emailEnabled(from.getEmailEnabled())
                 .pushEnabled(from.getPushEnabled())
-                .dontDisturbFrom(from.getDontDisturbFrom())
-                .dontDisturbTo(from.getDontDisturbTo())
+                .dontDisturbFrom(localTimeToLong(from.getDontDisturbFrom()))
+                .dontDisturbTo(localTimeToLong(from.getDontDisturbTo()))
                 .build();
     }
 }
