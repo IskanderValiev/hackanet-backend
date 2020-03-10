@@ -135,6 +135,16 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
     }
 
     @Override
+    public User getUserInfo(Long id, User currentUser) {
+        User user = get(id);
+        if (currentUser == null) {
+            return user;
+        }
+        SecurityUtils.checkUserProfileForViewing(user, currentUser);
+        return user;
+    }
+
+    @Override
     public User get(Long id) {
         return userRepository.findById(id).orElseThrow(() -> NotFoundException.forUser(id));
     }
