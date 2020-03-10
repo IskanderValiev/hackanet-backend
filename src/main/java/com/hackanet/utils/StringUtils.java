@@ -24,7 +24,7 @@ public class StringUtils {
         return arr.length > 1;
     }
 
-    public static void throwExceptionIfStringContainsBadWords(String input, String fieldName) {
+    public static void checkBadWords(String input, String fieldName) {
         if (SwearWordsFilter.containsBadWords(input))
             throw new BadRequestException(fieldName + " contains bad words");
     }

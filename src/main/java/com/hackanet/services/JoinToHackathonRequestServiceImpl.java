@@ -18,11 +18,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
 import static com.hackanet.security.utils.SecurityUtils.checkTeamAccessAsTeamLeader;
+import static com.hackanet.utils.DateTimeUtil.now;
+import static com.hackanet.utils.validators.HackathonUtils.registrationIsAvailable;
 
 /**
  * @author Iskander Valiev
@@ -50,13 +51,7 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
     @Override
     public JoinToHackathonRequest createRequest(JoinToHackathonRequestCreateForm form, User user) {
         Hackathon hackathon = hackathonService.get(form.getHackathonId());
-        if (hackathon.getRegistrationEndDate().isBefore(LocalDateTime.now()))
-            throw new BadRequestException("Registration for the hackathon has already finished");
-        if (hackathon.getRegistrationStartDate().isAfter(LocalDateTime.now()))
-            throw new BadRequestException("Registration for the hackathon has not started yet");
-        Date now = new Date(System.currentTimeMillis());
-        if (now.after(hackathon.getStartDate()))
-            throw new BadRequestException("Hackathon has already started or passed");
+        registrationIsAvailable(hackathon);
 
         if (JoinType.ALONE.equals(form.getJoinType())) {
             if (hackathon.getParticipants().contains(user))
@@ -71,14 +66,7 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
             checkTeamAccessAsTeamLeader(team, user);
         }
 
-        JoinToHackathonRequest request = JoinToHackathonRequest.builder()
-                .hackathon(hackathon)
-                .message(form.getMessage())
-                .date(now)
-                .entityId(form.getEntityId())
-                .joinType(form.getJoinType())
-                .status(RequestStatus.WAITING)
-                .build();
+        JoinToHackathonRequest request = buildRequestFromCreateForm(form, hackathon);
         request = requestRepository.save(request);
         return request;
     }
@@ -111,8 +99,7 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
                 List<Chat> chats = hackathon.getChats();
                 if (chats.isEmpty()) {
                     chats = chatService.createForHackathon(hackathon);
-                    hackathon.setChats(chats);
-                    hackathonService.save(hackathon);
+                    hackathonService.setChats(chats, hackathon);
                 }
                 if (alone) {
                     final User participant = userService.get(request.getEntityId());
@@ -137,7 +124,7 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
 
             case ATTENDED:
                 Date startDate = hackathon.getStartDate();
-                Date date = new Date(System.currentTimeMillis());
+                Date date = now();
                 if (date.before(startDate))
                     throw new BadRequestException("Registration for hackathons has not been started yet");
                 if (alone) {
@@ -180,7 +167,7 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
                 .joinType(JoinType.TEAM)
                 .entityId(team.getId())
                 .status(RequestStatus.WAITING)
-                .date(new Date(System.currentTimeMillis()))
+                .date(now())
                 .hackathon(team.getHackathon())
                 .message(team.getName() + " want to take part in this hackathon")
                 .build();
@@ -204,5 +191,15 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
             throw new BadRequestException("Request already exists");
     }
 
+    private JoinToHackathonRequest buildRequestFromCreateForm(JoinToHackathonRequestCreateForm form, Hackathon hackathon) {
+        return JoinToHackathonRequest.builder()
+                .hackathon(hackathon)
+                .message(form.getMessage())
+                .date(now())
+                .entityId(form.getEntityId())
+                .joinType(form.getJoinType())
+                .status(RequestStatus.WAITING)
+                .build();
+    }
 
 }

@@ -2,11 +2,14 @@ package com.hackanet.json.forms;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.hackanet.exceptions.BadRequestException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.sql.Date;
@@ -46,8 +49,12 @@ public class HackathonUpdateForm {
     @NotNull
     private Currency currency;
     @NotNull
+    @Max(value = 90, message = "Latitude must be less 90")
+    @Min(value = -90, message = "Latitude must be more -90")
     private Double latitude;
     @NotNull
+    @Max(value = 180, message = "Latitude must be less 180")
+    @Min(value = -180, message = "Latitude must be more -180")
     private Double longitude;
     @NotNull
     private Long registrationStartDate;

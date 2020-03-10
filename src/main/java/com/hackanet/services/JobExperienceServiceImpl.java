@@ -36,8 +36,8 @@ public class JobExperienceServiceImpl implements JobExperienceService {
 
     @Override
     public JobExperience addForPortfolio(User user, JobExperienceCreateForm form) {
-        Date from = form.getFrom();
-        Date to = form.getTo();
+        Date from = new Date(form.getFrom());
+        Date to = new Date(form.getTo());
         if (from.after(to)) {
             throw new BadRequestException("From date is after to date");
         }
@@ -82,8 +82,8 @@ public class JobExperienceServiceImpl implements JobExperienceService {
 
         jobExperience = JobExperience.builder()
                 .company(companyService.get(form.getCompanyId()))
-                .startDate(form.getFrom())
-                .endDate(form.getTo())
+                .startDate(new Date(form.getFrom()))
+                .endDate(new Date(form.getTo()))
                 .technologiesUsed(skillService.getByIds(form.getTechnologies()))
                 .description(form.getDescription())
                 .build();

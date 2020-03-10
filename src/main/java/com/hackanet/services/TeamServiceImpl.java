@@ -26,7 +26,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hackanet.utils.StringUtils.throwExceptionIfStringContainsBadWords;
+import static com.hackanet.utils.StringUtils.checkBadWords;
 
 /**
  * @author Iskander Valiev
@@ -75,26 +75,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     @Transactional
     public Team createTeam(User user, TeamCreateForm form) {
-        String name = form.getName().trim();
-        throwExceptionIfStringContainsBadWords(name, "name");
-
-        Set<User> participants = userService.getByIds(form.getParticipantsIds());
-        participants.add(user);
-        Chat chat = chatService.createForTeam(user);
-        List<Long> skillsLookingForIds = form.getSkillsLookingFor();
-        List<Skill> skillsLookingFor = new ArrayList<>();
-        if (skillsLookingForIds != null && !skillsLookingForIds.isEmpty())
-            skillsLookingFor = skillService.getByIds(skillsLookingForIds);
-
-        Team team = Team.builder()
-                .name(name)
-                .chat(chat)
-                .participants(Collections.singletonList(user))
-                .teamLeader(user)
-                .skillsLookingFor(skillsLookingFor)
-                .teamType(form.getTeamType())
-                .actual(true)
-                .build();
+        Team team = buildTeamFromTeamCreateForm(user, form);
 
         if (TeamType.HACKATHON.equals(form.getTeamType())) {
             if (form.getHackathonId() == null)
@@ -111,9 +92,8 @@ public class TeamServiceImpl implements TeamService {
         if (Boolean.TRUE.equals(settings.getPushEnabled())) {
             jobRunner.addHackathonJobReviewRequestJobToTeamLeader(settings, user, team);
         }
-        participants.stream()
-                .filter(p -> !p.equals(user))
-                .forEach(p -> teamInvitationService.createIfNotExists(user, p.getId(), savedTeam.getId()));
+        Set<User> participants = userService.getByIds(form.getParticipantsIds());
+        participants.forEach(p -> teamInvitationService.createIfNotExists(user, p.getId(), savedTeam.getId()));
         skillCombinationService.createByTeam(team);
         return team;
     }
@@ -127,7 +107,7 @@ public class TeamServiceImpl implements TeamService {
 
         String name = form.getName();
         if (!StringUtils.isBlank(name)) {
-            throwExceptionIfStringContainsBadWords(name.trim(), "name");
+            checkBadWords(name.trim(), "name");
             team.setName(name.trim());
         }
 
@@ -304,5 +284,24 @@ public class TeamServiceImpl implements TeamService {
         query.distinct(true);
         query.where(criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()])));
         return query;
+    }
+
+    private Team buildTeamFromTeamCreateForm(User user, TeamCreateForm form) {
+        String name = form.getName().trim();
+        Chat chat = chatService.createForTeam(user);
+        List<Long> skillsLookingForIds = form.getSkillsLookingFor();
+        List<Skill> skillsLookingFor = new ArrayList<>();
+        if (skillsLookingForIds != null && !skillsLookingForIds.isEmpty())
+            skillsLookingFor = skillService.getByIds(skillsLookingForIds);
+
+        return Team.builder()
+                .name(name)
+                .chat(chat)
+                .participants(Collections.singletonList(user))
+                .teamLeader(user)
+                .skillsLookingFor(skillsLookingFor)
+                .teamType(form.getTeamType())
+                .actual(true)
+                .build();
     }
 }

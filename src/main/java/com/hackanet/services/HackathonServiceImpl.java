@@ -2,7 +2,6 @@ package com.hackanet.services;
 
 import com.hackanet.application.AppConstants;
 import com.hackanet.components.Profiling;
-import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.HackathonCreateForm;
 import com.hackanet.json.forms.HackathonSearchForm;
@@ -11,9 +10,10 @@ import com.hackanet.models.FileInfo;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.Skill;
 import com.hackanet.models.User;
+import com.hackanet.models.chat.Chat;
 import com.hackanet.repositories.HackathonRepository;
 import com.hackanet.services.chat.ChatService;
-import com.hackanet.utils.DateTimeUtil;
+import com.hackanet.utils.validators.HackathonCreateFormValidator;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -27,13 +27,12 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.sql.Date;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
-import static com.hackanet.utils.DateTimeUtil.*;
+import static com.hackanet.utils.DateTimeUtil.epochToLocalDateTime;
+import static com.hackanet.utils.DateTimeUtil.getRegistrationLocalDateTimeFromForm;
 import static java.lang.System.currentTimeMillis;
 
 /**
@@ -60,6 +59,9 @@ public class HackathonServiceImpl implements HackathonService {
     @Autowired
     private ChatService chatService;
 
+    @Autowired
+    private HackathonCreateFormValidator createFormValidator;
+
     @Cacheable(value = "hackathons")
     @Override
     @Transactional
@@ -71,47 +73,13 @@ public class HackathonServiceImpl implements HackathonService {
     @Override
     @Transactional
     public Hackathon save(User user, HackathonCreateForm form) {
-        Date start = new Date(form.getStart());
-        Date end = new Date(form.getEnd());
-        if (start.after(end))
-            throw new BadRequestException("Start date is after end date");
-
-        List<Long> requiredSkills = form.getRequiredSkills();
-        if (requiredSkills == null)
-            requiredSkills = Collections.emptyList();
-
-        LocalDateTime registrationStartDate = form.getRegistrationStartDate() == null
-                ? LocalDateTime.now()
-                : epochToLocalDateTime(form.getRegistrationStartDate());
-        LocalDateTime registrationEndDate = form.getRegistrationEndDate() == null
-                ? end.toLocalDate().minusDays(1).atTime(23, 59)
-                : epochToLocalDateTime(form.getRegistrationEndDate());
-
-        Hackathon hackathon = Hackathon.builder()
-                .name(form.getName().trim())
-                .nameLc(form.getName().trim().toLowerCase())
-                .startDate(start)
-                .endDate(end)
-                .owner(user)
-                .description(form.getDescription().trim())
-                .country(StringUtils.capitalize(form.getCountry()))
-                .city(StringUtils.capitalize(form.getCity()))
-                .currency(form.getCurrency())
-                .prize(form.getPrizeFund())
-                .requiredSkills(skillService.getByIds(requiredSkills))
-                .deleted(false)
-                .longitude(form.getLongitude())
-                .latitude(form.getLatitude())
-                .registrationStartDate(registrationStartDate)
-                .registrationEndDate(registrationEndDate)
-                .build();
-
+        createFormValidator.validateCreateForm(form);
+        Hackathon hackathon = buildHackathonFromCreateForm(form, user);
         if (form.getLogoId() != null) {
             FileInfo logo = fileInfoService.get(form.getLogoId());
             hackathon.setLogo(logo);
         }
         hackathon = hackathonRepository.save(hackathon);
-
         chatService.createForHackathon(hackathon);
         return hackathon;
     }
@@ -137,57 +105,8 @@ public class HackathonServiceImpl implements HackathonService {
     public Hackathon update(Long id, User user, HackathonUpdateForm form) {
         Hackathon hackathon = get(id);
         checkHackathonAccess(hackathon, user);
-
-        Date start = new Date(form.getStart());
-        Date end = new Date(form.getEnd());
-        if (start.after(end)) {
-            throw new BadRequestException("Start date is after end date");
-        }
-        if (start.before(new Date(currentTimeMillis()))) {
-            throw new BadRequestException("Start date is in the past");
-        }
-        hackathon.setStartDate(start);
-        hackathon.setEndDate(end);
-
-        if (form.getLogo() != null) {
-            FileInfo file = fileInfoService.get(form.getLogo());
-            hackathon.setLogo(file);
-        }
-
-        String name = form.getName();
-        hackathon.setName(name.trim());
-        hackathon.setNameLc(form.getName().trim().toLowerCase());
-        hackathon.setDescription(form.getDescription().trim());
-
-        String country = StringUtils.capitalize(form.getCountry());
-        hackathon.setCountry(country);
-        String city = StringUtils.capitalize(form.getCity());
-        hackathon.setCity(city);
-
-        if (form.getLatitude() > 90 || form.getLatitude() < -90)
-            throw new BadRequestException("latitude must be >= -90 and <= 90");
-        hackathon.setLatitude(form.getLatitude());
-        if (form.getLongitude() > 180 || form.getLongitude() < -180)
-            throw new BadRequestException("longitude must be >= -180 and <= 180");
-        hackathon.setLongitude(form.getLongitude());
-
-        Long regStartDate = form.getRegistrationStartDate();
-        Long regEndDate = form.getRegistrationEndDate();
-        if (regStartDate > regEndDate)
-            throw new BadRequestException("Registration Start Date is after End Date");
-        if (regEndDate < System.currentTimeMillis())
-            throw new BadRequestException("Registration End Date is in the past");
-        if (new Timestamp(regStartDate).after(start))
-            throw new BadRequestException("Registration Start Date must be before hackathon start date");
-        if (new Timestamp(regEndDate).after(end))
-            throw new BadRequestException("Registration End Date must be before hackathon end date");
-        hackathon.setRegistrationEndDate(epochToLocalDateTime(regEndDate));
-        hackathon.setRegistrationStartDate(epochToLocalDateTime(regStartDate));
-
-        List<Long> requiredSkills = form.getRequiredSkills();
-        if (requiredSkills != null && !requiredSkills.isEmpty()) {
-            hackathon.setRequiredSkills(skillService.getByIds(requiredSkills));
-        }
+        createFormValidator.validateUpdateForm(form);
+        setHackathonNewValues(form, hackathon);
         hackathon = hackathonRepository.save(hackathon);
         return hackathon;
     }
@@ -234,8 +153,17 @@ public class HackathonServiceImpl implements HackathonService {
         Query nativeQuery = entityManager
                 .createNativeQuery(query, Hackathon.class)
                 .setParameter("userId", user.getId());
-        List<Hackathon> resultList = nativeQuery.getResultList();
-        return resultList;
+        return (List<Hackathon>) nativeQuery.getResultList();
+    }
+
+    @Override
+    public List<Hackathon> getHackathonsListByUser(User user) {
+        return hackathonRepository.findByParticipantsContaining(user);
+    }
+
+    public void setChats(List<Chat> chats, Hackathon hackathon) {
+        hackathon.setChats(chats);
+        save(hackathon);
     }
 
     private CriteriaQuery<Hackathon> getHackathonsListQuery(CriteriaBuilder criteriaBuilder, HackathonSearchForm form) {
@@ -262,17 +190,83 @@ public class HackathonServiceImpl implements HackathonService {
             join.on(join.get("id").in(form.getSkills()));
             predicates.add(join.getOn());
         }
-        Date from = form.getFrom();
-        if (from == null)
-            from = new Date(currentTimeMillis());
+
+        long fromInMillis = form.getFrom() == null ? currentTimeMillis() : form.getFrom();
+        Date from = new Date(fromInMillis);
         predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("startDate"), from));
-        Date to = form.getTo();
+
+        Date to = form.getTo() == null ? null : new Date(form.getTo());
         if (to != null) {
             predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("endDate"), to));
         }
         query.distinct(true);
         query.where(criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()])));
         return query;
+    }
+
+    private Hackathon buildHackathonFromCreateForm(HackathonCreateForm form, User user) {
+        List<Long> requiredSkills = form.getRequiredSkills();
+        if (requiredSkills == null)
+            requiredSkills = Collections.emptyList();
+
+        LocalDateTime registrationStart = getRegistrationLocalDateTimeFromForm(form, true);
+        LocalDateTime registrationEnd = getRegistrationLocalDateTimeFromForm(form, false);
+
+        Date startDate = new Date(form.getStart());
+        Date endDate = new Date(form.getEnd());
+
+        return Hackathon.builder()
+                .name(form.getName().trim())
+                .nameLc(form.getName().trim().toLowerCase())
+                .startDate(startDate)
+                .endDate(endDate)
+                .owner(user)
+                .description(form.getDescription().trim())
+                .country(StringUtils.capitalize(form.getCountry()))
+                .city(StringUtils.capitalize(form.getCity()))
+                .currency(form.getCurrency())
+                .prize(form.getPrizeFund())
+                .requiredSkills(skillService.getByIds(requiredSkills))
+                .deleted(false)
+                .longitude(form.getLongitude())
+                .latitude(form.getLatitude())
+                .registrationStartDate(registrationStart)
+                .registrationEndDate(registrationEnd)
+                .build();
+    }
+
+    private void setHackathonNewValues(HackathonUpdateForm form, Hackathon hackathon) {
+        Date start = new Date(form.getStart());
+        Date end = new Date(form.getEnd());
+        hackathon.setStartDate(start);
+        hackathon.setEndDate(end);
+
+        if (form.getLogo() != null) {
+            FileInfo file = fileInfoService.get(form.getLogo());
+            hackathon.setLogo(file);
+        }
+
+        String name = form.getName();
+        hackathon.setName(name.trim());
+        hackathon.setNameLc(form.getName().trim().toLowerCase());
+        hackathon.setDescription(form.getDescription().trim());
+
+        String country = StringUtils.capitalize(form.getCountry());
+        hackathon.setCountry(country);
+        String city = StringUtils.capitalize(form.getCity());
+        hackathon.setCity(city);
+        hackathon.setLatitude(form.getLatitude());
+        hackathon.setLongitude(form.getLongitude());
+
+        Long regStartDate = form.getRegistrationStartDate();
+        Long regEndDate = form.getRegistrationEndDate();
+        hackathon.setRegistrationEndDate(epochToLocalDateTime(regEndDate));
+        hackathon.setRegistrationStartDate(epochToLocalDateTime(regStartDate));
+
+        List<Long> requiredSkills = form.getRequiredSkills();
+        if (requiredSkills != null && !requiredSkills.isEmpty()) {
+            hackathon.setRequiredSkills(skillService.getByIds(requiredSkills));
+        }
     }
 
 }

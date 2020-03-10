@@ -7,6 +7,7 @@ import com.hackanet.models.Post;
 import com.hackanet.models.User;
 import com.hackanet.services.PostLikeService;
 import com.hackanet.services.PostViewService;
+import com.hackanet.utils.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -37,7 +38,7 @@ public class PostMapper implements Mapper<Post, PostDto> {
                 .title(from.getTitle())
                 .content(from.getContent())
                 .author(userMapper.map(from.getOwner()))
-                .date(from.getDate())
+                .date(DateTimeUtil.localDateTimeToLong(from.getDate()))
                 .likesCount(postLikeService.getCountOfPostLikes(from.getId()))
                 .views(postViewService.countOfUniqueViews(from.getId()))
                 .build();
