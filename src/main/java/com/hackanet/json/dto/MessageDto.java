@@ -2,6 +2,7 @@ package com.hackanet.json.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.hackanet.models.chat.Message;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,4 +29,5 @@ public class MessageDto {
     private String text;
     private Long timestamp;
     private List<FileInfoDto> attachments;
+    private List<MessageDto> replies;
 }
