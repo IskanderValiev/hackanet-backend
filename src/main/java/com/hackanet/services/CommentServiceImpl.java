@@ -44,6 +44,7 @@ public class CommentServiceImpl implements CommentService {
                 .post(postService.get(form.getPostId()))
                 .user(userService.get(form.getUserId()))
                 .date(DateTimeUtil.epochToLocalDateTime(System.currentTimeMillis()))
+                .replyParent(get(form.getReplyParentId()))
                 .build();
         return commentRepository.save(comment);
     }
@@ -59,7 +60,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void delete(User user, Long id) {
         Comment comment = get(id);
-        SecurityUtils.checkCommentAccess(comment, user);
+        SecurityUtils.checkCommentDeletingAccess(comment, user);
         commentRepository.delete(comment);
     }
 
