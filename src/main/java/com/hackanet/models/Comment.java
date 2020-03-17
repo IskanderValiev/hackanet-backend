@@ -34,4 +34,10 @@ public class Comment extends AbstractEntity {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "comment")
     private List<CommentLike> likes;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Comment replyParent;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "replyParent")
+    private List<Comment> replies;
 }

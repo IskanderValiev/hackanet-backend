@@ -26,4 +26,6 @@ public class CommentDto {
     private Long date;
 
     private List<CommentLikeDto> likes;
+
+    private List<CommentDto> replies;
 }

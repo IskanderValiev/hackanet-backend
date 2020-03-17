@@ -28,6 +28,7 @@ public class CommentMapper implements Mapper<Comment, CommentDto> {
                 .user(userMapper.map(from.getUser()))
                 .date(DateTimeUtil.localDateTimeToLong(from.getDate()))
                 .likes(likeMapper.map(from.getLikes()))
+                .replies(map(from.getReplies()))
                 .build();
     }
 }

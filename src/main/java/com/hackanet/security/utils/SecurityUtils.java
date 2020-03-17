@@ -125,6 +125,13 @@ public class SecurityUtils {
         }
     }
 
+    public static void checkCommentDeletingAccess(Comment comment, User user) {
+        checkCommentAccess(comment, user);
+        if (!isSuperAdmin(user)) {
+            throw new ForbiddenException("You have no access to this comment");
+        }
+    }
+
     public static void checkCommentLikeAccess(CommentLike like, User user) {
         if (!like.getUser().equals(user)) {
             throw new ForbiddenException("You have no access to this like");

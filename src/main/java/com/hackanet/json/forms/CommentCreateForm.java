@@ -25,4 +25,6 @@ public class CommentCreateForm {
 
     @NotNull
     private Long postId;
+
+    private Long replyParentId;
 }
