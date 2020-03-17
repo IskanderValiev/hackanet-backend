@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface MessageRepository extends ElasticsearchRepository<Message, String> {
     List<Message> findAllByChatIdOrderByTimestamp(Long chatId);
+    List<Message> findAllByReplyTo(String id);
 }

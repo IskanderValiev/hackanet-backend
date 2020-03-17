@@ -7,6 +7,7 @@ import com.hackanet.security.enums.Role;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * @author Iskander Valiev
