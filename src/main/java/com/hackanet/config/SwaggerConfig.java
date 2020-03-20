@@ -9,6 +9,9 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * created by Iskander Valiev
  * on 15.02.2018
@@ -27,7 +30,8 @@ public class SwaggerConfig {
                 .apis(RequestHandlerSelectors.basePackage("com.hackanet.controllers"))
                 .paths(PathSelectors.any())
                 .build()
-                .ignoredParameterTypes(AuthenticationPrincipal.class);
+                .ignoredParameterTypes(AuthenticationPrincipal.class,
+                        HttpServletRequest.class, HttpServletResponse.class);
     }
 
 }
