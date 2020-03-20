@@ -8,6 +8,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.TimeZone;
 
@@ -118,5 +119,18 @@ public class DateTimeUtil {
                     ? end.toLocalDate().minusDays(1).atTime(23, 59)
                     : epochToLocalDateTime(form.getRegistrationEndDate());
         }
+    }
+
+    public static String nowString() {
+        return getString(LocalDateTime.now(), "yyyy-MM-dd HH:mm:ss");
+    }
+
+    public static String getString(LocalDateTime dateTime, String format) {
+        DateTimeFormatter formatter = format(format);
+        return dateTime.format(formatter);
+    }
+
+    private static DateTimeFormatter format(String format) {
+        return DateTimeFormatter.ofPattern(format);
     }
 }

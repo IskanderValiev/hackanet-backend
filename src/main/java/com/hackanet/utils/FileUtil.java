@@ -26,4 +26,12 @@ public class FileUtil {
         }
         return convFile;
     }
+
+    public static File getCitiesFile() {
+        return new File("/Users/isko/Desktop/Projects/hackanet-backend/src/main/resources/location/GeoLite2-City.mmdb");
+    }
+
+    public static File getCountriesFile() {
+        return new File("location/GeoLite2-Country.mmdb");
+    }
 }
