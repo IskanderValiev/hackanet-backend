@@ -71,30 +71,43 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private PasswordUtil passwordUtil;
+
     @Autowired
     private JwtConfig jwtConfig;
+
     @Autowired
     private EntityManager entityManager;
+
     @Autowired
     private SkillService skillService;
+
     @Autowired
     private FileInfoService fileInfoService;
+
     @Autowired
     private UserPhoneTokenRepository userPhoneTokenRepository;
+
     @Autowired
     private EmailService emailService;
+
     @Autowired
     private PasswordChangeRequestRepository passwordChangeRequestRepository;
+
     @Autowired
     private PortfolioService portfolioService;
+
     @Autowired
     private UserNotificationSettingsService userNotificationSettingsService;
+
     @Autowired
     private UserTokenRepository userTokenRepository;
+
     @Autowired
     private ObjectMapper objectMapper;
+
     @Autowired
     private ConnectionInvitationService connectionInvitationService;
 
@@ -121,7 +134,7 @@ public class UserServiceImpl implements UserService {
                 .lookingForTeam(Boolean.FALSE)
                 .accessTokenParam(new RandomString().nextString())
                 .refreshTokenParam(new RandomString().nextString())
-                .image(fileInfoService.get(AppConstants.DEFAULT_PROFILE_IMAGE_ID))
+                .picture(fileInfoService.get(AppConstants.DEFAULT_PROFILE_IMAGE_ID))
                 .build();
 
         if (form.getSkills() != null && !form.getSkills().isEmpty())
@@ -251,7 +264,7 @@ public class UserServiceImpl implements UserService {
                 .email(email.toLowerCase())
                 .name((String) userDetails.get("given_name"))
                 .lastname((String) userDetails.get("family_name"))
-                .image(fileInfo)
+                .picture(fileInfo)
                 .role(Role.USER)
                 .lookingForTeam(Boolean.FALSE)
                 .refreshTokenParam(new RandomString().nextString())
@@ -375,7 +388,7 @@ public class UserServiceImpl implements UserService {
         if (form.getImage() == null) {
             form.setImage(AppConstants.DEFAULT_PROFILE_IMAGE_ID);
         }
-        user.setImage(fileInfoService.get(form.getImage()));
+        user.setPicture(fileInfoService.get(form.getImage()));
 
         if (form.getSkills() != null) {
             user.setSkills(skillService.getByIds(form.getSkills()));

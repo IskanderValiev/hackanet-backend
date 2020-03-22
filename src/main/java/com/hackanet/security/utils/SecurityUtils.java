@@ -14,6 +14,12 @@ import com.hackanet.security.enums.Role;
  */
 public class SecurityUtils {
 
+    public static void isAdmin(User user) {
+        if (Role.ADMIN.equals(user.getRole())) {
+            throw new ForbiddenException("The user is not admin");
+        }
+    }
+
     public static void checkUserProfileForViewing(User profileOwner, User user) {
         if (profileOwner.getBlockedUsers().contains(user))
             throw new BlackListException("You are in the black list");

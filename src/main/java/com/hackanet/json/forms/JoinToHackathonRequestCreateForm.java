@@ -20,11 +20,20 @@ import javax.validation.constraints.NotNull;
 @Setter
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class JoinToHackathonRequestCreateForm {
+
+    @NotNull
     private Long entityId;
+
     @NotNull
     private JoinType joinType;
+
     @NotNull
     @ApiModelProperty(hidden = true)
     private Long hackathonId;
-    private String message;
+
+    @NotNull
+    private Long mainTrackId;
+
+    @NotNull
+    private Long subTrackId;
 }

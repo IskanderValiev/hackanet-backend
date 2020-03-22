@@ -48,7 +48,7 @@ public class User extends AbstractEntity {
     private List<Hackathon> hackathons;
 
     @OneToOne(fetch = FetchType.LAZY)
-    private FileInfo image;
+    private FileInfo picture;
 
     @Column(length = 1024)
     private String about;

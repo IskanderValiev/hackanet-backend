@@ -12,7 +12,7 @@ import java.util.List;
  * created by isko
  * on 3/10/20
  */
-public interface ReportService extends CrudService<Report> {
+public interface ReportService extends RetrieveService<Report> {
     Report report(User user, ReportCreateFrom form);
     Report updateStatus(Long report, ReportStatus status);
     List<Report> getUnresolvedReports();

@@ -11,7 +11,7 @@ import java.util.Set;
  * created by isko
  * on 12/2/19
  */
-public interface ConnectionInvitationService extends CrudService<ConnectionInvitation> {
+public interface ConnectionInvitationService extends RetrieveService<ConnectionInvitation> {
     ConnectionInvitation sendInvitation(User user, Long invitedUser);
     ConnectionInvitation changeStatus(User user, Long invitationId, ConnectionInvitationStatus status);
     Set<ConnectionInvitation> getByInvitedUser(Long invitedUser);

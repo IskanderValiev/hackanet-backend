@@ -41,8 +41,8 @@ public class UserMapper implements Mapper<User, UserDto> {
                 .reviewCount(rating.getCount())
                 .rating(rating.getAverage())
                 .build();
-        if (from.getImage() != null)
-            user.setImage(mapper.map(from.getImage()));
+        if (from.getPicture() != null)
+            user.setImage(mapper.map(from.getPicture()));
         if (from.getSkills() != null)
             user.setSkills(skillMapper.map(from.getSkills()));
         return user;

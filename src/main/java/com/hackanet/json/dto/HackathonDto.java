@@ -27,8 +27,7 @@ public class HackathonDto {
     private String description;
     private Long start;
     private Long end;
-    private List<FileInfoDto> image;
-    private UserDto owner;
+    private OrganizerDto organizer;
     private FileInfoDto logo;
     private String country;
     private String city;
@@ -41,4 +40,6 @@ public class HackathonDto {
     private Double longitude;
     private Long registrationStartDate;
     private Long registrationEndDate;
+    private List<TrackDto> tracks;
+    private Boolean approved;
 }

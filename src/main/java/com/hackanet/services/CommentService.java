@@ -7,7 +7,7 @@ import com.hackanet.models.User;
 
 import java.util.List;
 
-public interface CommentService extends CrudService<Comment> {
+public interface CommentService extends RetrieveService<Comment> {
     Comment create(User user, CommentCreateForm form);
     Comment update(User user, Long id, CommentUpdateForm form);
     void delete(User user, Long id);

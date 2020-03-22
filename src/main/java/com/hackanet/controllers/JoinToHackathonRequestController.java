@@ -38,6 +38,7 @@ public class JoinToHackathonRequestController {
 
     @Autowired
     private JoinToHackathonRequestService service;
+
     @Autowired
     private Mapper<JoinToHackathonRequest, JoinToHackathonRequestDto> mapper;
 
