@@ -9,7 +9,7 @@ import com.hackanet.models.User;
 
 import java.util.List;
 
-public interface CompanyService extends CrudService<Company> {
+public interface CompanyService extends RetrieveService<Company> {
     CompanyOwnerTokenDto registerCompany(CompanyCreateForm form);
     Company update(Long id, User user, CompanyUpdateForm form);
     Company updateApprovedStatus(Long id, Boolean approved);

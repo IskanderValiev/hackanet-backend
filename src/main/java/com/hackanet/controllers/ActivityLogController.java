@@ -10,7 +10,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Iskander Valiev
@@ -26,7 +30,9 @@ public class ActivityLogController {
 
     @GetMapping
     public ResponseEntity<List<ActivityLog>> get() {
-        return ResponseEntity.ok(Lists.newArrayList(repository.findAll()));
+        ArrayList<ActivityLog> logs = Lists.newArrayList(repository.findAll());
+        List<ActivityLog> sortedLogs = logs.stream().sorted(Comparator.comparing(ActivityLog::getDate).reversed()).collect(Collectors.toList());
+        return ResponseEntity.ok(sortedLogs);
     }
 
     @DeleteMapping

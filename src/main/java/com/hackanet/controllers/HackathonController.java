@@ -1,9 +1,11 @@
 package com.hackanet.controllers;
 
 import com.hackanet.json.dto.HackathonDto;
+import com.hackanet.json.dto.HackathonSimpleDto;
 import com.hackanet.json.forms.HackathonCreateForm;
 import com.hackanet.json.forms.HackathonSearchForm;
 import com.hackanet.json.forms.HackathonUpdateForm;
+import com.hackanet.json.mappers.HackathonSimpleMapper;
 import com.hackanet.json.mappers.Mapper;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.User;
@@ -45,6 +47,7 @@ public class HackathonController {
     private static final String VIEWS = HACKATHON + "/views";
     private static final String FRIENDS = "/friends";
     private static final String CURRENT_USER_HACKATHONS = "/user";
+    private static final String APPROVE = HACKATHON + "/approve";
 
     @Autowired
     private HackathonService hackathonService;
@@ -54,6 +57,9 @@ public class HackathonController {
     private Mapper<Hackathon, HackathonDto> mapper;
 
     @Autowired
+    private HackathonSimpleMapper simpleMapper;
+
+    @Autowired
     private HackathonProfileViewService hackathonProfileViewService;
 
     @GetMapping
@@ -61,11 +67,11 @@ public class HackathonController {
             @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
                     required = false, dataType = "string", paramType = "header")
     })
-    @ApiOperation(value = "Get all hackathons")
-    public ResponseEntity<List<HackathonDto>> getAll(@AuthenticationPrincipal User user,
-                                                     HttpServletRequest request) {
+    @ApiOperation(value = "Get all hackathons (extremely important approved and NOT deleted!)")
+    public ResponseEntity<List<HackathonSimpleDto>> getAll(@AuthenticationPrincipal User user,
+                                                           HttpServletRequest request) {
         List<Hackathon> hackathons = hackathonService.getAll();
-        return new ResponseEntity<>(mapper.map(hackathons), HttpStatus.OK);
+        return new ResponseEntity<>(simpleMapper.map(hackathons), HttpStatus.OK);
     }
 
     @GetMapping(CURRENT_USER_HACKATHONS)
@@ -143,11 +149,11 @@ public class HackathonController {
                     required = false, dataType = "string", paramType = "header")
     })
     @ApiOperation(value = "Search hackathons")
-    public ResponseEntity<List<HackathonDto>> list(@RequestBody HackathonSearchForm form,
-                                                   @AuthenticationPrincipal User user,
-                                                   HttpServletRequest request) {
+    public ResponseEntity<List<HackathonSimpleDto>> list(@RequestBody HackathonSearchForm form,
+                                                         @AuthenticationPrincipal User user,
+                                                         HttpServletRequest request) {
         List<Hackathon> hackathons = hackathonService.hackathonList(form);
-        return ResponseEntity.ok(mapper.map(hackathons));
+        return ResponseEntity.ok(simpleMapper.map(hackathons));
     }
 
     @GetMapping(VIEWS)
@@ -172,9 +178,21 @@ public class HackathonController {
                     required = true, dataType = "string", paramType = "header")
     })
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<HackathonDto>> getFriendsHackathons(@AuthenticationPrincipal User user,
-                                                                   HttpServletRequest request) {
+    public ResponseEntity<List<HackathonSimpleDto>> getFriendsHackathons(@AuthenticationPrincipal User user,
+                                                                         HttpServletRequest request) {
         List<Hackathon> hackathons = hackathonService.getFriendsHackathons(user);
-        return ResponseEntity.ok(mapper.map(hackathons));
+        return ResponseEntity.ok(simpleMapper.map(hackathons));
+    }
+
+    @GetMapping(APPROVE)
+    @ApiOperation(value = "Set approved status for hackathon")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    @PreAuthorize("hasAuthority('SUPER_ADMIN')")
+    public ResponseEntity<HackathonDto> approve(@PathVariable Long id) {
+        Hackathon hackathon = hackathonService.approve(id);
+        return ResponseEntity.ok(mapper.map(hackathon));
     }
 }

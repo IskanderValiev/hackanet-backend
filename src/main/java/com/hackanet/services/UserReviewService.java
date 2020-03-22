@@ -7,7 +7,7 @@ import com.hackanet.models.UserReview;
 
 import java.util.List;
 
-public interface UserReviewService extends CrudService<UserReview> {
+public interface UserReviewService extends RetrieveService<UserReview> {
     UserReview createReview(User user, UserReviewCreateForm form);
     ReviewStatistic getReviewsCountAndUserRating(Long id);
     List<UserReview> getAllByUser(Long userId);

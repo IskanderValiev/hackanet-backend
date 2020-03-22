@@ -5,7 +5,7 @@ import com.hackanet.models.User;
 
 import java.util.List;
 
-public interface JobOfferService extends CrudService<JobOffer> {
+public interface JobOfferService extends RetrieveService<JobOffer> {
     JobOffer create(User admin, Long userId);
     List<JobOffer> getByUserId(Long userId);
     JobOffer deleteForUser(User user, Long id);

@@ -6,6 +6,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 /**
  * @author Iskander Valiev
@@ -20,16 +21,26 @@ import java.sql.Date;
 @Entity
 @Table(name = "join_to_hackathon_requests")
 public class JoinToHackathonRequest extends AbstractEntity {
-    @Column(nullable = false)
+
+    @Column(name = "entity_id", nullable = false)
     private Long entityId;
+
     @Enumerated(EnumType.STRING)
     private JoinType joinType;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hackathon_id")
     private Hackathon hackathon;
+
     @Enumerated(EnumType.STRING)
     private RequestStatus status;
-    @Column(nullable = false)
-    private Date date;
-    private String message;
+
+    @Column(name = "date", nullable = false)
+    private LocalDateTime date;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    private Track mainTrack;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    private Track subTrack;
 }

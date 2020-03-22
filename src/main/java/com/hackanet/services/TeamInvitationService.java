@@ -6,7 +6,7 @@ import com.hackanet.models.enums.TeamInvitationStatus;
 
 import java.util.List;
 
-public interface TeamInvitationService extends CrudService<TeamInvitation> {
+public interface TeamInvitationService extends RetrieveService<TeamInvitation> {
     TeamInvitation createIfNotExists(User currentUser, Long userId, Long teamId);
     List<TeamInvitation> getAllByUser(User user);
     void delete(User user, Long id);

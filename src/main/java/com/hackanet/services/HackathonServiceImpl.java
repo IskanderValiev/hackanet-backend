@@ -66,7 +66,7 @@ public class HackathonServiceImpl implements HackathonService {
     @Override
     @Transactional
     public List<Hackathon> getAll() {
-        return hackathonRepository.findAll();
+        return hackathonRepository.findAllByDeletedIsFalseAndApprovedIsTrue();
     }
 
     @CachePut("hackathons")
@@ -103,9 +103,9 @@ public class HackathonServiceImpl implements HackathonService {
     @CacheEvict(value = "hackathons", allEntries = true)
     @Override
     public Hackathon update(Long id, User user, HackathonUpdateForm form) {
+        createFormValidator.validateUpdateForm(form);
         Hackathon hackathon = get(id);
         checkHackathonAccess(hackathon, user);
-        createFormValidator.validateUpdateForm(form);
         setHackathonNewValues(form, hackathon);
         hackathon = hackathonRepository.save(hackathon);
         return hackathon;
@@ -149,7 +149,10 @@ public class HackathonServiceImpl implements HackathonService {
 
     @Override
     public List<Hackathon> getFriendsHackathons(User user) {
-        String query = "select h.* from hackathons h inner join hackathon_participants_table hpt on h.id = hpt.hackathon_id where hpt.user_id in (select c.connection_id from connections c where c.user_id = :userId) and h.id not in (select hpts.hackathon_id from hackathon_participants_table hpts where hpts.user_id = :userId);";
+        String query = "select h.* from hackathons h " +
+                "inner join hackathon_participants_table hpt on h.id = hpt.hackathon_id " +
+                "where hpt.user_id in " +
+                "(select c.connection_id from connections c where c.user_id = :userId) and h.id not in (select hpts.hackathon_id from hackathon_participants_table hpts where hpts.user_id = :userId);";
         Query nativeQuery = entityManager
                 .createNativeQuery(query, Hackathon.class)
                 .setParameter("userId", user.getId());
@@ -166,12 +169,26 @@ public class HackathonServiceImpl implements HackathonService {
         save(hackathon);
     }
 
+    @Override
+    public Hackathon getByAdmin(Long userId) {
+        return Optional.of(hackathonRepository.findByOwnerId(userId))
+                .orElseThrow(() -> new NotFoundException("Hackathon with admin id = " + userId + " not found"));
+    }
+
+    @Override
+    public Hackathon approve(Long id) {
+        Hackathon hackathon = get(id);
+        hackathon.setApproved(true);
+        return hackathonRepository.save(hackathon);
+    }
+
     private CriteriaQuery<Hackathon> getHackathonsListQuery(CriteriaBuilder criteriaBuilder, HackathonSearchForm form) {
         CriteriaQuery<Hackathon> query = criteriaBuilder.createQuery(Hackathon.class);
         Root<Hackathon> root = query.from(Hackathon.class);
         query.select(root);
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(criteriaBuilder.isFalse(root.get("deleted")));
+        predicates.add(criteriaBuilder.isTrue(root.get("approved")));
         String name = form.getName();
         if (!StringUtils.isBlank(name)) {
             name = name.toLowerCase();
@@ -232,6 +249,7 @@ public class HackathonServiceImpl implements HackathonService {
                 .latitude(form.getLatitude())
                 .registrationStartDate(registrationStart)
                 .registrationEndDate(registrationEnd)
+                .approved(false)
                 .build();
     }
 

@@ -21,10 +21,9 @@ import java.sql.Date;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class JoinToHackathonRequestDto {
     private Long id;
-    private String message;
     private JoinType joinType;
     private Object entity;
     private RequestStatus status;
     private HackathonDto hackathon;
-    private Date date;
+    private Long date;
 }

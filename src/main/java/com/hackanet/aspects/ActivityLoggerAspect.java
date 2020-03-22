@@ -12,16 +12,16 @@ import org.springframework.stereotype.Component;
 /**
  * @author Iskander Valiev
  * created by isko
- * on 3/20/20
+ * on 3/22/20
  */
 @Aspect
 @Component
-public class CommentLikeActivityLoggerAspect {
+public class ActivityLoggerAspect {
 
     @Autowired
     private ActivityLogService activityLogService;
 
-    @Pointcut("execution(public * com.hackanet.controllers.CommentLikeController.*(..))")
+    @Pointcut("execution(public * com.hackanet.controllers.*Controller.*(..))")
     public void addActivityLog() {
 
     }

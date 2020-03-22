@@ -10,12 +10,12 @@ import com.hackanet.models.enums.RequestStatus;
 
 import java.util.List;
 
-public interface JoinToHackathonRequestService extends CrudService<JoinToHackathonRequest> {
+public interface JoinToHackathonRequestService extends RetrieveService<JoinToHackathonRequest> {
     JoinToHackathonRequest createRequest(JoinToHackathonRequestCreateForm join, User user);
     List<JoinToHackathonRequest> getAllByHackathonId(Long hackathonId, User user);
     JoinToHackathonRequest changeStatus(Long id, User user, RequestStatus status);
     boolean isHackathonAttended(Hackathon hackathon, User user);
     JoinToHackathonRequest save(JoinToHackathonRequest request);
-    JoinToHackathonRequest createForHackathonTeam(Team team);
+    JoinToHackathonRequest createForHackathonTeam(Team team, Long mainTrackId, Long subTrackId);
     JoinToHackathonRequest getByHackathonIdAndJoinTypeAndEntityIdAndStatus(Hackathon hackathon, Long entityId, JoinType joinType, RequestStatus status);
 }

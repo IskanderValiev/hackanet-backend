@@ -13,6 +13,15 @@ import org.springframework.stereotype.Component;
 public class UserLocationInfoMapper {
 
     public UserLocationInfo map(CityResponse cityResponse) {
+        if (cityResponse == null) {
+            UserLocationInfo info = UserLocationInfo.builder()
+                    .city("Local")
+                    .country("Local")
+                    .latitude(0.0)
+                    .longitude(0.0)
+                    .build();
+            return info;
+        }
         UserLocationInfo info = UserLocationInfo.builder()
                 .city(cityResponse.getCity().getName())
                 .country(cityResponse.getCountry().getName())

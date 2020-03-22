@@ -5,8 +5,6 @@ import com.hackanet.models.FileInfo;
 import com.hackanet.models.Skill;
 import com.hackanet.models.Team;
 import com.hackanet.models.User;
-import com.hackanet.services.FileInfoService;
-import com.hackanet.services.SkillService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +26,7 @@ public class TeamParticipantMapper {
     private FileInfoMapper fileInfoMapper;
 
     public TeamParticipantDto map(User from, Team team) {
-        FileInfo image = from.getImage();
+        FileInfo image = from.getPicture();
         List<Skill> skills = from.getSkills();
         TeamParticipantDto build = TeamParticipantDto.builder()
                 .id(from.getId())

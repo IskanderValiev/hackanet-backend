@@ -5,7 +5,6 @@ import com.hackanet.models.FileInfo;
 import com.hackanet.models.Hackathon;
 import com.hackanet.models.Skill;
 import com.hackanet.models.User;
-import com.hackanet.utils.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.hackanet.utils.DateTimeUtil.localDateTimeToLong;
 
@@ -30,8 +28,7 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
     private Mapper<FileInfo, FileInfoDto> fileMapper;
 
     @Autowired
-    @Qualifier("userMapper")
-    private Mapper<User, UserDto> userMapper;
+    private OrganizerMapper organizerMapper;
 
     @Autowired
     @Qualifier("userSimpleMapper")
@@ -41,6 +38,9 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
     @Qualifier("skillMapper")
     private Mapper<Skill, SkillDto> skillMapper;
 
+    @Autowired
+    private TrackMapper trackMapper;
+
     @Override
     public HackathonDto map(Hackathon from) {
         HackathonDto hackathon = HackathonDto.builder()
@@ -49,7 +49,7 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
                 .description(from.getDescription())
                 .start(from.getStartDate().getTime())
                 .end(from.getEndDate().getTime())
-                .owner(userMapper.map(from.getOwner()))
+                .organizer(organizerMapper.map(from.getOwner()))
                 .country(from.getCountry())
                 .currency(from.getCurrency().toString())
                 .prizeFund(from.getPrize())
@@ -57,6 +57,7 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
                 .deleted(from.getDeleted())
                 .longitude(from.getLongitude())
                 .latitude(from.getLatitude())
+                .tracks(trackMapper.map(from.getTracks()))
                 .build();
         if (from.getLogo() != null)
             hackathon.setLogo(fileMapper.map(from.getLogo()));

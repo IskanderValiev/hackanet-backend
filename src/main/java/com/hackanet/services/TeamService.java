@@ -3,7 +3,6 @@ package com.hackanet.services;
 import com.hackanet.json.forms.TeamCreateForm;
 import com.hackanet.json.forms.TeamSearchForm;
 import com.hackanet.json.forms.TeamUpdateForm;
-import com.hackanet.models.Hackathon;
 import com.hackanet.models.Team;
 import com.hackanet.models.User;
 
@@ -15,7 +14,7 @@ import java.util.List;
  * created by isko
  * on 10/31/19
  */
-public interface TeamService extends CrudService<Team> {
+public interface TeamService extends RetrieveService<Team> {
     Team save(Team team);
     List<Team> save(List<Team> teams);
     Team createTeam(User user, TeamCreateForm form);

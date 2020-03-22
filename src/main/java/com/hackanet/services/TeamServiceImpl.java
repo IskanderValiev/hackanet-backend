@@ -86,7 +86,6 @@ public class TeamServiceImpl implements TeamService {
             team.setHackathon(hackathon);
         }
         final Team savedTeam = teamRepository.save(team);
-        joinToHackathonRequestService.createForHackathonTeam(team);
 
         UserNotificationSettings settings = userNotificationSettingsService.getOrCreateDefaultsSettingsForUser(user);
         if (Boolean.TRUE.equals(settings.getPushEnabled())) {

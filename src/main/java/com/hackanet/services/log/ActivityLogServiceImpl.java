@@ -63,7 +63,8 @@ public class ActivityLogServiceImpl implements ActivityLogService {
                 activityLogBuilder.userLocationInfo(userLocationInfo);
             }
         }
-        activityLogRepository.save(activityLogBuilder.build());
+        ActivityLog build = activityLogBuilder.build();
+        activityLogRepository.save(build);
     }
 
     @Override

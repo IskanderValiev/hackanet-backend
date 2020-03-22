@@ -1,12 +1,10 @@
 package com.hackanet.services;
 
+import com.google.common.collect.Lists;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.JoinToHackathonRequestCreateForm;
-import com.hackanet.models.Hackathon;
-import com.hackanet.models.JoinToHackathonRequest;
-import com.hackanet.models.Team;
-import com.hackanet.models.User;
+import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.JoinType;
 import com.hackanet.models.enums.RequestStatus;
@@ -18,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
@@ -35,18 +35,27 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
 
     @Autowired
     private JoinToHackathonRequestRepository requestRepository;
+
     @Autowired
     private HackathonService hackathonService;
+
     @Autowired
     private UserService userService;
+
     @Autowired
     private ChatService chatService;
+
     @Autowired
     private EmailService emailService;
+
     @Autowired
     private PortfolioService portfolioService;
+
     @Autowired
     private TeamService teamService;
+
+    @Autowired
+    private TrackService trackService;
 
     @Override
     public JoinToHackathonRequest createRequest(JoinToHackathonRequestCreateForm form, User user) {
@@ -64,6 +73,7 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
             Team team = teamService.get(form.getEntityId());
             throwExceptionIfRequestExistsByTeam(team);
             checkTeamAccessAsTeamLeader(team, user);
+            return createForHackathonTeam(team, form.getMainTrackId(), form.getSubTrackId());
         }
 
         JoinToHackathonRequest request = buildRequestFromCreateForm(form, hackathon);
@@ -158,18 +168,17 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
     }
 
     @Override
-    public JoinToHackathonRequest createForHackathonTeam(Team team) {
-        throwExceptionIfRequestExistsByTeam(team);
-        if (!TeamType.HACKATHON.equals(team.getTeamType()))
-            throw new RuntimeException("TeamType is not " + TeamType.HACKATHON.toString());
-
+    public JoinToHackathonRequest createForHackathonTeam(Team team, Long mainTrackId, Long subTrackId) {
+        validate(team);
+        List<Track> tracks = trackService.getMainAndSubTracks(mainTrackId, subTrackId);
         JoinToHackathonRequest request = JoinToHackathonRequest.builder()
                 .joinType(JoinType.TEAM)
                 .entityId(team.getId())
                 .status(RequestStatus.WAITING)
-                .date(now())
+                .date(LocalDateTime.now())
                 .hackathon(team.getHackathon())
-                .message(team.getName() + " want to take part in this hackathon")
+                .mainTrack(tracks.get(0))
+                .subTrack(tracks.get(1))
                 .build();
         return requestRepository.save(request);
     }
@@ -192,14 +201,23 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
     }
 
     private JoinToHackathonRequest buildRequestFromCreateForm(JoinToHackathonRequestCreateForm form, Hackathon hackathon) {
+        ArrayList<Track> tracks
+                = Lists.newArrayList(trackService.getMainAndSubTracks(form.getMainTrackId(), form.getSubTrackId()));
         return JoinToHackathonRequest.builder()
                 .hackathon(hackathon)
-                .message(form.getMessage())
-                .date(now())
+                .date(LocalDateTime.now())
                 .entityId(form.getEntityId())
                 .joinType(form.getJoinType())
                 .status(RequestStatus.WAITING)
+                .mainTrack(tracks.get(0))
+                .subTrack(tracks.get(1))
                 .build();
+    }
+
+    private void validate(Team team) {
+        throwExceptionIfRequestExistsByTeam(team);
+        if (!TeamType.HACKATHON.equals(team.getTeamType()))
+            throw new RuntimeException("TeamType is not " + TeamType.HACKATHON.toString());
     }
 
 }

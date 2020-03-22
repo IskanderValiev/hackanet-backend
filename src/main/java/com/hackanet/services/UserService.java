@@ -12,10 +12,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-public interface UserService extends CrudService<User> {
+public interface UserService extends RetrieveService<User> {
     TokenDto register(UserRegistrationForm form);
     TokenDto login(UserLoginForm form);
     Boolean exists(String email);
