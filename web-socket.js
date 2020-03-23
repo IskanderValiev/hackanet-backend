@@ -55,7 +55,8 @@ function sendMessage(event) {
 function onMessageReceived(payload) {
     var message = JSON.parse(payload.body);
     var messageElement = document.createElement('li');
-    console.log('message type: ' + message.text);
+    console.log('message type: ' + message);
+    document.querySelector("#typing").appendChild(typing.toString());
     if (k === 0) {
         for (var i = 0; i < message.length; i++) {
             messageElement.classList.add('message-data');
@@ -91,4 +92,42 @@ function onMessageReceived(payload) {
             .querySelector('#messageList').scrollHeight;
     }
     k++;
+}
+
+//setup before functions
+let typingTimer;                //timer identifier
+let doneTypingInterval = 5000;  //time in ms (5 seconds)
+let myInput = document.getElementById('chatMessage');
+let sent = false;
+let typing = false;
+
+myInput.addEventListener('keydown', () => {
+    typing = true;
+    if (!sent) {
+        var status = {
+            user_id: 1,
+            is_typing: true
+        };
+        stompClient.send("/chat/3/typing", headers, JSON.stringify(status));
+    }
+});
+
+
+//on keyup, start the countdown
+myInput.addEventListener('keyup', () => {
+    clearTimeout(typingTimer);
+    if (myInput.value) {
+        typingTimer = setTimeout(doneTyping, doneTypingInterval);
+    }
+});
+
+//user is "finished typing," do something
+function doneTyping () {
+    typing = false;
+    //do something
+    var status = {
+        user_id: 1,
+        is_typing: false
+    };
+    stompClient.send("/chat/3/typing", headers, JSON.stringify(status));
 }
