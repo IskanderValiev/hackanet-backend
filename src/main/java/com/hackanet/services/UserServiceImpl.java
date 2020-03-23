@@ -637,6 +637,12 @@ public class UserServiceImpl implements UserService {
         return resultList.stream().filter(u -> !u.getId().equals(user.getId())).collect(Collectors.toSet());
     }
 
+    @Override
+    public void updateLastRequestTime(User user) {
+        user.setLastRequestTime(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
     private String getTokenValue(User user, TokenType type) {
         return Jwts.builder()
                 .claim("role", user.getRole().toString())

@@ -32,4 +32,5 @@ public class UserDto {
     private List<SkillDto> skills;
     private Long reviewCount;
     private Double rating;
+    private Long lastRequestTime;
 }

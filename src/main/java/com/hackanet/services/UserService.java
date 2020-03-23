@@ -44,4 +44,5 @@ public interface UserService extends RetrieveService<User> {
     void deleteConnection(User user, Long connectionId);
     Set<User> getConnections(Long userId);
     Set<User> getConnectionsSuggestions(User user);
+    void updateLastRequestTime(User user);
 }

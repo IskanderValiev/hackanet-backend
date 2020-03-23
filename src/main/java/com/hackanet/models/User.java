@@ -5,6 +5,7 @@ import com.hackanet.security.enums.Role;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -86,6 +87,9 @@ public class User extends AbstractEntity {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "blocked_user_ud"))
     private Set<User> blockedUsers;
+
+    @Column(name = "last_request_time")
+    private LocalDateTime lastRequestTime;
 
     public List<FileInfo> getFiles() {
         return files == null ? new ArrayList<>() : files;
