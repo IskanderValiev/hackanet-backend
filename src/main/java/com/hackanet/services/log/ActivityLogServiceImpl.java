@@ -8,6 +8,7 @@ import com.hackanet.json.mappers.activity.log.UserLocationInfoMapper;
 import com.hackanet.models.User;
 import com.hackanet.models.log.ActivityLog;
 import com.hackanet.repositories.log.ActivityLogRepository;
+import com.hackanet.services.UserService;
 import com.hackanet.utils.StringUtils;
 import com.maxmind.geoip2.model.CityResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,9 @@ public class ActivityLogServiceImpl implements ActivityLogService {
     @Autowired
     private UserLocationService userLocationService;
 
+    @Autowired
+    private UserService userService;
+
     @Override
     public void saveLog(Object... args) {
         ActivityLog.ActivityLogBuilder activityLogBuilder = ActivityLog.builder()
@@ -53,6 +57,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
             if (arg instanceof User) {
                 User user = (User) arg;
                 activityLogBuilder.user(userMapper.map(user));
+                userService.updateLastRequestTime(user);
             }
             if (arg instanceof HttpServletRequest) {
                 HttpServletRequest request = (HttpServletRequest) arg;

@@ -37,14 +37,19 @@ public class PostServiceImpl implements PostService {
 
     @Autowired
     private PostRepository postRepository;
+
     @Autowired
     private HackathonService hackathonService;
+
     @Autowired
     private FileInfoService fileInfoService;
+
     @Autowired
     private UserService userService;
+
     @Autowired
     private EntityManager entityManager;
+
     @Autowired
     private JobRunner jobRunner;
 
@@ -75,13 +80,9 @@ public class PostServiceImpl implements PostService {
     public Post update(Long id, User user, PostUpdateForm form) {
         Post post = get(id);
         SecurityUtils.checkPostAccess(post, user);
-        if (!isBlank(form.getTitle()))
-            post.setTitle(form.getTitle());
-        if (!isBlank(form.getContent()))
-            post.setContent(form.getContent());
-        if (form.getHackathon() != null) {
-            post.setHackathon(hackathonService.get(form.getHackathon()));
-        }
+        post.setTitle(form.getTitle());
+        post.setContent(form.getContent());
+        post.setPicture(fileInfoService.get(form.getPictureId()));
         if (form.getImages() != null && !form.getImages().isEmpty()) {
             post.setImages(fileInfoService.getByIdsIn(form.getImages()));
         }

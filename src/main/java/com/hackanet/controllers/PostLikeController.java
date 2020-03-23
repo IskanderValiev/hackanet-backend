@@ -4,6 +4,7 @@ import com.hackanet.json.dto.PostLikeDto;
 import com.hackanet.json.mappers.PostLikeMapper;
 import com.hackanet.models.PostLike;
 import com.hackanet.models.User;
+import com.hackanet.models.enums.LikeType;
 import com.hackanet.services.PostLikeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -39,8 +40,9 @@ public class PostLikeController {
     })
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PostLikeDto> likePost(@PathVariable Long id,
+                                                @RequestParam("type") LikeType type,
                                                 @AuthenticationPrincipal User user) {
-        PostLike like = postLikeService.like(id, user);
+        PostLike like = postLikeService.like(id, user, type);
         return new ResponseEntity<>(postLikeMapper.map(like), HttpStatus.CREATED);
     }
 

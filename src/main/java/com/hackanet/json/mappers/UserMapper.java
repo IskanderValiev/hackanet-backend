@@ -8,6 +8,7 @@ import com.hackanet.models.ReviewStatistic;
 import com.hackanet.models.Skill;
 import com.hackanet.models.User;
 import com.hackanet.services.UserReviewService;
+import com.hackanet.utils.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +41,7 @@ public class UserMapper implements Mapper<User, UserDto> {
                 .about(from.getAbout())
                 .reviewCount(rating.getCount())
                 .rating(rating.getAverage())
+                .lastRequestTime(DateTimeUtil.localDateTimeToLong(from.getLastRequestTime()))
                 .build();
         if (from.getPicture() != null)
             user.setImage(mapper.map(from.getPicture()));
