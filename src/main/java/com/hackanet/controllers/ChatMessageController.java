@@ -1,7 +1,9 @@
 package com.hackanet.controllers;
 
+import com.hackanet.json.dto.ChatUserDto;
 import com.hackanet.json.dto.MessageDto;
 import com.hackanet.json.forms.ChatMessageSaveForm;
+import com.hackanet.json.forms.ChatUserTypingStatus;
 import com.hackanet.json.mappers.MessageMapper;
 import com.hackanet.models.chat.Message;
 import com.hackanet.services.chat.ChatMessageServiceElasticsearchImpl;
@@ -26,6 +28,7 @@ public class ChatMessageController {
 
     @Autowired
     private MessageMapper messageMapper;
+
     @Autowired
     private ChatMessageServiceElasticsearchImpl messageService;
 
@@ -53,5 +56,16 @@ public class ChatMessageController {
                                      @Payload String connect) {
         List<Message> messages = messageService.getByChatId(id);
         return messageMapper.map(messages);
+    }
+
+    @MessageMapping("/chat/{id}/typing")
+    @SendTo("/chat/{id}")
+    public ChatUserDto typingStatus(@DestinationVariable Long id,
+                                    @Payload ChatUserTypingStatus status) {
+        return ChatUserDto.builder()
+                .id(status.getUserId())
+                .chatIsTypingIn(id)
+                .isTyping(Boolean.TRUE.equals(status.getIsTyping()))
+                .build();
     }
 }
