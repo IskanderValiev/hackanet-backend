@@ -9,6 +9,7 @@ import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.JoinType;
 import com.hackanet.models.enums.RequestStatus;
 import com.hackanet.models.enums.TeamType;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.repositories.JoinToHackathonRequestRepository;
 import com.hackanet.services.chat.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;

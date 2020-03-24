@@ -23,6 +23,9 @@ public class TeamInvitationMapper implements Mapper<TeamInvitation, TeamInvitati
 
     @Override
     public TeamInvitationDto map(TeamInvitation from) {
+        if (from == null) {
+            return null;
+        }
         return TeamInvitationDto.builder()
                 .id(from.getId())
                 .localDateTime(DateTimeUtil.localDateTimeToLong(from.getTime()))

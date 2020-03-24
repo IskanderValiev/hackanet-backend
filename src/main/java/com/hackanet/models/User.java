@@ -1,6 +1,7 @@
 package com.hackanet.models;
 
 import com.hackanet.models.chat.Chat;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.security.enums.Role;
 import lombok.*;
 

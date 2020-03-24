@@ -3,7 +3,7 @@ package com.hackanet.services;
 import com.google.common.collect.Multimap;
 import com.hackanet.json.dto.TokenDto;
 import com.hackanet.json.forms.*;
-import com.hackanet.models.Hackathon;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.User;
 import com.hackanet.models.UserPhoneToken;
 import com.hackanet.models.UserToken;

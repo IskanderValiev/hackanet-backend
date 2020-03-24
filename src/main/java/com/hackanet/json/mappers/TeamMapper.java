@@ -20,8 +20,9 @@ public class TeamMapper implements Mapper<Team, TeamDto> {
 
     @Override
     public TeamDto map(Team from) {
-        if (from == null)
+        if (from == null) {
             return null;
+        }
         return TeamDto.builder()
                 .id(from.getId())
                 .name(from.getName())

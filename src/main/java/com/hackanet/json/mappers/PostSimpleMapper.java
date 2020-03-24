@@ -32,6 +32,9 @@ public class PostSimpleMapper implements Mapper<Post, PostSimpleDto> {
 
     @Override
     public PostSimpleDto map(Post from) {
+        if (from == null) {
+            return null;
+        }
         return PostSimpleDto.builder()
                 .id(from.getId())
                 .date(DateTimeUtil.localDateTimeToLong(from.getDate()))

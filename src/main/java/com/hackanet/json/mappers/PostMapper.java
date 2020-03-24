@@ -2,7 +2,7 @@ package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.*;
 import com.hackanet.models.FileInfo;
-import com.hackanet.models.Hackathon;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.Post;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.LikeType;
@@ -11,7 +11,6 @@ import com.hackanet.services.PostLikeService;
 import com.hackanet.services.PostViewService;
 import com.hackanet.utils.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -42,6 +41,9 @@ public class PostMapper implements Mapper<Post, PostDto> {
 
     @Override
     public PostDto map(Post from) {
+        if (from == null) {
+            return null;
+        }
         PostDto postDto = PostDto.builder()
                 .id(from.getId())
                 .title(from.getTitle())

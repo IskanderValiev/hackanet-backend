@@ -1,11 +1,9 @@
 package com.hackanet.services.scheduler;
 
 import com.hackanet.models.*;
-import com.hackanet.models.chat.Chat;
 import com.hackanet.models.chat.Message;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.services.SubscriptionService;
-import com.hackanet.services.UserServiceImpl;
-import com.hackanet.services.scheduler.email.EmailJob;
 import com.hackanet.services.scheduler.phone.PhonePushJob;
 import com.hackanet.utils.DateTimeUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.hackanet.utils.JobUtils.createDurableJob;

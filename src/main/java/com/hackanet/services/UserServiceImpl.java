@@ -12,6 +12,7 @@ import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.dto.TokenDto;
 import com.hackanet.json.forms.*;
 import com.hackanet.models.*;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.push.enums.ClientType;
 import com.hackanet.repositories.PasswordChangeRequestRepository;
 import com.hackanet.repositories.UserPhoneTokenRepository;

@@ -7,11 +7,10 @@ import com.hackanet.json.forms.HackathonSearchForm;
 import com.hackanet.json.forms.HackathonUpdateForm;
 import com.hackanet.json.mappers.HackathonSimpleMapper;
 import com.hackanet.json.mappers.Mapper;
-import com.hackanet.models.Hackathon;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.User;
 import com.hackanet.services.HackathonProfileViewService;
 import com.hackanet.services.HackathonService;
-import com.hackanet.utils.log.LogUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -19,7 +18,6 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.logging.LogLevel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -157,7 +155,7 @@ public class HackathonController {
     }
 
     @GetMapping(VIEWS)
-    @ApiOperation(value = "Get information about views in the perion")
+    @ApiOperation(value = "Get information about views in the period")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
                     required = true, dataType = "string", paramType = "header")

@@ -3,7 +3,7 @@ package com.hackanet.controllers;
 import com.hackanet.json.dto.HackathonJobDescriptionDto;
 import com.hackanet.json.forms.HackathonJobDescriptionCreateForm;
 import com.hackanet.json.mappers.HackathonJobDescriptionMapper;
-import com.hackanet.models.HackathonJobDescription;
+import com.hackanet.models.hackathon.HackathonJobDescription;
 import com.hackanet.models.User;
 import com.hackanet.services.HackathonJobDescriptionService;
 import io.swagger.annotations.Api;

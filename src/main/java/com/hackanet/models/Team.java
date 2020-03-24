@@ -2,12 +2,12 @@ package com.hackanet.models;
 
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.TeamType;
+import com.hackanet.models.hackathon.Hackathon;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Iskander Valiev

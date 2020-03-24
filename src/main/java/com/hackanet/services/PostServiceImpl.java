@@ -5,7 +5,7 @@ import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.PostCreateForm;
 import com.hackanet.json.forms.PostSearchForm;
 import com.hackanet.json.forms.PostUpdateForm;
-import com.hackanet.models.Hackathon;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.Post;
 import com.hackanet.models.PostLike;
 import com.hackanet.models.User;
@@ -20,12 +20,9 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.apache.commons.lang.StringUtils.isBlank;
 
 /**
  * @author Iskander Valiev

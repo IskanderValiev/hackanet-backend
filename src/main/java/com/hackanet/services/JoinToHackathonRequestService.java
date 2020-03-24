@@ -1,7 +1,7 @@
 package com.hackanet.services;
 
 import com.hackanet.json.forms.JoinToHackathonRequestCreateForm;
-import com.hackanet.models.Hackathon;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.JoinToHackathonRequest;
 import com.hackanet.models.Team;
 import com.hackanet.models.User;

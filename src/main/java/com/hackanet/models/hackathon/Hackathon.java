@@ -1,7 +1,8 @@
-package com.hackanet.models;
+package com.hackanet.models.hackathon;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.Currency;
 import lombok.*;
@@ -72,8 +73,11 @@ public class Hackathon extends AbstractEntity {
     @OneToMany(mappedBy = "hackathon")
     private List<Chat> chats;
 
-    @OneToMany(mappedBy = "hackathon")
+    @OneToMany(mappedBy = "hackathon", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Track> tracks;
+
+    @OneToMany(mappedBy = "hackathon", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Sponsor> sponsors;
 
     private Double longitude;
     private Double latitude;

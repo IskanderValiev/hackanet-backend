@@ -42,4 +42,5 @@ public class HackathonDto {
     private Long registrationEndDate;
     private List<TrackDto> tracks;
     private Boolean approved;
+    private List<SponsorDto> sponsors;
 }

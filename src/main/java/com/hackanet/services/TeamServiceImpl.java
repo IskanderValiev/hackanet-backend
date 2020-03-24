@@ -8,6 +8,7 @@ import com.hackanet.json.forms.TeamUpdateForm;
 import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.TeamType;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.repositories.TeamRepository;
 import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.chat.ChatService;

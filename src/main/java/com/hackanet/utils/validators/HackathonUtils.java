@@ -1,7 +1,7 @@
 package com.hackanet.utils.validators;
 
 import com.hackanet.exceptions.BadRequestException;
-import com.hackanet.models.Hackathon;
+import com.hackanet.models.hackathon.Hackathon;
 
 import java.sql.Date;
 import java.time.LocalDateTime;

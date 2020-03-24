@@ -22,6 +22,9 @@ public class CommentMapper implements Mapper<Comment, CommentDto> {
 
     @Override
     public CommentDto map(Comment from) {
+        if (from == null) {
+            return null;
+        }
         return CommentDto.builder()
                 .id(from.getId())
                 .postId(from.getPost().getId())
