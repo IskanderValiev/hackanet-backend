@@ -26,7 +26,9 @@ public class ChatMapper implements Mapper<Chat, ChatDto> {
 
     @Override
     public ChatDto map(Chat from) {
-
+        if (from == null) {
+            return null;
+        }
         if (from.getMessages()==null) {
             from.setMessages(Collections.emptyList());
         }

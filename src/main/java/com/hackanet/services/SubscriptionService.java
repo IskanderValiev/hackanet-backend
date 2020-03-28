@@ -1,6 +1,6 @@
 package com.hackanet.services;
 
-import com.hackanet.models.Subscription;
+import com.hackanet.models.hackathon.Subscription;
 import com.hackanet.models.User;
 
 import java.util.List;

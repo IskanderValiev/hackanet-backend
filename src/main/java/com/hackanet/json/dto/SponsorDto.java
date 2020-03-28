@@ -8,12 +8,18 @@ import lombok.Data;
 /**
  * @author Iskander Valiev
  * created by isko
- * on 10/20/19
+ * on 3/24/20
  */
-@Data
 @Builder
+@Data
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class FileInfoDto {
+public class SponsorDto {
+
     private Long id;
-    private String previewLink;
+
+    private String name;
+
+    private FileInfoDto logo;
+
+    private String link;
 }

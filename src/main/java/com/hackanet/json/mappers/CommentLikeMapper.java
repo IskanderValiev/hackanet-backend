@@ -18,6 +18,9 @@ public class CommentLikeMapper implements Mapper<CommentLike, CommentLikeDto> {
 
     @Override
     public CommentLikeDto map(CommentLike from) {
+        if (from == null) {
+            return null;
+        }
         return CommentLikeDto.builder()
                 .id(from.getId())
                 .commentId(from.getComment().getId())

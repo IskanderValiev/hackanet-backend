@@ -28,7 +28,7 @@ public class HackathonDto {
     private Long start;
     private Long end;
     private OrganizerDto organizer;
-    private FileInfoDto logo;
+    private FileInfoDto picture;
     private String country;
     private String city;
     private List<SkillDto> requiredSkills;
@@ -42,4 +42,5 @@ public class HackathonDto {
     private Long registrationEndDate;
     private List<TrackDto> tracks;
     private Boolean approved;
+    private List<SponsorDto> sponsors;
 }

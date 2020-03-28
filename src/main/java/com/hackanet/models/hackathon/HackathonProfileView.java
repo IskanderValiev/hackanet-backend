@@ -1,5 +1,7 @@
-package com.hackanet.models;
+package com.hackanet.models.hackathon;
 
+import com.hackanet.models.AbstractEntity;
+import com.hackanet.models.User;
 import lombok.*;
 
 import javax.persistence.Entity;

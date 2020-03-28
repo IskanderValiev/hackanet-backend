@@ -9,6 +9,7 @@ import com.hackanet.json.mappers.MessageMapper;
 import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.chat.ChatSettings;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.push.ResolvedPush;
 import com.hackanet.push.enums.ClientType;
 import com.hackanet.push.enums.PushType;

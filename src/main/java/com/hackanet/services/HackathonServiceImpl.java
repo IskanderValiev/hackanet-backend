@@ -7,7 +7,7 @@ import com.hackanet.json.forms.HackathonCreateForm;
 import com.hackanet.json.forms.HackathonSearchForm;
 import com.hackanet.json.forms.HackathonUpdateForm;
 import com.hackanet.models.FileInfo;
-import com.hackanet.models.Hackathon;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.Skill;
 import com.hackanet.models.User;
 import com.hackanet.models.chat.Chat;

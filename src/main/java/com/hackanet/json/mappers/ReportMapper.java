@@ -18,6 +18,9 @@ public class ReportMapper implements Mapper<Report, ReportDto> {
 
     @Override
     public ReportDto map(Report from) {
+        if (from == null) {
+            return null;
+        }
         ReportDto reportDto = ReportDto
                 .builder()
                 .id(from.getId())

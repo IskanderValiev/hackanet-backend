@@ -29,6 +29,9 @@ public class UserMapper implements Mapper<User, UserDto> {
 
     @Override
     public UserDto map(User from) {
+        if (from == null) {
+            return null;
+        }
         ReviewStatistic rating = userReviewService.getReviewsCountAndUserRating(from.getId());
         UserDto user = UserDto.builder()
                 .id(from.getId())

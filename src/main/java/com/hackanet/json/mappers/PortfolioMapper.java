@@ -27,6 +27,9 @@ public class PortfolioMapper implements Mapper<Portfolio, PortfolioDto> {
 
     @Override
     public PortfolioDto map(Portfolio from) {
+        if (from == null) {
+            return null;
+        }
         List<HackathonJobDescriptionDto> jobDescription = hackathonJobDescriptionMapper.map(from.getHackathonJobDescriptions());
         List<JobExperience> jobExperience = from.getJobExperience();
         PortfolioDto dto = PortfolioDto.builder()

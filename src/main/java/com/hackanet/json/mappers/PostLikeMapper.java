@@ -18,6 +18,9 @@ public class PostLikeMapper implements Mapper<PostLike, PostLikeDto> {
 
     @Override
     public PostLikeDto map(PostLike from) {
+        if (from == null) {
+            return null;
+        }
         return PostLikeDto.builder()
                 .id(from.getId())
                 .postId(from.getPost().getId())

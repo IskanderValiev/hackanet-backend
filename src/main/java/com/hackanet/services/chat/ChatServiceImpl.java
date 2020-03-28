@@ -3,7 +3,7 @@ package com.hackanet.services.chat;
 import com.google.common.collect.Lists;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.ChatCreateForm;
-import com.hackanet.models.Hackathon;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.JobOffer;
 import com.hackanet.models.User;
 import com.hackanet.models.chat.Chat;

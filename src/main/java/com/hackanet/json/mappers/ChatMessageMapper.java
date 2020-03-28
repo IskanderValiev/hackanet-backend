@@ -19,6 +19,9 @@ public class ChatMessageMapper implements Mapper<ChatMessage, ChatMessageDto> {
 
     @Override
     public ChatMessageDto map(ChatMessage from) {
+        if (from == null) {
+            return null;
+        }
         return ChatMessageDto.builder()
                 .id(from.getId())
                 .messageTime(from.getMessageTime().getTime())

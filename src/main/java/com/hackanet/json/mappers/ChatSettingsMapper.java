@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 public class ChatSettingsMapper implements Mapper<ChatSettings, ChatSettingsDto> {
     @Override
     public ChatSettingsDto map(ChatSettings from) {
+        if (from == null) {
+            return null;
+        }
         return ChatSettingsDto.builder()
                 .id(from.getId())
                 .chatId(from.getChat().getId())

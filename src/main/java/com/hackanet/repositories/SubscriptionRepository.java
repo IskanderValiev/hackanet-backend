@@ -1,6 +1,6 @@
 package com.hackanet.repositories;
 
-import com.hackanet.models.Subscription;
+import com.hackanet.models.hackathon.Subscription;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

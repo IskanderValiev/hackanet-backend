@@ -3,6 +3,8 @@ package com.hackanet.services;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.json.forms.HackathonJobDescriptionCreateForm;
 import com.hackanet.models.*;
+import com.hackanet.models.hackathon.Hackathon;
+import com.hackanet.models.hackathon.HackathonJobDescription;
 import com.hackanet.repositories.HackathonJobDescriptionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

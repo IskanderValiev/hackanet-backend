@@ -18,6 +18,9 @@ public class ConnectionInvitationMapper implements Mapper<ConnectionInvitation, 
 
     @Override
     public ConnectionInvitationDto map(ConnectionInvitation from) {
+        if (from == null) {
+            return null;
+        }
         return ConnectionInvitationDto.builder()
                 .id(from.getId())
                 .invitedUser(userSimpleMapper.map(from.getInvitedUser()))

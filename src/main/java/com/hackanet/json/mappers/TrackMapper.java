@@ -14,6 +14,9 @@ public class TrackMapper implements Mapper<Track, TrackDto> {
 
     @Override
     public TrackDto map(Track from) {
+        if (from == null) {
+            return null;
+        }
         return TrackDto.builder()
                 .id(from.getId())
                 .name(from.getName())

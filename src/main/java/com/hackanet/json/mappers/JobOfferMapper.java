@@ -22,6 +22,9 @@ public class JobOfferMapper implements Mapper<JobOffer, JobOfferDto> {
 
     @Override
     public JobOfferDto map(JobOffer from) {
+        if (from == null) {
+            return null;
+        }
         return JobOfferDto.builder()
                 .id(from.getId())
                 .time(DateTimeUtil.localDateTimeToLong(from.getTime()))

@@ -16,6 +16,9 @@ import static com.hackanet.utils.DateTimeUtil.localTimeToLong;
 public class UserNotificationSettingsMapper implements  Mapper<UserNotificationSettings, UserNotificationSettingsDto> {
     @Override
     public UserNotificationSettingsDto map(UserNotificationSettings from) {
+        if (from == null) {
+            return null;
+        }
         return UserNotificationSettingsDto.builder()
                 .id(from.getId())
                 .userId(from.getUser().getId())

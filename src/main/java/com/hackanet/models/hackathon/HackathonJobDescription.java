@@ -1,9 +1,11 @@
-package com.hackanet.models;
+package com.hackanet.models.hackathon;
 
+import com.hackanet.models.AbstractEntity;
+import com.hackanet.models.Portfolio;
+import com.hackanet.models.Team;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.List;
 
 /**
  * @author Iskander Valiev
@@ -18,13 +20,17 @@ import java.util.List;
 @Entity
 @Table(name = "hackathon_job_descriptions")
 public class HackathonJobDescription extends AbstractEntity {
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
     private Team team;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hackathon_id")
     private Hackathon hackathon;
+
     private String description;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "portfolio_id")
     private Portfolio portfolio;

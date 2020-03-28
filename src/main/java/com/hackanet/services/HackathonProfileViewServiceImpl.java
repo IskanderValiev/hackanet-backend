@@ -1,10 +1,9 @@
 package com.hackanet.services;
 
-import com.hackanet.models.Hackathon;
-import com.hackanet.models.HackathonProfileView;
+import com.hackanet.models.hackathon.Hackathon;
+import com.hackanet.models.hackathon.HackathonProfileView;
 import com.hackanet.models.User;
 import com.hackanet.repositories.HackathonProfileViewRepository;
-import com.hackanet.security.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

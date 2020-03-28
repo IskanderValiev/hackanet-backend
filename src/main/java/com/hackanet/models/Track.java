@@ -1,9 +1,9 @@
 package com.hackanet.models;
 
+import com.hackanet.models.hackathon.Hackathon;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 /**
  * @author Iskander Valiev

@@ -2,10 +2,10 @@ package com.hackanet.models;
 
 import com.hackanet.models.enums.JoinType;
 import com.hackanet.models.enums.RequestStatus;
+import com.hackanet.models.hackathon.Hackathon;
 import lombok.*;
 
 import javax.persistence.*;
-import java.sql.Date;
 import java.time.LocalDateTime;
 
 /**
