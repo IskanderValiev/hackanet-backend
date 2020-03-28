@@ -66,7 +66,7 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
                 .tracks(trackMapper.map(from.getTracks()))
                 .approved(Boolean.TRUE.equals(from.getApproved()))
                 .sponsors(sponsorMapper.map(from.getSponsors()))
-                .logo(fileMapper.map(from.getLogo()))
+                .picture(fileMapper.map(from.getLogo()))
                 .build();
         List<Skill> requiredSkills = from.getRequiredSkills();
         if (requiredSkills != null)

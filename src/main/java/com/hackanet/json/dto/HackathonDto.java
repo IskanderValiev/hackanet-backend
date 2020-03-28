@@ -28,7 +28,7 @@ public class HackathonDto {
     private Long start;
     private Long end;
     private OrganizerDto organizer;
-    private FileInfoDto logo;
+    private FileInfoDto picture;
     private String country;
     private String city;
     private List<SkillDto> requiredSkills;
