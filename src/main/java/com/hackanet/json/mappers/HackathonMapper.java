@@ -58,7 +58,7 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
                 .organizer(organizerMapper.map(from.getOwner()))
                 .country(from.getCountry())
                 .currency(from.getCurrency().toString())
-                .prizeFund(from.getPrizeFund())
+                .prizeFund(from.getPrize())
                 .city(from.getCity())
                 .deleted(from.getDeleted())
                 .longitude(from.getLongitude())

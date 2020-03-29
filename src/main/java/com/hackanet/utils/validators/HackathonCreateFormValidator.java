@@ -27,8 +27,8 @@ public class HackathonCreateFormValidator implements FormValidator<HackathonCrea
 
     @Override
     public void validateUpdateForm(HackathonUpdateForm updateForm) {
-        Date start = new Date(updateForm.getStart());
-        Date end = new Date(updateForm.getEnd());
+        Date start = new Date(updateForm.getStartDate());
+        Date end = new Date(updateForm.getEndDate());
         checkArgument(start.after(end), "Start date is after end date");
         checkArgument(start.before(new Date(currentTimeMillis())), "Start date is in the past");
 

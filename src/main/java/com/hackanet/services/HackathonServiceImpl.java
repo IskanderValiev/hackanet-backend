@@ -14,6 +14,7 @@ import com.hackanet.models.chat.Chat;
 import com.hackanet.repositories.HackathonRepository;
 import com.hackanet.services.chat.ChatService;
 import com.hackanet.utils.validators.HackathonCreateFormValidator;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -34,6 +35,7 @@ import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
 import static com.hackanet.utils.DateTimeUtil.epochToLocalDateTime;
 import static com.hackanet.utils.DateTimeUtil.getRegistrationLocalDateTimeFromForm;
 import static java.lang.System.currentTimeMillis;
+import static org.apache.commons.lang.StringUtils.lowerCase;
 
 /**
  * @author Iskander Valiev
@@ -196,13 +198,13 @@ public class HackathonServiceImpl implements HackathonService {
         }
         if (!StringUtils.isBlank(form.getCity())) {
             String city = form.getCity().trim().toLowerCase();
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("city")), "%" + StringUtils.lowerCase(city) + "%"));
+            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("city")), "%" + lowerCase(city) + "%"));
         }
         if (!StringUtils.isBlank(form.getCountry())) {
             String country = form.getCountry().trim().toLowerCase();
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("country")), "%" + StringUtils.lowerCase(country) + "%"));
+            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("country")), "%" + lowerCase(country) + "%"));
         }
-        if (isNotEmpty(form.getSkills())) {
+        if (CollectionUtils.isNotEmpty(form.getSkills())) {
             Join<Hackathon, Skill> join = root.join("requiredSkills", JoinType.INNER);
             join.on(join.get("id").in(form.getSkills()));
             predicates.add(join.getOn());
@@ -254,8 +256,8 @@ public class HackathonServiceImpl implements HackathonService {
     }
 
     private void setHackathonNewValues(HackathonUpdateForm form, Hackathon hackathon) {
-        Date start = new Date(form.getStart());
-        Date end = new Date(form.getEnd());
+        Date start = new Date(form.getStartDate());
+        Date end = new Date(form.getEndDate());
         hackathon.setStartDate(start);
         hackathon.setEndDate(end);
 

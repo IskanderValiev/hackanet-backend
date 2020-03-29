@@ -3,6 +3,7 @@ package com.hackanet.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.hackanet.config.JwtConfig;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.dto.TokenDto;
@@ -10,14 +11,18 @@ import com.hackanet.json.forms.*;
 import com.hackanet.models.*;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.push.enums.ClientType;
+import com.hackanet.repositories.PasswordChangeRequestRepository;
 import com.hackanet.repositories.UserPhoneTokenRepository;
 import com.hackanet.repositories.UserRepository;
 import com.hackanet.repositories.UserTokenRepository;
 import com.hackanet.security.enums.Role;
+import com.hackanet.security.enums.TokenType;
 import com.hackanet.security.utils.PasswordUtil;
 import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.utils.PhoneUtil;
 import com.hackanet.utils.RandomString;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -33,6 +38,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -338,7 +344,7 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
         user.setAbout(form.getAbout());
         user.setAbout(form.getCity());
         user.setCountry(form.getCountry());
-        user.setImage(fileInfoService.get(form.getImage()));
+        user.setPicture(fileInfoService.get(form.getImage()));
         user.setSkills(skillService.getByIds(form.getSkills()));
         user.setLookingForTeam(form.getLookingForTeam());
         user = userRepository.save(user);
@@ -394,6 +400,8 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
     private void throwIfExistsByPhone(String phone) {
         if (existsByPhone(phone))
             throw new BadRequestException("User with such phone already exists");
+    }
+
     @Override
     public void updateLastRequestTime(User user) {
         user.setLastRequestTime(LocalDateTime.now());

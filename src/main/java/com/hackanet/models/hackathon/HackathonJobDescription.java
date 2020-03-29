@@ -2,7 +2,7 @@ package com.hackanet.models.hackathon;
 
 import com.hackanet.models.AbstractEntity;
 import com.hackanet.models.Portfolio;
-import com.hackanet.models.Team;
+import com.hackanet.models.team.Team;
 import lombok.*;
 
 import javax.persistence.*;

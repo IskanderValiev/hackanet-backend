@@ -2,7 +2,7 @@ package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.HackathonJobDescriptionDto;
 import com.hackanet.models.hackathon.HackathonJobDescription;
-import com.hackanet.models.Team;
+import com.hackanet.models.team.Team;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

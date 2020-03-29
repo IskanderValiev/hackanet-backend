@@ -4,7 +4,7 @@ import com.hackanet.models.User;
 import com.hackanet.models.enums.TeamInvitationStatus;
 import com.hackanet.models.team.Team;
 import com.hackanet.models.team.TeamInvitation;
-import com.hackanet.services.CrudService;
+import com.hackanet.services.RetrieveService;
 
 import java.util.List;
 import java.util.Set;

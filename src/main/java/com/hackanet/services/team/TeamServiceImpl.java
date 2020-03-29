@@ -117,7 +117,6 @@ public class TeamServiceImpl implements TeamService {
 
         String name = form.getName();
         if (!StringUtils.isBlank(name)) {
-            checkBadWords(name.trim(), "name");
             team.setName(name.trim());
         }
 
