@@ -28,4 +28,5 @@ public interface UserService extends RetrieveService<User> {
     User createForCompany(CompanyCreateForm form);
     TokenDto getTokenDtoFromString(String string);
     User get(User jwtData);
+    void updateLastRequestTime(User user);
 }

@@ -10,6 +10,7 @@ import com.hackanet.models.UserToken;
 import com.hackanet.repositories.UserRepository;
 import com.hackanet.repositories.UserTokenRepository;
 import com.hackanet.security.enums.TokenType;
+import com.hackanet.utils.DateTimeUtil;
 import com.hackanet.utils.RandomString;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -63,8 +64,8 @@ public class UserTokenServiceImpl implements UserTokenService {
                 .userId(user.getId())
                 .refreshToken(userToken.getRefreshToken())
                 .accessToken(getTokenValue(user, TokenType.ACCESS))
-                .refreshTokenExpiresAt(userToken.getRefreshTokenExpiresAt())
-                .accessTokenExpiresAt(userToken.getAccessTokenExpiresAt())
+                .refreshTokenExpiresAt(DateTimeUtil.localDateTimeToLong(userToken.getRefreshTokenExpiresAt()))
+                .accessTokenExpiresAt(DateTimeUtil.localDateTimeToLong(userToken.getAccessTokenExpiresAt()))
                 .role(user.getRole().toString())
                 .build();
     }

@@ -237,7 +237,6 @@ public class HackathonServiceImpl implements HackathonService {
 
         return Hackathon.builder()
                 .name(form.getName().trim())
-                .nameLc(form.getName().trim().toLowerCase())
                 .startDate(startDate)
                 .endDate(endDate)
                 .owner(user)
@@ -245,7 +244,7 @@ public class HackathonServiceImpl implements HackathonService {
                 .country(StringUtils.capitalize(form.getCountry()))
                 .city(StringUtils.capitalize(form.getCity()))
                 .currency(form.getCurrency())
-                .prize(form.getPrizeFund())
+                .prizeFund(form.getPrizeFund())
                 .requiredSkills(skillService.getByIds(requiredSkills))
                 .deleted(false)
                 .longitude(form.getLongitude())
@@ -257,8 +256,8 @@ public class HackathonServiceImpl implements HackathonService {
     }
 
     private void setHackathonNewValues(HackathonUpdateForm form, Hackathon hackathon) {
-        Date start = new Date(form.getStart());
-        Date end = new Date(form.getEnd());
+        Date start = new Date(form.getStartDate());
+        Date end = new Date(form.getEndDate());
         hackathon.setStartDate(start);
         hackathon.setEndDate(end);
 
@@ -269,7 +268,6 @@ public class HackathonServiceImpl implements HackathonService {
 
         String name = form.getName();
         hackathon.setName(name.trim());
-        hackathon.setNameLc(form.getName().trim().toLowerCase());
         hackathon.setDescription(form.getDescription().trim());
 
         String country = StringUtils.capitalize(form.getCountry());

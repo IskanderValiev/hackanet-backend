@@ -1,20 +1,21 @@
 package com.hackanet.services;
 
-import com.hackanet.annotations.NotFormatted;
 import com.hackanet.application.AppConstants;
-import com.hackanet.exceptions.BadFormTypeException;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.dto.CompanyOwnerTokenDto;
 import com.hackanet.json.dto.TokenDto;
-import com.hackanet.json.forms.*;
+import com.hackanet.json.forms.CompanyCreateForm;
+import com.hackanet.json.forms.CompanySearchForm;
+import com.hackanet.json.forms.CompanyUpdateForm;
+import com.hackanet.json.forms.UserLoginForm;
 import com.hackanet.models.Company;
-import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.Skill;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.CompanyType;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.repositories.CompanyRepository;
-import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,12 +24,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import javax.validation.constraints.NotNull;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.hackanet.security.utils.SecurityUtils.checkCompanyAccess;
-import static com.hackanet.utils.StringUtils.formatTitle;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.lowerCase;
@@ -39,18 +38,23 @@ import static org.apache.commons.lang.StringUtils.lowerCase;
  * on 11/7/19
  */
 @Service
-public class CompanyServiceImpl extends AbstractManageableService<Company> implements CompanyService {
+public class CompanyServiceImpl implements CompanyService {
 
     @Autowired
     private CompanyRepository companyRepository;
+
     @Autowired
     private UserService userService;
+
     @Autowired
     private SkillService skillService;
+
     @Autowired
     private FileInfoService fileInfoService;
+
     @Autowired
     private EntityManager entityManager;
+
     @Autowired
     private UserTokenService userTokenService;
 
@@ -75,24 +79,21 @@ public class CompanyServiceImpl extends AbstractManageableService<Company> imple
     }
 
     @Override
-    public Company update(Long id, User user, UpdateForm form) {
-        validateUpdateForm(form);
+    public Company update(Long id, User user, CompanyUpdateForm form) {
         Company company = get(id);
         checkCompanyAccess(company, user);
 
-        CompanyUpdateForm updateForm = (CompanyUpdateForm) form;
-//        String name = updateForm.getName();
-//        company.setName(name.trim());
-//        String city = updateForm.getCity();
-//        city = city.trim();
-//        company.setCity(capitalize(city));
-//        String country = updateForm.getCountry();
-//        company.setCountry(capitalize(country.trim()));
-//        CompanyType companyType = updateForm.getType();
-//        company.setType(companyType);
-        fillUpData(updateForm, company);
+        String name = form.getName();
+        company.setName(name.trim());
+        String city = form.getCity();
+        city = city.trim();
+        company.setCity(StringUtils.capitalize(city));
+        String country = form.getCountry();
+        company.setCountry(StringUtils.capitalize(country.trim()));
+        CompanyType companyType = form.getType();
+        company.setType(companyType);
 
-        List<Long> technologies = updateForm.getTechnologies();
+        List<Long> technologies = form.getTechnologies();
         if (isNotEmpty(technologies)) {
             company.setTechnologies(skillService.getByIds(technologies));
         }
@@ -167,18 +168,6 @@ public class CompanyServiceImpl extends AbstractManageableService<Company> imple
         query.distinct(true);
         query.where(criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()])));
         return query;
-    }
-
-    @Override
-    public void validateCreateForm(CreateForm form) {
-        if (!(form instanceof CompanyCreateForm))
-            throw new BadFormTypeException("The form is not company create form");
-    }
-
-    @Override
-    public void validateUpdateForm(UpdateForm form) {
-        if (!(form instanceof CompanyUpdateForm))
-            throw new BadFormTypeException("The form is not company update form");
     }
 
     private TokenDto getTokenForAdmin(String password, User user) {
