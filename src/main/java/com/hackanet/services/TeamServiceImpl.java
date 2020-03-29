@@ -42,24 +42,34 @@ public class TeamServiceImpl implements TeamService {
 
     @Autowired
     private TeamRepository teamRepository;
+
     @Autowired
     private UserService userService;
+
     @Autowired
     private HackathonService hackathonService;
+
     @Autowired
     private ChatService chatService;
+
     @Autowired
     private SkillService skillService;
+
     @Autowired
     private EntityManager entityManager;
+
     @Autowired
     private JobRunner jobRunner;
+
     @Autowired
     private UserNotificationSettingsService userNotificationSettingsService;
+
     @Autowired
     private JoinToHackathonRequestService joinToHackathonRequestService;
+
     @Autowired
     private SkillCombinationService skillCombinationService;
+
     @Autowired
     private TeamInvitationService teamInvitationService;
 
