@@ -31,9 +31,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hackanet.utils.StringUtils.badWordFilter;
-import static com.hackanet.utils.StringUtils.checkBadWords;
-
 /**
  * @author Iskander Valiev
  * created by isko
