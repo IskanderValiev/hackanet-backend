@@ -9,7 +9,7 @@ import com.hackanet.json.dto.CompanyOwnerTokenDto;
 import com.hackanet.json.dto.TokenDto;
 import com.hackanet.json.forms.*;
 import com.hackanet.models.Company;
-import com.hackanet.models.Hackathon;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.Skill;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.CompanyType;

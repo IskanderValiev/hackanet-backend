@@ -25,13 +25,18 @@ public class ChatMessageSaveForm {
     @NotNull
     @ApiModelProperty(required = true)
     private Long senderId;
+
     @NotNull
     @ApiModelProperty(required = true)
     private Long chatId;
+
     @NotNull
     @NotEmpty
     @Length(max = 1000)
     @ApiModelProperty(required = true)
     private String text;
+
     private List<Long> attachments;
+
+    private String replyTo;
 }

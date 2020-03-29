@@ -1,6 +1,6 @@
 package com.hackanet.repositories;
 
-import com.hackanet.models.HackathonProfileView;
+import com.hackanet.models.hackathon.HackathonProfileView;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

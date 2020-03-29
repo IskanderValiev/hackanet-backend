@@ -66,7 +66,7 @@ public class CommentLikeController {
         return new ResponseEntity<>(mapper.map(commentLike), HttpStatus.CREATED);
     }
 
-    @PutMapping(ONE)
+    @GetMapping(ONE)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
                     required = false, dataType = "string", paramType = "header")

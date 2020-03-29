@@ -23,7 +23,8 @@ import java.util.List;
 @Getter
 @Setter
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class PostUpdateForm extends UpdateForm {
+public class PostUpdateForm {
+
     @NotNull(message = HttpResponse.INVALID_PARAM)
     @NotEmpty(message = HttpResponse.INVALID_PARAM)
     @ApiModelProperty(required = true)
@@ -35,8 +36,12 @@ public class PostUpdateForm extends UpdateForm {
     @Length(max = 1024)
     private String content;
 
-    private Long hackathon;
     private List<Long> images;
+
+    @NotNull
     private Boolean important;
+
+    @NotNull
+    private Long pictureId;
 }
 

@@ -3,7 +3,7 @@ package com.hackanet.services;
 import com.google.common.collect.Multimap;
 import com.hackanet.json.dto.TokenDto;
 import com.hackanet.json.forms.*;
-import com.hackanet.models.Hackathon;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.User;
 import com.hackanet.models.UserPhoneToken;
 import com.hackanet.push.enums.ClientType;
@@ -13,7 +13,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import java.util.List;
 import java.util.Set;
 
-public interface UserService extends CrudService<User> {
+public interface UserService extends RetrieveService<User> {
     TokenDto register(UserRegistrationForm form);
     TokenDto login(UserLoginForm form);
     Boolean exists(String email);

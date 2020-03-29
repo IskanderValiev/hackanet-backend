@@ -5,6 +5,7 @@ import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.models.Post;
 import com.hackanet.models.PostLike;
 import com.hackanet.models.User;
+import com.hackanet.models.enums.LikeType;
 import com.hackanet.repositories.PostLikeRepository;
 import com.hackanet.security.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ public class PostLikeServiceImpl implements PostLikeService {
 
     @Autowired
     private PostLikeRepository postLikeRepository;
+
     @Autowired
     private PostService postService;
 
@@ -28,7 +30,7 @@ public class PostLikeServiceImpl implements PostLikeService {
     }
 
     @Override
-    public PostLike like(Long postId, User user) {
+    public PostLike like(Long postId, User user, LikeType type) {
         Boolean exists = postLikeRepository.existsByPostIdAndUserId(postId, user.getId());
         if (!exists) {
             Post post = postService.get(postId);
@@ -36,16 +38,16 @@ public class PostLikeServiceImpl implements PostLikeService {
             PostLike postLike = PostLike.builder()
                     .post(post)
                     .user(user)
+                    .likeType(type)
                     .build();
 
-            postLike = postLikeRepository.save(postLike);
-            return postLike;
+            return postLikeRepository.save(postLike);
         } else throw new BadRequestException("You have already liked this post");
     }
 
     @Override
-    public Long getCountOfPostLikes(Long postId) {
-        return postLikeRepository.countAllByPostId(postId);
+    public Long getCountOfPostLikes(Long postId, LikeType type) {
+        return postLikeRepository.countAllByPostIdAndLikeType(postId, type);
     }
 
     @Override

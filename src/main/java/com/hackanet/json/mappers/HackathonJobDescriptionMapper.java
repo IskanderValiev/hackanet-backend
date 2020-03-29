@@ -1,8 +1,8 @@
 package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.HackathonJobDescriptionDto;
-import com.hackanet.models.HackathonJobDescription;
-import com.hackanet.models.team.Team;
+import com.hackanet.models.hackathon.HackathonJobDescription;
+import com.hackanet.models.Team;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +16,9 @@ public class HackathonJobDescriptionMapper implements Mapper<HackathonJobDescrip
 
     @Override
     public HackathonJobDescriptionDto map(HackathonJobDescription from) {
+        if (from == null) {
+            return null;
+        }
         Team team = from.getTeam();
         HackathonJobDescriptionDto dto = HackathonJobDescriptionDto.builder()
                 .id(from.getId())

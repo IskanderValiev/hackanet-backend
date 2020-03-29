@@ -4,7 +4,7 @@ import com.hackanet.application.AppConstants;
 import com.hackanet.exceptions.BadFormTypeException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.*;
-import com.hackanet.models.Hackathon;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.Post;
 import com.hackanet.models.PostLike;
 import com.hackanet.models.User;
@@ -29,54 +29,56 @@ import java.util.List;
  * on 10/22/19
  */
 @Service
-public class PostServiceImpl extends AbstractManageableService<Post> implements PostService {
+public class PostServiceImpl implements PostService {
 
     @Autowired
     private PostRepository postRepository;
+
     @Autowired
     private HackathonService hackathonService;
+
     @Autowired
     private FileInfoService fileInfoService;
+
     @Autowired
     private UserService userService;
+
     @Autowired
     private EntityManager entityManager;
+
     @Autowired
     private JobRunner jobRunner;
 
     @Override
     public Post add(PostCreateForm form, User user) {
-        Post post = buildFromForm(form, user);
+        Post post = Post.builder()
+                .title(form.getTitle())
+                .content(form.getContent())
+                .owner(user)
+                .date(LocalDateTime.now())
+                .build();
         if (form.getHackathon() != null) {
             Hackathon hackathon = hackathonService.get(form.getHackathon());
             SecurityUtils.checkHackathonAccess(hackathon, user);
             post.setHackathon(hackathon);
         }
-        if (form.getImages() != null && !form.getImages().isEmpty()) {
+        if (form.getImages() != null && !form.getImages().isEmpty())
             post.setImages(fileInfoService.getByIdsIn(form.getImages()));
-        }
-        if (Boolean.TRUE.equals(form.getSendImportanceRequest())) {
+        if (Boolean.TRUE.equals(form.getSendImportanceRequest()))
             post.setImportance(PostImportance.WAITING);
-        } else {
-            post.setImportance(PostImportance.NOT_IMPORTANT);
-        }
+        else post.setImportance(PostImportance.NOT_IMPORTANT);
         post = postRepository.save(post);
         jobRunner.addNewPostNotification(null, post);
         return post;
     }
 
     @Override
-    public Post update(Long id, User user, UpdateForm updateForm) {
-        validateUpdateForm(updateForm);
-        PostUpdateForm form = (PostUpdateForm) updateForm;
-
+    public Post update(Long id, User user, PostUpdateForm form) {
         Post post = get(id);
         SecurityUtils.checkPostAccess(post, user);
         post.setTitle(form.getTitle());
         post.setContent(form.getContent());
-        if (form.getHackathon() != null) {
-            post.setHackathon(hackathonService.get(form.getHackathon()));
-        }
+        post.setPicture(fileInfoService.get(form.getPictureId()));
         if (form.getImages() != null && !form.getImages().isEmpty()) {
             post.setImages(fileInfoService.getByIdsIn(form.getImages()));
         }
@@ -177,27 +179,4 @@ public class PostServiceImpl extends AbstractManageableService<Post> implements 
         return query;
     }
 
-    private Post buildFromForm(PostCreateForm form, User user) {
-        Post post = Post.builder()
-                .title(form.getTitle())
-                .content(form.getContent())
-                .owner(user)
-                .date(LocalDateTime.now())
-                .build();
-        return post;
-    }
-
-    @Override
-    public void validateCreateForm(CreateForm form) {
-        if (!(form instanceof PostCreateForm)) {
-            throw new BadFormTypeException(form.getClass().getName() + " is not a post create form");
-        }
-    }
-
-    @Override
-    public void validateUpdateForm(UpdateForm form) {
-        if (!(form instanceof PostUpdateForm)) {
-            throw new BadFormTypeException(form.getClass().getName() + " is not a post update form");
-        }
-    }
 }

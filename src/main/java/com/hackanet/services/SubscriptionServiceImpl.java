@@ -1,8 +1,7 @@
 package com.hackanet.services;
 
-import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
-import com.hackanet.models.Subscription;
+import com.hackanet.models.hackathon.Subscription;
 import com.hackanet.models.User;
 import com.hackanet.repositories.SubscriptionRepository;
 import org.springframework.beans.factory.annotation.Autowired;

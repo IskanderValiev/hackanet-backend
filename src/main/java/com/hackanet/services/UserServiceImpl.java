@@ -8,6 +8,7 @@ import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.dto.TokenDto;
 import com.hackanet.json.forms.*;
 import com.hackanet.models.*;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.push.enums.ClientType;
 import com.hackanet.repositories.UserPhoneTokenRepository;
 import com.hackanet.repositories.UserRepository;
@@ -55,26 +56,43 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
 
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private PasswordUtil passwordUtil;
+
+    @Autowired
+    private JwtConfig jwtConfig;
+
     @Autowired
     private EntityManager entityManager;
+
     @Autowired
     private SkillService skillService;
+
     @Autowired
     private FileInfoService fileInfoService;
+
     @Autowired
     private UserPhoneTokenRepository userPhoneTokenRepository;
+
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private PasswordChangeRequestRepository passwordChangeRequestRepository;
+
     @Autowired
     private PortfolioService portfolioService;
+
     @Autowired
     private UserNotificationSettingsService userNotificationSettingsService;
+
     @Autowired
     private UserTokenRepository userTokenRepository;
+
     @Autowired
     private ObjectMapper objectMapper;
+
     @Autowired
     private UserTokenService userTokenService;
 
@@ -200,7 +218,7 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
                 .email(email.toLowerCase())
                 .name((String) userDetails.get("given_name"))
                 .lastname((String) userDetails.get("family_name"))
-                .image(fileInfo)
+                .picture(fileInfo)
                 .role(Role.USER)
                 .lookingForTeam(Boolean.FALSE)
                 .refreshTokenParam(new RandomString().nextString())
@@ -376,6 +394,20 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
     private void throwIfExistsByPhone(String phone) {
         if (existsByPhone(phone))
             throw new BadRequestException("User with such phone already exists");
+    @Override
+    public void updateLastRequestTime(User user) {
+        user.setLastRequestTime(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
+    private String getTokenValue(User user, TokenType type) {
+        return Jwts.builder()
+                .claim("role", user.getRole().toString())
+                .claim("email", user.getEmail())
+                .claim("tokenParam", TokenType.REFRESH.equals(type) ? user.getRefreshTokenParam() : user.getAccessTokenParam())
+                .claim("token-type", type.toString())
+                .setSubject(user.getId().toString())
+                .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecret()).compact();
     }
 
     private CriteriaQuery<User> getUsersListQuery(CriteriaBuilder criteriaBuilder, UserSearchForm form) {

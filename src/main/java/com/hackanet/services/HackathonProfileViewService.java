@@ -1,7 +1,7 @@
 package com.hackanet.services;
 
-import com.hackanet.models.Hackathon;
-import com.hackanet.models.HackathonProfileView;
+import com.hackanet.models.hackathon.Hackathon;
+import com.hackanet.models.hackathon.HackathonProfileView;
 import com.hackanet.models.User;
 
 import java.sql.Date;

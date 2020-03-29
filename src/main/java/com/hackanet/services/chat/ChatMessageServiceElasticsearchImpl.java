@@ -12,7 +12,6 @@ import com.hackanet.models.enums.LocalMessageText;
 import com.hackanet.repositories.chat.MessageRepository;
 import com.hackanet.services.FileInfoService;
 import com.hackanet.services.UserService;
-import com.hackanet.services.push.RabbitMQPushNotificationService;
 import com.hackanet.services.scheduler.JobRunner;
 import com.hackanet.utils.SwearWordsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,6 @@ import org.springframework.data.elasticsearch.core.query.SimpleField;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -69,15 +67,17 @@ public class ChatMessageServiceElasticsearchImpl {
         }
         chatService.get(form.getChatId());
         userService.get(form.getSenderId());
-        String text = form.getText();
-        text = SwearWordsFilter.filterText(text.trim());
+        if (form.getReplyTo() != null) {
+            getById(form.getReplyTo());
+        }
         Message chatMessage = Message.builder()
                 .id(generateRandomString())
                 .chatId(form.getChatId())
                 .timestamp(LocalDateTime.now())
-                .text(text.trim())
+                .text(form.getText().trim())
                 .attachments(attachments)
                 .senderId(form.getSenderId())
+                .replyTo(form.getReplyTo())
                 .build();
         chatMessage = messageRepository.save(chatMessage);
         jobRunner.addNewMessageNotification(null, chatMessage);
@@ -136,5 +136,9 @@ public class ChatMessageServiceElasticsearchImpl {
 
     public Message getById(String id) {
         return messageRepository.findById(id).orElseThrow(() -> new NotFoundException("Message with id = " + id + " not found"));
+    }
+
+    public List<Message> getReplies(String id) {
+        return messageRepository.findAllByReplyTo(id);
     }
 }

@@ -2,12 +2,12 @@ package com.hackanet.services;
 
 import com.hackanet.application.AppConstants;
 import com.hackanet.components.Profiling;
-import com.hackanet.exceptions.BadFormTypeException;
-import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
-import com.hackanet.json.forms.*;
+import com.hackanet.json.forms.HackathonCreateForm;
+import com.hackanet.json.forms.HackathonSearchForm;
+import com.hackanet.json.forms.HackathonUpdateForm;
 import com.hackanet.models.FileInfo;
-import com.hackanet.models.Hackathon;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.Skill;
 import com.hackanet.models.User;
 import com.hackanet.models.chat.Chat;
@@ -34,9 +34,6 @@ import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
 import static com.hackanet.utils.DateTimeUtil.epochToLocalDateTime;
 import static com.hackanet.utils.DateTimeUtil.getRegistrationLocalDateTimeFromForm;
 import static java.lang.System.currentTimeMillis;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static org.apache.commons.lang.StringUtils.capitalize;
-import static org.apache.commons.lang.StringUtils.lowerCase;
 
 /**
  * @author Iskander Valiev
@@ -45,7 +42,7 @@ import static org.apache.commons.lang.StringUtils.lowerCase;
  */
 @Profiling(enabled = true)
 @Service
-public class HackathonServiceImpl extends AbstractManageableService<Hackathon> implements HackathonService {
+public class HackathonServiceImpl implements HackathonService {
 
     @Autowired
     private HackathonRepository hackathonRepository;
@@ -69,7 +66,7 @@ public class HackathonServiceImpl extends AbstractManageableService<Hackathon> i
     @Override
     @Transactional
     public List<Hackathon> getAll() {
-        return hackathonRepository.findAll();
+        return hackathonRepository.findAllByDeletedIsFalseAndApprovedIsTrue();
     }
 
     @CachePut("hackathons")
@@ -82,7 +79,6 @@ public class HackathonServiceImpl extends AbstractManageableService<Hackathon> i
             FileInfo logo = fileInfoService.get(form.getLogoId());
             hackathon.setLogo(logo);
         }
-        Hackathon hackathon = buildFromForm(user, form);
         hackathon = hackathonRepository.save(hackathon);
         chatService.createForHackathon(hackathon);
         return hackathon;
@@ -106,39 +102,13 @@ public class HackathonServiceImpl extends AbstractManageableService<Hackathon> i
      */
     @CacheEvict(value = "hackathons", allEntries = true)
     @Override
-    public Hackathon update(Long id, User user, UpdateForm form) {
-        validateUpdateForm(form);
-        final Hackathon hackathon = get(id);
-        checkHackathonAccess(hackathon, user);
+    public Hackathon update(Long id, User user, HackathonUpdateForm form) {
         createFormValidator.validateUpdateForm(form);
+        Hackathon hackathon = get(id);
+        checkHackathonAccess(hackathon, user);
         setHackathonNewValues(form, hackathon);
         hackathon = hackathonRepository.save(hackathon);
         return hackathon;
-
-        HackathonUpdateForm updateForm = (HackathonUpdateForm) form;
-        fillUpData(updateForm, hackathon);
-        Date start = new Date(updateForm.getStartDate());
-        Date end = new Date(updateForm.getEndDate());
-        validateHackathonDates(start, end);
-        hackathon.setStartDate(start);
-        hackathon.setEndDate(end);
-
-        Optional.of(updateForm.getLogo()).ifPresent(logo -> {
-            FileInfo file = fileInfoService.get(updateForm.getLogo());
-            hackathon.setLogo(file);
-        });
-
-        Long regStartDate = updateForm.getRegistrationStartDate();
-        Long regEndDate = updateForm.getRegistrationEndDate();
-        validateRegistrationDates(regStartDate, regEndDate, start, end);
-        hackathon.setRegistrationEndDate(epochToLocalDateTime(regEndDate));
-        hackathon.setRegistrationStartDate(epochToLocalDateTime(regStartDate));
-
-        List<Long> requiredSkills = updateForm.getRequiredSkills();
-        if (isNotEmpty(requiredSkills)) {
-            hackathon.setRequiredSkills(skillService.getByIds(requiredSkills));
-        }
-        return hackathonRepository.save(hackathon);
     }
 
     @Override
@@ -179,7 +149,10 @@ public class HackathonServiceImpl extends AbstractManageableService<Hackathon> i
 
     @Override
     public List<Hackathon> getFriendsHackathons(User user) {
-        String query = "select h.* from hackathons h inner join hackathon_participants_table hpt on h.id = hpt.hackathon_id where hpt.user_id in (select c.connection_id from connections c where c.user_id = :userId) and h.id not in (select hpts.hackathon_id from hackathon_participants_table hpts where hpts.user_id = :userId);";
+        String query = "select h.* from hackathons h " +
+                "inner join hackathon_participants_table hpt on h.id = hpt.hackathon_id " +
+                "where hpt.user_id in " +
+                "(select c.connection_id from connections c where c.user_id = :userId) and h.id not in (select hpts.hackathon_id from hackathon_participants_table hpts where hpts.user_id = :userId);";
         Query nativeQuery = entityManager
                 .createNativeQuery(query, Hackathon.class)
                 .setParameter("userId", user.getId());
@@ -196,12 +169,26 @@ public class HackathonServiceImpl extends AbstractManageableService<Hackathon> i
         save(hackathon);
     }
 
+    @Override
+    public Hackathon getByAdmin(Long userId) {
+        return Optional.of(hackathonRepository.findByOwnerId(userId))
+                .orElseThrow(() -> new NotFoundException("Hackathon with admin id = " + userId + " not found"));
+    }
+
+    @Override
+    public Hackathon approve(Long id) {
+        Hackathon hackathon = get(id);
+        hackathon.setApproved(true);
+        return hackathonRepository.save(hackathon);
+    }
+
     private CriteriaQuery<Hackathon> getHackathonsListQuery(CriteriaBuilder criteriaBuilder, HackathonSearchForm form) {
         CriteriaQuery<Hackathon> query = criteriaBuilder.createQuery(Hackathon.class);
         Root<Hackathon> root = query.from(Hackathon.class);
         query.select(root);
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(criteriaBuilder.isFalse(root.get("deleted")));
+        predicates.add(criteriaBuilder.isTrue(root.get("approved")));
         String name = form.getName();
         if (!StringUtils.isBlank(name)) {
             Expression<String> nameInLc = criteriaBuilder.lower(root.get("name"));
@@ -262,6 +249,7 @@ public class HackathonServiceImpl extends AbstractManageableService<Hackathon> i
                 .latitude(form.getLatitude())
                 .registrationStartDate(registrationStart)
                 .registrationEndDate(registrationEnd)
+                .approved(false)
                 .build();
     }
 
@@ -299,53 +287,4 @@ public class HackathonServiceImpl extends AbstractManageableService<Hackathon> i
         }
     }
 
-    private Hackathon buildFromForm(User user, HackathonCreateForm form) {
-        Date start = new Date(form.getStart());
-        Date end = new Date(form.getEnd());
-        if (start.after(end))
-            throw new BadRequestException("Start date is after end date");
-
-        List<Long> requiredSkills = form.getRequiredSkills();
-        if (requiredSkills == null)
-            requiredSkills = Collections.emptyList();
-
-        LocalDateTime registrationStartDate = getRegistrationDate(form.getRegistrationStartDate(), true, end);
-        LocalDateTime registrationEndDate = getRegistrationDate(form.getRegistrationEndDate(), false, end);
-
-        final Hackathon hackathon = Hackathon.builder()
-                .name(form.getName().trim())
-                .startDate(start)
-                .endDate(end)
-                .owner(user)
-                .description(form.getDescription().trim())
-                .country(capitalize(form.getCountry()))
-                .city(capitalize(form.getCity()))
-                .currency(form.getCurrency())
-                .prizeFund(form.getPrizeFund())
-                .requiredSkills(skillService.getByIds(requiredSkills))
-                .deleted(false)
-                .longitude(form.getLongitude())
-                .latitude(form.getLatitude())
-                .registrationStartDate(registrationStartDate)
-                .registrationEndDate(registrationEndDate)
-                .build();
-
-        if (form.getLogoId() != null) {
-            FileInfo logo = fileInfoService.get(form.getLogoId());
-            hackathon.setLogo(logo);
-        }
-        return hackathon;
-    }
-
-    @Override
-    public void validateCreateForm(CreateForm form) {
-        if (!(form instanceof HackathonCreateForm))
-            throw new BadFormTypeException(form.getClass().getTypeName() + " is not a hackathon create form.");
-    }
-
-    @Override
-    public void validateUpdateForm(UpdateForm form) {
-        if (!(form instanceof HackathonUpdateForm))
-            throw new BadFormTypeException(form.getClass().getTypeName() + " is not a hackathon update form.");
-    }
 }

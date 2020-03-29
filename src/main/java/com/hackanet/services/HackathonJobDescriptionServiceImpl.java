@@ -4,6 +4,8 @@ import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.json.forms.HackathonJobDescriptionCreateForm;
 import com.hackanet.models.*;
 import com.hackanet.models.team.Team;
+import com.hackanet.models.hackathon.Hackathon;
+import com.hackanet.models.hackathon.HackathonJobDescription;
 import com.hackanet.repositories.HackathonJobDescriptionRepository;
 import com.hackanet.services.team.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;

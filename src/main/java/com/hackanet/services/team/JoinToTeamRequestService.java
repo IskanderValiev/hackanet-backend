@@ -8,7 +8,7 @@ import com.hackanet.services.CrudService;
 
 import java.util.List;
 
-public interface JoinToTeamRequestService extends CrudService<JoinToTeamRequest> {
+public interface JoinToTeamRequestService extends RetrieveService<JoinToTeamRequest> {
     JoinToTeamRequest create(User user, JoinToTeamRequestCreateForm form);
     void delete(User user, Long id);
     JoinToTeamRequest updateStatus(User user, Long id, JoinToTeamRequestStatus status);

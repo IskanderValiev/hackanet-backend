@@ -9,6 +9,7 @@ import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.TeamType;
 import com.hackanet.models.team.Team;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.repositories.TeamRepository;
 import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.*;
@@ -116,7 +117,7 @@ public class TeamServiceImpl implements TeamService {
 
         String name = form.getName();
         if (!StringUtils.isBlank(name)) {
-            badWordFilter(name.trim(), "name");
+            checkBadWords(name.trim(), "name");
             team.setName(name.trim());
         }
 
@@ -307,8 +308,6 @@ public class TeamServiceImpl implements TeamService {
 
     private Team build(TeamCreateForm form, User user) {
         String name = form.getName().trim();
-        badWordFilter(name, "name");
-
         Chat chat = chatService.createForTeam(user);
         List<Long> skillsLookingForIds = form.getSkillsLookingFor();
         List<Skill> skillsLookingFor = new ArrayList<>();

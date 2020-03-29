@@ -26,7 +26,7 @@ public class TeamParticipantMapper {
     private FileInfoMapper fileInfoMapper;
 
     public TeamParticipantDto map(User from, Team team) {
-        FileInfo image = from.getImage();
+        FileInfo image = from.getPicture();
         List<Skill> skills = from.getSkills();
         TeamParticipantDto build = TeamParticipantDto.builder()
                 .id(from.getId())

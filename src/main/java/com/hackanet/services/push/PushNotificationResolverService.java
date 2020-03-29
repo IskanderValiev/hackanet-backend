@@ -1,6 +1,7 @@
 package com.hackanet.services.push;
 
 import com.google.common.collect.Lists;
+import com.hackanet.json.dto.UserDto;
 import com.hackanet.push.ResolvedPush;
 import org.springframework.stereotype.Service;
 

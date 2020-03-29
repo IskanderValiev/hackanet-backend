@@ -31,4 +31,5 @@ public class Message {
     private LocalDateTime timestamp;
     private String text;
     private List<Long> attachments;
+    private String replyTo;
 }
