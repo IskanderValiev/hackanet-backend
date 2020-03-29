@@ -2,7 +2,7 @@ package com.hackanet.models.chat;
 
 import com.google.common.collect.Sets;
 import com.hackanet.models.AbstractEntity;
-import com.hackanet.models.Hackathon;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.Team;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.ChatType;

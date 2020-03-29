@@ -20,6 +20,6 @@ public class TeamInvitationDto {
     private Long id;
     private UserSimpleDto userSimpleDto;
     private TeamSimpleDto teamSimpleDto;
-    private LocalDateTime localDateTime;
+    private Long localDateTime;
     private TeamInvitationStatus status;
 }

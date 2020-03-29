@@ -20,11 +20,14 @@ public class JobExperienceMapper implements Mapper<JobExperience, JobExperienceD
 
     @Override
     public JobExperienceDto map(JobExperience from) {
+        if (from == null) {
+            return null;
+        }
         JobExperienceDto dto = JobExperienceDto.builder()
                 .id(from.getId())
                 .company(companyMapper.map(from.getCompany()))
-                .from(from.getStartDate())
-                .to(from.getEndDate())
+                .from(from.getStartDate().getTime())
+                .to(from.getEndDate().getTime())
                 .description(from.getDescription())
                 .technologies(skillMapper.map(from.getTechnologiesUsed()))
                 .build();

@@ -15,6 +15,5 @@ import lombok.Data;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class FileInfoDto {
     private Long id;
-    private String name;
     private String previewLink;
 }

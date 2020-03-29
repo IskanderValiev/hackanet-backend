@@ -20,8 +20,9 @@ public class UserReviewMapper implements Mapper<UserReview, UserReviewDto> {
 
     @Override
     public UserReviewDto map(UserReview from) {
-        if (from == null)
+        if (from == null) {
             return null;
+        }
         UserReviewDto dto = UserReviewDto.builder()
                 .id(from.getId())
                 .teamDto(teamMapper.map(from.getTeam()))

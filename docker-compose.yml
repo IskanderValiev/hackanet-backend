@@ -1,14 +1,20 @@
 version: '3.1'
 
 services:
-  db:
-    image: postgres
-    restart: always
+  postgres:
+    image: postgres:9.4
+    container_name: postgres
     environment:
-      POSTGRES_PASSWORD: bQmdPlf2SrC3POH
+      - POSTGRES_PASSWORD=IskoJava18
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=hackanet_db
+    ports:
+      - "5434:5432"
 
   hackanet-backend:
-    image: hackanet
-    restart: always
+    image: hackanet-backend:latest
+    container_name: hackanet-backend
     ports:
-      - 8080:8080
+      - "8080:8080"
+    depends_on:
+      - postgres

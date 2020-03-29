@@ -1,0 +1,29 @@
+package com.hackanet.models.hackathon;
+
+import com.hackanet.models.AbstractEntity;
+import com.hackanet.models.User;
+import lombok.*;
+
+import javax.persistence.*;
+
+/**
+ * @author Iskander Valiev
+ * created by isko
+ * on 12/6/19
+ */
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Entity
+@Table(name = "subscriptions")
+public class Subscription extends AbstractEntity {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hackathon_id")
+    private Hackathon hackathon;
+}

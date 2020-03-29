@@ -1,15 +1,13 @@
 package com.hackanet.json.mappers;
 
-import com.hackanet.json.dto.HackathonDto;
 import com.hackanet.json.dto.JoinToHackathonRequestDto;
-import com.hackanet.json.dto.UserSimpleDto;
-import com.hackanet.models.Hackathon;
 import com.hackanet.models.JoinToHackathonRequest;
 import com.hackanet.models.Team;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.JoinType;
 import com.hackanet.services.TeamService;
 import com.hackanet.services.UserService;
+import com.hackanet.utils.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -45,8 +43,7 @@ public class JoinToHackathonRequestMapper implements Mapper<JoinToHackathonReque
                 .id(from.getId())
                 .hackathon(mapper.map(from.getHackathon()))
                 .joinType(from.getJoinType())
-                .message(from.getMessage())
-                .date(from.getDate())
+                .date(DateTimeUtil.localDateTimeToLong(from.getDate()))
                 .status(from.getStatus())
                 .build();
 

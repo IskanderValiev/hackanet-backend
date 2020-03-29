@@ -20,13 +20,16 @@ public class UserSimpleMapper implements Mapper<User, UserSimpleDto> {
 
     @Override
     public UserSimpleDto map(User from) {
+        if (from == null) {
+            return null;
+        }
         UserSimpleDto userDto = UserSimpleDto.builder()
                 .id(from.getId())
                 .name(from.getName())
                 .lastname(from.getLastname())
                 .build();
-        if (from.getImage() != null)
-            userDto.setImage(mapper.map(from.getImage()));
+        if (from.getPicture() != null)
+            userDto.setImage(mapper.map(from.getPicture()));
         return userDto;
     }
 }

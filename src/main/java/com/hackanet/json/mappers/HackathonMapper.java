@@ -2,7 +2,7 @@ package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.*;
 import com.hackanet.models.FileInfo;
-import com.hackanet.models.Hackathon;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.Skill;
 import com.hackanet.models.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +28,7 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
     private Mapper<FileInfo, FileInfoDto> fileMapper;
 
     @Autowired
-    @Qualifier("userMapper")
-    private Mapper<User, UserDto> userMapper;
+    private OrganizerMapper organizerMapper;
 
     @Autowired
     @Qualifier("userSimpleMapper")
@@ -39,15 +38,24 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
     @Qualifier("skillMapper")
     private Mapper<Skill, SkillDto> skillMapper;
 
+    @Autowired
+    private TrackMapper trackMapper;
+
+    @Autowired
+    private SponsorMapper sponsorMapper;
+
     @Override
     public HackathonDto map(Hackathon from) {
+        if (from == null) {
+            return null;
+        }
         HackathonDto hackathon = HackathonDto.builder()
                 .id(from.getId())
                 .name(from.getName())
                 .description(from.getDescription())
                 .start(from.getStartDate().getTime())
                 .end(from.getEndDate().getTime())
-                .owner(userMapper.map(from.getOwner()))
+                .organizer(organizerMapper.map(from.getOwner()))
                 .country(from.getCountry())
                 .currency(from.getCurrency().toString())
                 .prizeFund(from.getPrizeFund())
@@ -55,9 +63,11 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
                 .deleted(from.getDeleted())
                 .longitude(from.getLongitude())
                 .latitude(from.getLatitude())
+                .tracks(trackMapper.map(from.getTracks()))
+                .approved(Boolean.TRUE.equals(from.getApproved()))
+                .sponsors(sponsorMapper.map(from.getSponsors()))
+                .picture(fileMapper.map(from.getLogo()))
                 .build();
-        if (from.getLogo() != null)
-            hackathon.setLogo(fileMapper.map(from.getLogo()));
         List<Skill> requiredSkills = from.getRequiredSkills();
         if (requiredSkills != null)
             hackathon.setRequiredSkills(skillMapper.map(requiredSkills));

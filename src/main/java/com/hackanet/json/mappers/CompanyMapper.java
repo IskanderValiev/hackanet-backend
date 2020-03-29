@@ -20,6 +20,9 @@ public class CompanyMapper implements Mapper<Company, CompanyDto> {
 
     @Override
     public CompanyDto map(Company from) {
+        if (from == null) {
+            return null;
+        }
         return CompanyDto.builder()
                 .id(from.getId())
                 .companyType(from.getType())

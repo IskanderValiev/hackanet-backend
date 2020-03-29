@@ -3,11 +3,15 @@ package com.hackanet.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.hackanet.application.AppConstants;
+import com.hackanet.application.Patterns;
+import com.hackanet.config.JwtConfig;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.dto.TokenDto;
 import com.hackanet.json.forms.*;
 import com.hackanet.models.*;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.push.enums.ClientType;
 import com.hackanet.repositories.UserPhoneTokenRepository;
 import com.hackanet.repositories.UserRepository;
@@ -38,6 +42,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.hackanet.security.utils.ProviderUtils.*;
+import static com.hackanet.security.utils.SecurityUtils.checkUserProfileForViewing;
+import static com.hackanet.utils.DateTimeUtil.localDateTimeToLong;
 import static com.hackanet.utils.StringUtils.generateRandomString;
 import static com.hackanet.utils.StringUtils.getJsonOfTokenDtoFromPrincipalName;
 
@@ -52,29 +58,47 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
 
     // FIXME: 10/21/19 change the value
     private static final Integer DEFAULT_LIMIT = 10;
+    private static final Integer PASSWORD_REQUEST_EXPIRED_TIME = 15;
 
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private PasswordUtil passwordUtil;
+
+    @Autowired
+    private JwtConfig jwtConfig;
+
     @Autowired
     private EntityManager entityManager;
+
     @Autowired
     private SkillService skillService;
+
     @Autowired
     private FileInfoService fileInfoService;
+
     @Autowired
     private UserPhoneTokenRepository userPhoneTokenRepository;
+
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private PasswordChangeRequestRepository passwordChangeRequestRepository;
+
     @Autowired
     private PortfolioService portfolioService;
+
     @Autowired
     private UserNotificationSettingsService userNotificationSettingsService;
+
     @Autowired
     private UserTokenRepository userTokenRepository;
+
     @Autowired
     private ObjectMapper objectMapper;
+
     @Autowired
     private UserTokenService userTokenService;
 
@@ -135,6 +159,15 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
     }
 
     @Override
+    public User getUserInfo(Long id, User currentUser) {
+        User user = get(id);
+        if (currentUser == null)
+            return user;
+        checkUserProfileForViewing(user, currentUser);
+        return user;
+    }
+
+    @Override
     public User get(Long id) {
         return userRepository.findById(id).orElseThrow(() -> NotFoundException.forUser(id));
     }
@@ -190,7 +223,7 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
                 .email(email.toLowerCase())
                 .name((String) userDetails.get("given_name"))
                 .lastname((String) userDetails.get("family_name"))
-                .image(fileInfo)
+                .picture(fileInfo)
                 .role(Role.USER)
                 .lookingForTeam(Boolean.FALSE)
                 .refreshTokenParam(new RandomString().nextString())
@@ -243,12 +276,9 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
         UserToken token = userTokenService.getOrCreateTokenIfNotExists(user);
 
         String avatarUrl = (String) userDetails.get("avatar_url");
-        FileInfo fileInfo = FileInfo.builder()
-                .previewLink(avatarUrl)
-                .user(user)
-                .build();
-        fileInfoService.save(fileInfo);
+        fileInfoService.createAndSave(user, avatarUrl);
         return userTokenService.buildTokenDtoByUser(user, token);
+
     }
 
     @Override
@@ -283,6 +313,7 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
         String name = (String) userDetails.get("localizedFirstName");
         String lastName = (String) userDetails.get("localizedLastName");
         String email = (String) userDetails.get("email");
+
         // TODO: 11/20/19 get email and save user if he does not exist with received email
         User user = User.builder()
                 .name(name)
@@ -361,6 +392,12 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
     private void throwIfExistsByEmail(String email) {
         if (exists(email))
             throw new BadRequestException("User with such email already exists");
+    }
+
+    @Override
+    public void updateLastRequestTime(User user) {
+        user.setLastRequestTime(LocalDateTime.now());
+        userRepository.save(user);
     }
 
     private void throwIfExistsByPhone(String phone) {

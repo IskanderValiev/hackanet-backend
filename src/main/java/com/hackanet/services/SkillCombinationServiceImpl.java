@@ -44,10 +44,10 @@ public class SkillCombinationServiceImpl implements SkillCombinationService {
         List<AuxiliarySkillCombination> list = new ArrayList<>();
         user.getSkills().forEach(skill -> {
             List<SkillCombination> combinations = skillCombinationRepository.findBySkillId(skill.getId());
-            long combinationCount = combinations.stream()
-                    .mapToLong(SkillCombination::getCountOfCombination)
-                    .sum();
-
+            long combinationCount = 0;
+            for (SkillCombination combination : combinations) {
+                combinationCount += combination.getCountOfCombination();
+            }
             for (SkillCombination combination : combinations) {
                 double probability = (double) combination.getCountOfCombination() / combinationCount;
                 list.add(AuxiliarySkillCombination.builder()

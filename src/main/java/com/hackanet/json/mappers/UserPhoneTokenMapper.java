@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 public class UserPhoneTokenMapper implements Mapper<UserPhoneToken, UserPhoneTokenDto> {
     @Override
     public UserPhoneTokenDto map(UserPhoneToken from) {
+        if (from == null) {
+            return null;
+        }
         return UserPhoneTokenDto.builder()
                 .id(from.getId())
                 .deviceId(from.getDeviceId())

@@ -1,9 +1,11 @@
 package com.hackanet.security.utils;
 
+import com.hackanet.exceptions.BlackListException;
 import com.hackanet.exceptions.ForbiddenException;
 import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.CompanyType;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.security.enums.Role;
 
 /**
@@ -12,6 +14,17 @@ import com.hackanet.security.enums.Role;
  * on 10/20/19
  */
 public class SecurityUtils {
+
+    public static void isAdmin(User user) {
+        if (Role.ADMIN.equals(user.getRole())) {
+            throw new ForbiddenException("The user is not admin");
+        }
+    }
+
+    public static void checkUserProfileForViewing(User profileOwner, User user) {
+        if (profileOwner.getBlockedUsers().contains(user))
+            throw new BlackListException("You are in the black list");
+    }
 
     public static void checkFileAccess(FileInfo fileInfo, User user) {
         if (!user.equals(fileInfo.getUser()) && !Role.SUPER_ADMIN.equals(user.getRole()))
@@ -110,6 +123,25 @@ public class SecurityUtils {
         } else {
             if (!invitation.getInvitedUser().equals(user))
                 throw new ForbiddenException("You have no access to this connection invitation as an invited user");
+        }
+    }
+
+    public static void checkCommentAccess(Comment comment, User user) {
+        if (!comment.getUser().equals(user)) {
+            throw new ForbiddenException("You have no access to this comment");
+        }
+    }
+
+    public static void checkCommentDeletingAccess(Comment comment, User user) {
+        checkCommentAccess(comment, user);
+        if (!isSuperAdmin(user)) {
+            throw new ForbiddenException("You have no access to this comment");
+        }
+    }
+
+    public static void checkCommentLikeAccess(CommentLike like, User user) {
+        if (!like.getUser().equals(user)) {
+            throw new ForbiddenException("You have no access to this like");
         }
     }
 }

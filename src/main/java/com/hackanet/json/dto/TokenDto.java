@@ -24,7 +24,7 @@ public class TokenDto implements Serializable {
     private Long userId;
     private String role;
     private String accessToken;
-    private LocalDateTime accessTokenExpiresAt;
+    private Long accessTokenExpiresAt;
     private String refreshToken;
-    private LocalDateTime refreshTokenExpiresAt;
+    private Long refreshTokenExpiresAt;
 }

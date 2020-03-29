@@ -1,16 +1,15 @@
 package com.hackanet.services;
 
+import com.google.common.collect.Lists;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.JoinToHackathonRequestCreateForm;
-import com.hackanet.models.Hackathon;
-import com.hackanet.models.JoinToHackathonRequest;
-import com.hackanet.models.Team;
-import com.hackanet.models.User;
+import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.JoinType;
 import com.hackanet.models.enums.RequestStatus;
 import com.hackanet.models.enums.TeamType;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.repositories.JoinToHackathonRequestRepository;
 import com.hackanet.services.chat.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
 import static com.hackanet.security.utils.SecurityUtils.checkTeamAccessAsTeamLeader;
+import static com.hackanet.utils.DateTimeUtil.now;
+import static com.hackanet.utils.validators.HackathonUtils.registrationIsAvailable;
 
 /**
  * @author Iskander Valiev
@@ -34,29 +36,32 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
 
     @Autowired
     private JoinToHackathonRequestRepository requestRepository;
+
     @Autowired
     private HackathonService hackathonService;
+
     @Autowired
     private UserService userService;
+
     @Autowired
     private ChatService chatService;
+
     @Autowired
     private EmailService emailService;
+
     @Autowired
     private PortfolioService portfolioService;
+
     @Autowired
     private TeamService teamService;
+
+    @Autowired
+    private TrackService trackService;
 
     @Override
     public JoinToHackathonRequest createRequest(JoinToHackathonRequestCreateForm form, User user) {
         Hackathon hackathon = hackathonService.get(form.getHackathonId());
-        if (hackathon.getRegistrationEndDate().isBefore(LocalDateTime.now()))
-            throw new BadRequestException("Registration for the hackathon has already finished");
-        if (hackathon.getRegistrationStartDate().isAfter(LocalDateTime.now()))
-            throw new BadRequestException("Registration for the hackathon has not started yet");
-        Date now = new Date(System.currentTimeMillis());
-        if (now.after(hackathon.getStartDate()))
-            throw new BadRequestException("Hackathon has already started or passed");
+        registrationIsAvailable(hackathon);
 
         if (JoinType.ALONE.equals(form.getJoinType())) {
             if (hackathon.getParticipants().contains(user))
@@ -69,16 +74,10 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
             Team team = teamService.get(form.getEntityId());
             throwExceptionIfRequestExistsByTeam(team);
             checkTeamAccessAsTeamLeader(team, user);
+            return createForHackathonTeam(team, form.getMainTrackId(), form.getSubTrackId());
         }
 
-        JoinToHackathonRequest request = JoinToHackathonRequest.builder()
-                .hackathon(hackathon)
-                .message(form.getMessage())
-                .date(now)
-                .entityId(form.getEntityId())
-                .joinType(form.getJoinType())
-                .status(RequestStatus.WAITING)
-                .build();
+        JoinToHackathonRequest request = buildRequestFromCreateForm(form, hackathon);
         request = requestRepository.save(request);
         return request;
     }
@@ -111,8 +110,7 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
                 List<Chat> chats = hackathon.getChats();
                 if (chats.isEmpty()) {
                     chats = chatService.createForHackathon(hackathon);
-                    hackathon.setChats(chats);
-                    hackathonService.save(hackathon);
+                    hackathonService.setChats(chats, hackathon);
                 }
                 if (alone) {
                     final User participant = userService.get(request.getEntityId());
@@ -137,7 +135,7 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
 
             case ATTENDED:
                 Date startDate = hackathon.getStartDate();
-                Date date = new Date(System.currentTimeMillis());
+                Date date = now();
                 if (date.before(startDate))
                     throw new BadRequestException("Registration for hackathons has not been started yet");
                 if (alone) {
@@ -171,18 +169,17 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
     }
 
     @Override
-    public JoinToHackathonRequest createForHackathonTeam(Team team) {
-        throwExceptionIfRequestExistsByTeam(team);
-        if (!TeamType.HACKATHON.equals(team.getTeamType()))
-            throw new RuntimeException("TeamType is not " + TeamType.HACKATHON.toString());
-
+    public JoinToHackathonRequest createForHackathonTeam(Team team, Long mainTrackId, Long subTrackId) {
+        validate(team);
+        List<Track> tracks = trackService.getMainAndSubTracks(mainTrackId, subTrackId);
         JoinToHackathonRequest request = JoinToHackathonRequest.builder()
                 .joinType(JoinType.TEAM)
                 .entityId(team.getId())
                 .status(RequestStatus.WAITING)
-                .date(new Date(System.currentTimeMillis()))
+                .date(LocalDateTime.now())
                 .hackathon(team.getHackathon())
-                .message(team.getName() + " want to take part in this hackathon")
+                .mainTrack(tracks.get(0))
+                .subTrack(tracks.get(1))
                 .build();
         return requestRepository.save(request);
     }
@@ -204,5 +201,24 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
             throw new BadRequestException("Request already exists");
     }
 
+    private JoinToHackathonRequest buildRequestFromCreateForm(JoinToHackathonRequestCreateForm form, Hackathon hackathon) {
+        ArrayList<Track> tracks
+                = Lists.newArrayList(trackService.getMainAndSubTracks(form.getMainTrackId(), form.getSubTrackId()));
+        return JoinToHackathonRequest.builder()
+                .hackathon(hackathon)
+                .date(LocalDateTime.now())
+                .entityId(form.getEntityId())
+                .joinType(form.getJoinType())
+                .status(RequestStatus.WAITING)
+                .mainTrack(tracks.get(0))
+                .subTrack(tracks.get(1))
+                .build();
+    }
+
+    private void validate(Team team) {
+        throwExceptionIfRequestExistsByTeam(team);
+        if (!TeamType.HACKATHON.equals(team.getTeamType()))
+            throw new RuntimeException("TeamType is not " + TeamType.HACKATHON.toString());
+    }
 
 }

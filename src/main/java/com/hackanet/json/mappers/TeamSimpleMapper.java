@@ -13,8 +13,9 @@ import org.springframework.stereotype.Component;
 public class TeamSimpleMapper implements Mapper<Team, TeamSimpleDto> {
     @Override
     public TeamSimpleDto map(Team from) {
-        if (from == null)
+        if (from == null) {
             return null;
+        }
         return TeamSimpleDto.builder()
                 .id(from.getId())
                 .name(from.getName())

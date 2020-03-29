@@ -7,6 +7,7 @@ import com.hackanet.models.User;
 import com.hackanet.models.chat.Message;
 import com.hackanet.services.FileInfoService;
 import com.hackanet.services.UserService;
+import com.hackanet.services.chat.ChatMessageServiceElasticsearchImpl;
 import com.hackanet.utils.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,12 +28,18 @@ public class MessageMapper {
 
     @Autowired
     private UserSimpleMapper userSimpleMapper;
+
     @Autowired
     private UserService userService;
+
     @Autowired
     private FileInfoService fileInfoService;
+
     @Autowired
     private FileInfoMapper fileInfoMapper;
+
+    @Autowired
+    private ChatMessageServiceElasticsearchImpl chatMessageService;
 
     public MessageDto map(Message from) {
         User sender = userService.get(from.getSenderId());
@@ -47,6 +54,7 @@ public class MessageMapper {
                 .timestamp(localDateTimeToLong(from.getTimestamp()))
                 .attachments(files)
                 .chatId(from.getChatId())
+                .replies(map(chatMessageService.getReplies(from.getId())))
                 .sender(userSimpleMapper.map(sender)).build();
     }
 

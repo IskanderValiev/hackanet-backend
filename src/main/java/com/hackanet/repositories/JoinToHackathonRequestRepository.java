@@ -1,8 +1,7 @@
 package com.hackanet.repositories;
 
-import com.hackanet.models.Hackathon;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.JoinToHackathonRequest;
-import com.hackanet.models.User;
 import com.hackanet.models.enums.JoinType;
 import com.hackanet.models.enums.RequestStatus;
 import org.springframework.data.jpa.repository.JpaRepository;

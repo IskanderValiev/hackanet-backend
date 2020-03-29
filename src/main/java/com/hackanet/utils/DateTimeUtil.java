@@ -2,12 +2,14 @@ package com.hackanet.utils;
 
 import com.hackanet.application.AppConstants;
 import com.hackanet.exceptions.BadRequestException;
+import com.hackanet.json.forms.HackathonCreateForm;
 import com.hackanet.models.UserNotificationSettings;
 
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.TimeZone;
 
@@ -27,9 +29,7 @@ public class DateTimeUtil {
 
     public static long localTimeToLong(LocalTime localTime) {
         LocalDate localDate = LocalDate.of(1970, Month.JANUARY, 1);
-        LocalDateTime localDateTime = localTime.atDate(localDate);
-        long mills = localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        return mills;
+        return localDateTimeToLong(localTime.atDate(localDate));
     }
 
     public static long localDateTimeToLong(LocalDateTime localDateTime) {
@@ -105,6 +105,36 @@ public class DateTimeUtil {
         if (now.isAfter(fromLT) && now.isBefore(toLT))
             return nowInMills;
         return (long) (fromLT.toSecondOfDay() * 1000);
+    }
+
+    public static Date now() {
+        return new Date(System.currentTimeMillis());
+    }
+
+    public static LocalDateTime getRegistrationLocalDateTimeFromForm(HackathonCreateForm form, boolean start) {
+        if (start) {
+            return form.getRegistrationStartDate() == null
+                    ? LocalDateTime.now()
+                    : epochToLocalDateTime(form.getRegistrationStartDate());
+        } else {
+            Date end = new Date(form.getEnd());
+            return form.getRegistrationEndDate() == null
+                    ? end.toLocalDate().minusDays(1).atTime(23, 59)
+                    : epochToLocalDateTime(form.getRegistrationEndDate());
+        }
+    }
+
+    public static String nowString() {
+        return getString(LocalDateTime.now(), "yyyy-MM-dd HH:mm:ss");
+    }
+
+    public static String getString(LocalDateTime dateTime, String format) {
+        DateTimeFormatter formatter = format(format);
+        return dateTime.format(formatter);
+    }
+
+    private static DateTimeFormatter format(String format) {
+        return DateTimeFormatter.ofPattern(format);
     }
 
     public static LocalDateTime getRegistrationDate(Long date, boolean start, Date end) {

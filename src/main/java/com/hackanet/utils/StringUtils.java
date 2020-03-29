@@ -7,6 +7,7 @@ import com.hackanet.security.enums.Role;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * @author Iskander Valiev
@@ -29,7 +30,7 @@ public class StringUtils {
         return arr.length > 1;
     }
 
-    public static void badWordFilter(String input, String fieldName) {
+    public static void checkBadWords(String input, String fieldName) {
         if (SwearWordsFilter.containsBadWords(input))
             throw new BadRequestException(fieldName + " contains bad words");
     }

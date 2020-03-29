@@ -2,9 +2,6 @@ package com.hackanet.json.forms;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.hackanet.annotations.End;
-import com.hackanet.annotations.NotFormatted;
-import com.hackanet.annotations.Start;
 import com.hackanet.exceptions.BadRequestException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,8 +28,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class HackathonUpdateForm extends UpdateForm {
-
+public class HackathonUpdateForm {
     @NotNull
     @NotEmpty
     private String name;
@@ -65,13 +61,13 @@ public class HackathonUpdateForm extends UpdateForm {
     private Currency currency;
 
     @NotNull
-    @Max(value = 90, message = "latitude must be >= -90 and <= 90")
-    @Min(value = -90, message = "latitude must be >= -90 and <= 90")
+    @Max(value = 90, message = "Latitude must be less 90")
+    @Min(value = -90, message = "Latitude must be more -90")
     private Double latitude;
 
     @NotNull
-    @Max(value = 180, message = "latitude must be >= -180 and <= 180")
-    @Min(value = -180, message = "latitude must be >= -180 and <= 180")
+    @Max(value = 180, message = "Latitude must be less 180")
+    @Min(value = -180, message = "Latitude must be more -180")
     private Double longitude;
 
     @NotNull

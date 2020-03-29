@@ -2,14 +2,12 @@ package com.hackanet.services;
 
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.PortfolioUpdateForm;
-import com.hackanet.models.Hackathon;
-import com.hackanet.models.HackathonJobDescription;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.Portfolio;
 import com.hackanet.models.User;
 import com.hackanet.repositories.PortfolioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;

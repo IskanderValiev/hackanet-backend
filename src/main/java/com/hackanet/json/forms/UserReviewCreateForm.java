@@ -22,6 +22,7 @@ public class UserReviewCreateForm {
 
     @Max(5)
     @Positive
+    @NotNull
     private Integer mark;
 
     private String reviewMessage;

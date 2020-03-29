@@ -24,20 +24,30 @@ import java.util.List;
 @Builder
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class UserUpdateForm {
+    @NotNull
+    @NotEmpty
 
     @NotNull
     @NotEmpty
     private String name;
+    @NotNull
+    @NotEmpty
 
     @NotNull
     @NotEmpty
     private String lastname;
+    @NotNull
+    @NotEmpty
 
     private Long image;
+    @NotNull
+    @NotEmpty
 
     @NotNull
     @NotEmpty
     private String about;
+    @NotNull
+    @NotEmpty
 
     @NotNull
     @NotEmpty
@@ -48,6 +58,8 @@ public class UserUpdateForm {
     private String city;
 
     private List<Long> skills;
+    @NotNull
+    @NotEmpty
 
     private Boolean lookingForTeam;
 

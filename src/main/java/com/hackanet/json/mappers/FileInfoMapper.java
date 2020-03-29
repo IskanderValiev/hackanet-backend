@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
  */
 @Component("fileInfoMapper")
 public class FileInfoMapper implements Mapper<FileInfo, FileInfoDto> {
+
     @Override
     public FileInfoDto map(FileInfo from) {
         if (from == null)
@@ -21,7 +22,6 @@ public class FileInfoMapper implements Mapper<FileInfo, FileInfoDto> {
 
         return FileInfoDto.builder()
                 .id(from.getId())
-                .name(from.getName())
                 .previewLink(from.getPreviewLink())
                 .build();
     }

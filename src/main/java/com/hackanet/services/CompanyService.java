@@ -9,8 +9,9 @@ import com.hackanet.models.User;
 
 import java.util.List;
 
-public interface CompanyService extends ManageableService<Company>, FormValidatorService {
+public interface CompanyService extends RetrieveService<Company> {
     CompanyOwnerTokenDto registerCompany(CompanyCreateForm form);
+    Company update(Long id, User user, CompanyUpdateForm form);
     Company updateApprovedStatus(Long id, Boolean approved);
     List<Company> getCompaniesList(CompanySearchForm form);
     Company createCompanyByName(String name, String country, String city);

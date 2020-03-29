@@ -8,6 +8,7 @@ import com.hackanet.models.ReviewStatistic;
 import com.hackanet.models.Skill;
 import com.hackanet.models.User;
 import com.hackanet.services.UserReviewService;
+import com.hackanet.utils.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +29,9 @@ public class UserMapper implements Mapper<User, UserDto> {
 
     @Override
     public UserDto map(User from) {
+        if (from == null) {
+            return null;
+        }
         ReviewStatistic rating = userReviewService.getReviewsCountAndUserRating(from.getId());
         UserDto user = UserDto.builder()
                 .id(from.getId())
@@ -40,9 +44,10 @@ public class UserMapper implements Mapper<User, UserDto> {
                 .about(from.getAbout())
                 .reviewCount(rating.getCount())
                 .rating(rating.getAverage())
+                .lastRequestTime(DateTimeUtil.localDateTimeToLong(from.getLastRequestTime()))
                 .build();
-        if (from.getImage() != null)
-            user.setImage(mapper.map(from.getImage()));
+        if (from.getPicture() != null)
+            user.setImage(mapper.map(from.getPicture()));
         if (from.getSkills() != null)
             user.setSkills(skillMapper.map(from.getSkills()));
         return user;

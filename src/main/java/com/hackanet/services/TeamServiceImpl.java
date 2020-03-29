@@ -8,6 +8,7 @@ import com.hackanet.json.forms.TeamUpdateForm;
 import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.TeamType;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.repositories.TeamRepository;
 import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.chat.ChatService;
@@ -26,7 +27,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hackanet.utils.StringUtils.badWordFilter;
+import static com.hackanet.utils.StringUtils.checkBadWords;
 
 /**
  * @author Iskander Valiev
@@ -87,16 +88,13 @@ public class TeamServiceImpl implements TeamService {
     public Team createTeam(User user, TeamCreateForm form) {
         Team team = build(form, user);
         final Team savedTeam = teamRepository.save(team);
-        joinToHackathonRequestService.createForHackathonTeam(team);
 
         UserNotificationSettings settings = userNotificationSettingsService.getOrCreateDefaultsSettingsForUser(user);
         if (Boolean.TRUE.equals(settings.getPushEnabled())) {
             jobRunner.addHackathonJobReviewRequestJobToTeamLeader(settings, user, team);
         }
-
         Set<User> participants = userService.getByIds(form.getParticipantsIds());
-        participants.add(user);
-        teamInvitationService.sendInvitations(participants, user, savedTeam);
+        participants.forEach(p -> teamInvitationService.createIfNotExists(user, p.getId(), savedTeam.getId()));
         skillCombinationService.createByTeam(team);
         return team;
     }
@@ -110,7 +108,7 @@ public class TeamServiceImpl implements TeamService {
 
         String name = form.getName();
         if (!StringUtils.isBlank(name)) {
-            badWordFilter(name.trim(), "name");
+            checkBadWords(name.trim(), "name");
             team.setName(name.trim());
         }
 

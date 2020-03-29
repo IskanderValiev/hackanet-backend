@@ -2,7 +2,7 @@ package com.hackanet.controllers;
 
 import com.hackanet.json.dto.SubscriptionDto;
 import com.hackanet.json.mappers.SubscriptionMapper;
-import com.hackanet.models.Subscription;
+import com.hackanet.models.hackathon.Subscription;
 import com.hackanet.models.User;
 import com.hackanet.services.SubscriptionService;
 import io.swagger.annotations.Api;

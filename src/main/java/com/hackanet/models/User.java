@@ -1,10 +1,12 @@
 package com.hackanet.models;
 
 import com.hackanet.models.chat.Chat;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.security.enums.Role;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -48,7 +50,7 @@ public class User extends AbstractEntity {
     private List<Hackathon> hackathons;
 
     @OneToOne(fetch = FetchType.LAZY)
-    private FileInfo image;
+    private FileInfo picture;
 
     @Column(length = 1024)
     private String about;
@@ -81,6 +83,15 @@ public class User extends AbstractEntity {
             inverseJoinColumns = @JoinColumn(name = "connection_id"))
     private Set<User> connections;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "blocked_users",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "blocked_user_ud"))
+    private Set<User> blockedUsers;
+
+    @Column(name = "last_request_time")
+    private LocalDateTime lastRequestTime;
+
     public List<FileInfo> getFiles() {
         return files == null ? new ArrayList<>() : files;
     }
@@ -103,5 +114,9 @@ public class User extends AbstractEntity {
 
     public Set<User> getConnections() {
         return connections == null ? new HashSet<>() : connections;
+    }
+
+    public Set<User> getBlockedUsers() {
+        return blockedUsers == null ? new HashSet<>() : blockedUsers;
     }
 }

@@ -20,8 +20,8 @@ import java.util.List;
 public class JobExperienceDto {
     private Long id;
     private CompanyDto company;
-    private Date from;
-    private Date to;
+    private Long from;
+    private Long to;
     private String description;
     private List<SkillDto> technologies;
 }
