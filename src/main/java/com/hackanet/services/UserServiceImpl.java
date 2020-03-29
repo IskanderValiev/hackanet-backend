@@ -3,6 +3,8 @@ package com.hackanet.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.hackanet.application.AppConstants;
+import com.hackanet.application.Patterns;
 import com.hackanet.config.JwtConfig;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
@@ -59,6 +61,7 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
 
     // FIXME: 10/21/19 change the value
     private static final Integer DEFAULT_LIMIT = 10;
+    private static final Integer PASSWORD_REQUEST_EXPIRED_TIME = 15;
 
     @Autowired
     private UserRepository userRepository;
@@ -277,12 +280,9 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
         UserToken token = userTokenService.getOrCreateTokenIfNotExists(user);
 
         String avatarUrl = (String) userDetails.get("avatar_url");
-        FileInfo fileInfo = FileInfo.builder()
-                .previewLink(avatarUrl)
-                .user(user)
-                .build();
-        fileInfoService.save(fileInfo);
+        fileInfoService.createAndSave(user, avatarUrl);
         return userTokenService.buildTokenDtoByUser(user, token);
+
     }
 
     @Override
@@ -397,25 +397,15 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
             throw new BadRequestException("User with such email already exists");
     }
 
-    private void throwIfExistsByPhone(String phone) {
-        if (existsByPhone(phone))
-            throw new BadRequestException("User with such phone already exists");
-    }
-
     @Override
     public void updateLastRequestTime(User user) {
         user.setLastRequestTime(LocalDateTime.now());
         userRepository.save(user);
     }
 
-    private String getTokenValue(User user, TokenType type) {
-        return Jwts.builder()
-                .claim("role", user.getRole().toString())
-                .claim("email", user.getEmail())
-                .claim("tokenParam", TokenType.REFRESH.equals(type) ? user.getRefreshTokenParam() : user.getAccessTokenParam())
-                .claim("token-type", type.toString())
-                .setSubject(user.getId().toString())
-                .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecret()).compact();
+    private void throwIfExistsByPhone(String phone) {
+        if (existsByPhone(phone))
+            throw new BadRequestException("User with such phone already exists");
     }
 
     private CriteriaQuery<User> getUsersListQuery(CriteriaBuilder criteriaBuilder, UserSearchForm form) {

@@ -2,6 +2,8 @@ package com.hackanet.services;
 
 import com.hackanet.application.AppConstants;
 import com.hackanet.components.Profiling;
+import com.hackanet.exceptions.BadFormTypeException;
+import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.HackathonCreateForm;
 import com.hackanet.json.forms.HackathonSearchForm;
@@ -198,11 +200,11 @@ public class HackathonServiceImpl implements HackathonService {
         }
         if (!StringUtils.isBlank(form.getCity())) {
             String city = form.getCity().trim().toLowerCase();
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("city")), "%" + lowerCase(city) + "%"));
+            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("city")), "%" + StringUtils.lowerCase(city) + "%"));
         }
         if (!StringUtils.isBlank(form.getCountry())) {
             String country = form.getCountry().trim().toLowerCase();
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("country")), "%" + lowerCase(country) + "%"));
+            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("country")), "%" + StringUtils.lowerCase(country) + "%"));
         }
         if (CollectionUtils.isNotEmpty(form.getSkills())) {
             Join<Hackathon, Skill> join = root.join("requiredSkills", JoinType.INNER);
@@ -236,7 +238,6 @@ public class HackathonServiceImpl implements HackathonService {
 
         return Hackathon.builder()
                 .name(form.getName().trim())
-                .nameLc(form.getName().trim().toLowerCase())
                 .startDate(startDate)
                 .endDate(endDate)
                 .owner(user)
@@ -244,7 +245,7 @@ public class HackathonServiceImpl implements HackathonService {
                 .country(StringUtils.capitalize(form.getCountry()))
                 .city(StringUtils.capitalize(form.getCity()))
                 .currency(form.getCurrency())
-                .prize(form.getPrizeFund())
+                .prizeFund(form.getPrizeFund())
                 .requiredSkills(skillService.getByIds(requiredSkills))
                 .deleted(false)
                 .longitude(form.getLongitude())
@@ -268,7 +269,6 @@ public class HackathonServiceImpl implements HackathonService {
 
         String name = form.getName();
         hackathon.setName(name.trim());
-        hackathon.setNameLc(form.getName().trim().toLowerCase());
         hackathon.setDescription(form.getDescription().trim());
 
         String country = StringUtils.capitalize(form.getCountry());

@@ -1,6 +1,7 @@
 package com.hackanet.utils;
 
 import com.hackanet.application.AppConstants;
+import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.json.forms.HackathonCreateForm;
 import com.hackanet.models.UserNotificationSettings;
 
@@ -134,5 +135,39 @@ public class DateTimeUtil {
 
     private static DateTimeFormatter format(String format) {
         return DateTimeFormatter.ofPattern(format);
+    }
+
+    public static LocalDateTime getRegistrationDate(Long date, boolean start, Date end) {
+        LocalDateTime retVal;
+        if (start) {
+            retVal = date == null
+                    ? LocalDateTime.now()
+                    : epochToLocalDateTime(date);
+            return retVal;
+        }
+        retVal = date == null
+                ? end.toLocalDate().minusDays(1).atTime(23, 59)
+                : epochToLocalDateTime(date);
+        return retVal;
+    }
+
+    public static void validateRegistrationDates(Long regStartDate, Long regEndDate, Date start, Date end) {
+        if (regStartDate > regEndDate)
+            throw new BadRequestException("Registration Start Date is after End Date");
+        if (regEndDate < System.currentTimeMillis())
+            throw new BadRequestException("Registration End Date is in the past");
+        if (new Timestamp(regStartDate).after(start))
+            throw new BadRequestException("Registration Start Date must be before hackathon start date");
+        if (new Timestamp(regEndDate).after(end))
+            throw new BadRequestException("Registration End Date must be before hackathon end date");
+    }
+
+    public static void validateHackathonDates(Date start, Date end) {
+        if (start.after(end)) {
+            throw new BadRequestException("Start date is after end date");
+        }
+        if (start.before(new Date(currentTimeMillis()))) {
+            throw new BadRequestException("Start date is in the past");
+        }
     }
 }

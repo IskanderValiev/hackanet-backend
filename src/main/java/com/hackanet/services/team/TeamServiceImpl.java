@@ -15,6 +15,8 @@ import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.*;
 import com.hackanet.services.chat.ChatService;
 import com.hackanet.services.scheduler.JobRunner;
+import com.hackanet.utils.SwearWordsFilter;
+import com.hackanet.utils.validators.TeamFormValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hackanet.utils.StringUtils.badWordFilter;
+import static com.hackanet.utils.StringUtils.checkBadWords;
 
 /**
  * @author Iskander Valiev
@@ -77,6 +80,9 @@ public class TeamServiceImpl implements TeamService {
 
     @Autowired
     private TeamMemberService teamMemberService;
+
+    @Autowired
+    private TeamFormValidator teamFormValidator;
 
     @Override
     public Team save(Team team) {
@@ -305,7 +311,8 @@ public class TeamServiceImpl implements TeamService {
     }
 
     private Team build(TeamCreateForm form, User user) {
-        String name = form.getName().trim();
+        teamFormValidator.validateCreateForm(form);
+
         Chat chat = chatService.createForTeam(user);
         List<Long> skillsLookingForIds = form.getSkillsLookingFor();
         List<Skill> skillsLookingFor = new ArrayList<>();
@@ -314,7 +321,7 @@ public class TeamServiceImpl implements TeamService {
         }
 
         Team team = Team.builder()
-                .name(name)
+                .name(form.getName().trim())
                 .chat(chat)
                 .participants(Collections.singletonList(user))
                 .teamLeader(user)

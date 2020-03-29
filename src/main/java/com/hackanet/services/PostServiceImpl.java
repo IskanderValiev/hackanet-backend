@@ -1,14 +1,17 @@
 package com.hackanet.services;
 
 import com.hackanet.application.AppConstants;
-import com.hackanet.exceptions.BadFormTypeException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.*;
 import com.hackanet.models.hackathon.Hackathon;
+import com.hackanet.json.forms.PostCreateForm;
+import com.hackanet.json.forms.PostSearchForm;
+import com.hackanet.json.forms.PostUpdateForm;
 import com.hackanet.models.Post;
 import com.hackanet.models.PostLike;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.PostImportance;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.repositories.PostRepository;
 import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.scheduler.JobRunner;
@@ -62,11 +65,14 @@ public class PostServiceImpl implements PostService {
             SecurityUtils.checkHackathonAccess(hackathon, user);
             post.setHackathon(hackathon);
         }
-        if (form.getImages() != null && !form.getImages().isEmpty())
+        if (form.getImages() != null && !form.getImages().isEmpty()) {
             post.setImages(fileInfoService.getByIdsIn(form.getImages()));
-        if (Boolean.TRUE.equals(form.getSendImportanceRequest()))
+        }
+        if (Boolean.TRUE.equals(form.getSendImportanceRequest())) {
             post.setImportance(PostImportance.WAITING);
-        else post.setImportance(PostImportance.NOT_IMPORTANT);
+        } else {
+            post.setImportance(PostImportance.NOT_IMPORTANT);
+        }
         post = postRepository.save(post);
         jobRunner.addNewPostNotification(null, post);
         return post;
