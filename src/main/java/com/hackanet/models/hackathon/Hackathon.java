@@ -27,6 +27,7 @@ import java.util.*;
 @Entity
 @Table(name = "hackathons")
 public class Hackathon extends AbstractEntity {
+
     @Column(nullable = false)
     private String name;
 
@@ -45,9 +46,6 @@ public class Hackathon extends AbstractEntity {
 
     @Enumerated(EnumType.STRING)
     private Currency currency;
-
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "hackathon")
-    private List<FileInfo> fileInfo;
 
     @OneToOne(fetch = FetchType.LAZY)
     private FileInfo logo;
@@ -86,10 +84,6 @@ public class Hackathon extends AbstractEntity {
     private Boolean deleted;
 
     private Boolean approved;
-
-    public List<FileInfo> getFileInfo() {
-        return fileInfo == null ? Lists.newArrayList() : fileInfo;
-    }
 
     public List<Chat> getChats() {
         return chats == null ? Lists.newArrayList() : chats;

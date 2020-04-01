@@ -30,6 +30,7 @@ import java.util.List;
 @Builder
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class HackathonUpdateForm {
+
     @NotNull
     @NotEmpty
     private String name;
@@ -50,6 +51,7 @@ public class HackathonUpdateForm {
 
     @NotNull
     private String city;
+
     private List<Long> requiredSkills;
 
     @NotNull

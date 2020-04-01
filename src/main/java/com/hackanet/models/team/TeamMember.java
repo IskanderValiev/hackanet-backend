@@ -25,13 +25,13 @@ public class TeamMember extends AbstractEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Team team;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "team_members_skills", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
     private List<Skill> skills;
 
-    @Column(columnDefinition = "DEFAULT false")
+    @Column(columnDefinition = "bool DEFAULT false")
     private Boolean skillsUpdated;
 }

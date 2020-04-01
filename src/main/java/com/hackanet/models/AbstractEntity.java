@@ -24,6 +24,7 @@ public abstract class AbstractEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
+        System.out.println(o.getClass().getName() + " -- " + getClass().getName());
         if (o == null || getClass() != o.getClass()) return false;
         AbstractEntity that = (AbstractEntity) o;
         return Objects.equal(id, that.id);
