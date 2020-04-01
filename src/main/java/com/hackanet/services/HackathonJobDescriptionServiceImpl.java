@@ -3,9 +3,11 @@ package com.hackanet.services;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.json.forms.HackathonJobDescriptionCreateForm;
 import com.hackanet.models.*;
+import com.hackanet.models.team.Team;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.hackathon.HackathonJobDescription;
 import com.hackanet.repositories.HackathonJobDescriptionRepository;
+import com.hackanet.services.team.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +25,13 @@ public class HackathonJobDescriptionServiceImpl implements HackathonJobDescripti
 
     @Autowired
     private HackathonJobDescriptionRepository hackathonJobDescriptionRepository;
+
     @Autowired
     private HackathonService hackathonService;
+
     @Autowired
     private TeamService teamService;
+
     @Autowired
     private PortfolioService portfolioService;
 
@@ -36,9 +41,10 @@ public class HackathonJobDescriptionServiceImpl implements HackathonJobDescripti
         Team team = teamService.get(form.getTeamId());
 
         Long userId = form.getUserId();
-        List<Long> collect = team.getParticipants().stream().map(User::getId).filter(id -> Objects.equals(id, userId)).collect(Collectors.toList());
-        if (collect.isEmpty())
+        boolean contains = teamService.teamContainsUser(team, userId);
+        if (!contains) {
             throw new BadRequestException("The user is not in the team");
+        }
 
         HackathonJobDescription hackathonJobDescription = HackathonJobDescription.builder()
                 .description(form.getDescription())

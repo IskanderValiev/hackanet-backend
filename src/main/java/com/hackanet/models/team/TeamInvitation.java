@@ -1,6 +1,7 @@
-package com.hackanet.models;
+package com.hackanet.models.team;
 
-import com.hackanet.models.enums.RequestStatus;
+import com.hackanet.models.AbstractEntity;
+import com.hackanet.models.User;
 import com.hackanet.models.enums.TeamInvitationStatus;
 import lombok.*;
 

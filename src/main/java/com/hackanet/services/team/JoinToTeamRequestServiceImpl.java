@@ -1,19 +1,20 @@
-package com.hackanet.services;
+package com.hackanet.services.team;
 
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.JoinToTeamRequestCreateForm;
-import com.hackanet.models.JoinToTeamRequest;
-import com.hackanet.models.Team;
+import com.hackanet.models.team.JoinToTeamRequest;
+import com.hackanet.models.team.Team;
 import com.hackanet.models.User;
-import com.hackanet.models.UserNotificationSettings;
 import com.hackanet.models.enums.JoinToTeamRequestStatus;
+import com.hackanet.models.team.TeamMember;
 import com.hackanet.repositories.JoinToTeamRequestRepository;
 import com.hackanet.security.utils.SecurityUtils;
+import com.hackanet.services.EmailService;
+import com.hackanet.services.SkillCombinationService;
+import com.hackanet.services.UserNotificationSettingsService;
 import com.hackanet.services.chat.ChatService;
 import com.hackanet.services.push.RabbitMQPushNotificationService;
-import com.hackanet.services.scheduler.JobRunner;
-import com.hackanet.utils.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,18 +32,27 @@ public class JoinToTeamRequestServiceImpl implements JoinToTeamRequestService {
 
     @Autowired
     private JoinToTeamRequestRepository joinToTeamRequestRepository;
+
     @Autowired
     private TeamService teamService;
+
     @Autowired
     private ChatService chatService;
+
     @Autowired
     private EmailService emailService;
+
     @Autowired
     private UserNotificationSettingsService userNotificationSettingsService;
+
     @Autowired
     private RabbitMQPushNotificationService pushNotificationService;
+
     @Autowired
     private SkillCombinationService skillCombinationService;
+
+    @Autowired
+    private TeamMemberService teamMemberService;
 
     @Override
     public JoinToTeamRequest create(User user, JoinToTeamRequestCreateForm form) {
@@ -87,6 +97,9 @@ public class JoinToTeamRequestServiceImpl implements JoinToTeamRequestService {
         User userFromRequest = request.getUser();
 
         if (JoinToTeamRequestStatus.APPROVED.equals(status)) {
+            // TODO: 2/18/20 change this to team members service
+            List<TeamMember> members = teamMemberService.getMembers(team.getId());
+
             List<User> participants = team.getParticipants();
             if (!participants.contains(userFromRequest)) {
                 participants.add(userFromRequest);

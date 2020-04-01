@@ -1,7 +1,7 @@
 package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.TeamSimpleDto;
-import com.hackanet.models.Team;
+import com.hackanet.models.team.Team;
 import org.springframework.stereotype.Component;
 
 /**

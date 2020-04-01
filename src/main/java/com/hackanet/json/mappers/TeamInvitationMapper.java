@@ -1,8 +1,7 @@
 package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.TeamInvitationDto;
-import com.hackanet.json.dto.TeamSimpleDto;
-import com.hackanet.models.TeamInvitation;
+import com.hackanet.models.team.TeamInvitation;
 import com.hackanet.utils.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

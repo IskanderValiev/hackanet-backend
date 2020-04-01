@@ -1,10 +1,11 @@
-package com.hackanet.services;
+package com.hackanet.services.team;
 
 import com.hackanet.json.forms.TeamCreateForm;
 import com.hackanet.json.forms.TeamSearchForm;
 import com.hackanet.json.forms.TeamUpdateForm;
-import com.hackanet.models.Team;
+import com.hackanet.models.team.Team;
 import com.hackanet.models.User;
+import com.hackanet.services.RetrieveService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,4 +28,5 @@ public interface TeamService extends RetrieveService<Team> {
     void throwExceptionIfTeamIsNotActual(Team team);
     List<Team> getTeamsSuggestion(User user);
     List<Team> getTeamsSuggestion(User user, Long hackathonId);
+    boolean teamContainsUser(Team team, Long userId);
 }

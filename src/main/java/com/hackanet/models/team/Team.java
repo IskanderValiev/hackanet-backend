@@ -1,5 +1,8 @@
-package com.hackanet.models;
+package com.hackanet.models.team;
 
+import com.hackanet.models.AbstractEntity;
+import com.hackanet.models.Skill;
+import com.hackanet.models.User;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.TeamType;
 import com.hackanet.models.hackathon.Hackathon;

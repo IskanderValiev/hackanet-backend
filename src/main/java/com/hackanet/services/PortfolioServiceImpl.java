@@ -8,6 +8,7 @@ import com.hackanet.models.User;
 import com.hackanet.repositories.PortfolioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,10 +25,13 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     @Autowired
     private PortfolioRepository portfolioRepository;
+
     @Autowired
     private UserService userService;
+
     @Autowired
     private JobExperienceService jobExperienceService;
+
     @Autowired
     private HackathonJobDescriptionService hackathonJobDescriptionService;
 
@@ -42,8 +46,9 @@ public class PortfolioServiceImpl implements PortfolioService {
     @Override
     public Portfolio getByUserId(Long userId) {
         Optional<Portfolio> byUserId = portfolioRepository.findByUserId(userId);
-        if (byUserId.isPresent())
+        if (byUserId.isPresent()) {
             return byUserId.get();
+        }
 
         Portfolio portfolio = Portfolio.builder()
                 .user(userService.get(userId))
@@ -53,6 +58,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     @Override
+    @Transactional
     public Portfolio update(Long id, User user, PortfolioUpdateForm form) {
         Portfolio portfolio = get(id);
         checkPortfolioAccess(portfolio, user);

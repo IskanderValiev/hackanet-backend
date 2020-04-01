@@ -8,7 +8,7 @@ import com.hackanet.json.forms.UserSearchForm;
 import com.hackanet.json.forms.UserUpdateForm;
 import com.hackanet.json.mappers.Mapper;
 import com.hackanet.models.User;
-import com.hackanet.services.UserService;
+import com.hackanet.services.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -58,9 +58,22 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
     @Autowired
     @Qualifier("userMapper")
     private Mapper<User, UserDto> userMapper;
+
+    @Autowired
+    private UserTokenService userTokenService;
+
+    @Autowired
+    private ConnectionService connectionService;
+
+    @Autowired
+    private PasswordResetRequestService passwordResetRequestService;
+
+    @Autowired
+    private SocialNetworkAuthService socialNetworkAuthService;
 
     @PostMapping(REGISTER)
     @ApiOperation("Register a new user")
@@ -123,7 +136,7 @@ public class UserController {
     @ApiOperation("Send reset password request")
     @GetMapping(RESET_PASSWORD_REQUEST)
     public ResponseEntity<String> resetPasswordRequest(@RequestParam("email") String email) {
-        userService.passwordResetRequest(email);
+        passwordResetRequestService.passwordResetRequest(email);
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
@@ -132,7 +145,7 @@ public class UserController {
     public ResponseEntity<String> resetPassword(@RequestParam("email") String email,
                                                 @RequestParam("code") String code,
                                                 @RequestParam("newPassword") String newPassword) {
-        userService.changePassword(code, newPassword, email);
+        passwordResetRequestService.changePassword(code, newPassword, email);
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
@@ -144,14 +157,14 @@ public class UserController {
     @ApiOperation("Get access token using REFRESH TOKEN")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<TokenDto> getAccessToken(@AuthenticationPrincipal User user) {
-        TokenDto tokenDto = userService.updateAccessToken(user);
+        TokenDto tokenDto = userTokenService.updateAccessToken(user);
         return ResponseEntity.ok(tokenDto);
     }
 
     @GetMapping(SOCIAL_LOGIN)
     @PreAuthorize("isAuthenticated()")
     public TokenDto me(OAuth2AuthenticationToken principal) {
-        return userService.saveFromSocialNetwork(principal);
+        return socialNetworkAuthService.saveFromSocialNetwork(principal);
     }
 
     @GetMapping(ME)
@@ -171,7 +184,7 @@ public class UserController {
                     required = false, dataType = "string", paramType = "header")
     })
     public ResponseEntity<List<UserDto>> getConnections(@PathVariable Long id) {
-        Set<User> connections = userService.getConnections(id);
+        Set<User> connections = connectionService.getConnections(id);
         return ResponseEntity.ok(userMapper.map(connections));
     }
 
@@ -183,7 +196,7 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<String> deleteConnection(@PathVariable("connectionId") Long connectionId,
                                                    @AuthenticationPrincipal User user) {
-        userService.deleteConnection(user, connectionId);
+        connectionService.deleteConnection(user, connectionId);
         return ResponseEntity.ok("OK");
     }
 
@@ -194,7 +207,7 @@ public class UserController {
     })
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<UserDto>> getConnectionSuggestions(@AuthenticationPrincipal User user) {
-        Set<User> connectionsSuggestions = userService.getConnectionsSuggestions(user);
+        Set<User> connectionsSuggestions = connectionService.getConnectionsSuggestions(user);
         return ResponseEntity.ok(userMapper.map(connectionsSuggestions));
     }
 }

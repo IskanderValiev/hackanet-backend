@@ -1,11 +1,16 @@
 package com.hackanet.security.utils;
 
 import com.hackanet.exceptions.BlackListException;
+import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.ForbiddenException;
 import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.CompanyType;
 import com.hackanet.models.hackathon.Hackathon;
+import com.hackanet.models.team.JoinToTeamRequest;
+import com.hackanet.models.team.Team;
+import com.hackanet.models.team.TeamInvitation;
+import com.hackanet.models.team.TeamMember;
 import com.hackanet.security.enums.Role;
 
 /**
@@ -142,6 +147,15 @@ public class SecurityUtils {
     public static void checkCommentLikeAccess(CommentLike like, User user) {
         if (!like.getUser().equals(user)) {
             throw new ForbiddenException("You have no access to this like");
+        }
+    }
+
+    public static void checkTeamMemberAccess(TeamMember teamMember, User user) {
+        if (teamMember == null) {
+            throw new BadRequestException("Team member is null");
+        }
+        if (!teamMember.getUser().equals(user)) {
+            throw new ForbiddenException("You have no access to this member entity");
         }
     }
 }

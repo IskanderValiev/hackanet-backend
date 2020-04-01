@@ -10,8 +10,10 @@ import com.hackanet.models.enums.JoinType;
 import com.hackanet.models.enums.RequestStatus;
 import com.hackanet.models.enums.TeamType;
 import com.hackanet.models.hackathon.Hackathon;
+import com.hackanet.models.team.Team;
 import com.hackanet.repositories.JoinToHackathonRequestRepository;
 import com.hackanet.services.chat.ChatService;
+import com.hackanet.services.team.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +26,7 @@ import java.util.List;
 import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
 import static com.hackanet.security.utils.SecurityUtils.checkTeamAccessAsTeamLeader;
 import static com.hackanet.utils.DateTimeUtil.now;
-import static com.hackanet.utils.validators.HackathonUtils.registrationIsAvailable;
+import static com.hackanet.utils.validators.HackathonRegistrationDateValidator.registrationIsAvailable;
 
 /**
  * @author Iskander Valiev

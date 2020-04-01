@@ -19,28 +19,34 @@ import java.util.List;
  */
 @Data
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class CompanyCreateForm {
+public class CompanyCreateForm extends CreateForm {
     @NotNull
     @NotEmpty
     @Pattern(regexp = Patterns.VALID_EMAIL_REGEX, message = HttpResponse.BAD_EMAIL)
     private String email;
+
     @NotNull
     @NotEmpty
     @Pattern(regexp = Patterns.VALID_PASSWORD_REGEX, message = HttpResponse.BAD_PASSWORD)
     private String password;
+
     @NotNull
     @NotEmpty
     private String name;
+
     @NotNull
     @NotEmpty
     // TODO: 11/7/19 add maxlength
     private String description;
+
     @NotNull
     @NotEmpty
     private String country;
+
     @NotNull
     @NotEmpty
     private String city;
+
     private List<Long> technologies;
     private Long logoId;
     private CompanyType companyType = CompanyType.SOFTWARE_ENGINEERING;

@@ -40,4 +40,7 @@ public class Comment extends AbstractEntity {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "replyParent")
     private List<Comment> replies;
+
+    @Column(name = "edited", nullable = false)
+    private Boolean edited;
 }

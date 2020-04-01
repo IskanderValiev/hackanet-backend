@@ -9,6 +9,7 @@ import com.hackanet.models.Post;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.PostImportance;
 import com.hackanet.services.PostService;
+import com.hackanet.services.PostServiceImpl;
 import com.hackanet.services.PostViewService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -45,7 +46,7 @@ public class PostController {
     @Autowired
     private PostMapper postMapper;
     @Autowired
-    private PostService postService;
+    private PostServiceImpl postService;
     @Autowired
     private PostViewService postViewService;
 

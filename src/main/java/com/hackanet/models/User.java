@@ -27,9 +27,10 @@ import java.util.Set;
 @Table(name = "users")
 public class User extends AbstractEntity {
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "lastname")
     private String lastname;
 
     @Column(nullable = false)
@@ -52,9 +53,13 @@ public class User extends AbstractEntity {
     @OneToOne(fetch = FetchType.LAZY)
     private FileInfo picture;
 
-    @Column(length = 1024)
+    @Column(name = "about", length = 1024)
     private String about;
+
+    @Column(name = "country", length = 50)
     private String country;
+
+    @Column(name = "city", length = 50)
     private String city;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -91,6 +96,9 @@ public class User extends AbstractEntity {
 
     @Column(name = "last_request_time")
     private LocalDateTime lastRequestTime;
+
+    @Column(name = "email_confirmed")
+    private Boolean email_confirmed;
 
     public List<FileInfo> getFiles() {
         return files == null ? new ArrayList<>() : files;

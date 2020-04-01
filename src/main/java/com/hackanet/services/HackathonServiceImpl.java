@@ -2,6 +2,8 @@ package com.hackanet.services;
 
 import com.hackanet.application.AppConstants;
 import com.hackanet.components.Profiling;
+import com.hackanet.exceptions.BadFormTypeException;
+import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.HackathonCreateForm;
 import com.hackanet.json.forms.HackathonSearchForm;
@@ -14,6 +16,7 @@ import com.hackanet.models.chat.Chat;
 import com.hackanet.repositories.HackathonRepository;
 import com.hackanet.services.chat.ChatService;
 import com.hackanet.utils.validators.HackathonCreateFormValidator;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -34,6 +37,7 @@ import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
 import static com.hackanet.utils.DateTimeUtil.epochToLocalDateTime;
 import static com.hackanet.utils.DateTimeUtil.getRegistrationLocalDateTimeFromForm;
 import static java.lang.System.currentTimeMillis;
+import static org.apache.commons.lang.StringUtils.lowerCase;
 
 /**
  * @author Iskander Valiev
@@ -191,8 +195,8 @@ public class HackathonServiceImpl implements HackathonService {
         predicates.add(criteriaBuilder.isTrue(root.get("approved")));
         String name = form.getName();
         if (!StringUtils.isBlank(name)) {
-            name = name.toLowerCase();
-            predicates.add(criteriaBuilder.like(root.get("nameLc"), "%" + name + "%"));
+            Expression<String> nameInLc = criteriaBuilder.lower(root.get("name"));
+            predicates.add(criteriaBuilder.like(nameInLc, "%" + lowerCase(name.trim()) + "%"));
         }
         if (!StringUtils.isBlank(form.getCity())) {
             String city = form.getCity().trim().toLowerCase();
@@ -202,7 +206,7 @@ public class HackathonServiceImpl implements HackathonService {
             String country = form.getCountry().trim().toLowerCase();
             predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("country")), "%" + StringUtils.lowerCase(country) + "%"));
         }
-        if (form.getSkills() != null && !form.getSkills().isEmpty()) {
+        if (CollectionUtils.isNotEmpty(form.getSkills())) {
             Join<Hackathon, Skill> join = root.join("requiredSkills", JoinType.INNER);
             join.on(join.get("id").in(form.getSkills()));
             predicates.add(join.getOn());
@@ -234,7 +238,6 @@ public class HackathonServiceImpl implements HackathonService {
 
         return Hackathon.builder()
                 .name(form.getName().trim())
-                .nameLc(form.getName().trim().toLowerCase())
                 .startDate(startDate)
                 .endDate(endDate)
                 .owner(user)
@@ -242,7 +245,7 @@ public class HackathonServiceImpl implements HackathonService {
                 .country(StringUtils.capitalize(form.getCountry()))
                 .city(StringUtils.capitalize(form.getCity()))
                 .currency(form.getCurrency())
-                .prize(form.getPrizeFund())
+                .prizeFund(form.getPrizeFund())
                 .requiredSkills(skillService.getByIds(requiredSkills))
                 .deleted(false)
                 .longitude(form.getLongitude())
@@ -254,8 +257,8 @@ public class HackathonServiceImpl implements HackathonService {
     }
 
     private void setHackathonNewValues(HackathonUpdateForm form, Hackathon hackathon) {
-        Date start = new Date(form.getStart());
-        Date end = new Date(form.getEnd());
+        Date start = new Date(form.getStartDate());
+        Date end = new Date(form.getEndDate());
         hackathon.setStartDate(start);
         hackathon.setEndDate(end);
 
@@ -266,7 +269,6 @@ public class HackathonServiceImpl implements HackathonService {
 
         String name = form.getName();
         hackathon.setName(name.trim());
-        hackathon.setNameLc(form.getName().trim().toLowerCase());
         hackathon.setDescription(form.getDescription().trim());
 
         String country = StringUtils.capitalize(form.getCountry());

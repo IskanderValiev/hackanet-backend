@@ -1,15 +1,17 @@
 package com.hackanet.services;
 
 import com.hackanet.models.*;
+import com.hackanet.models.team.Team;
+import com.hackanet.models.team.TeamMember;
 import com.hackanet.repositories.SkillCombinationRepository;
+import com.hackanet.services.team.TeamMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.Comparator.comparing;
 
 /**
  * @author Iskander Valiev
@@ -25,18 +27,21 @@ public class SkillCombinationServiceImpl implements SkillCombinationService {
     @Autowired
     private SkillService skillService;
 
+    @Autowired
+    private TeamMemberService teamMemberService;
+
     @Override
     public void createByTeam(Team team) {
-        List<User> participants = team.getParticipants();
-        for (User p : participants) {
-            combineSkills(p, participants);
+        List<TeamMember> members = teamMemberService.getMembers(team.getId());
+        for (TeamMember m : members) {
+            combineSkills(m.getUser(), team, members);
         }
     }
 
     @Override
     public void updateIfUserJoinedToTeam(User user, Team team) {
-        List<User> participants = team.getParticipants();
-        combineSkills(user, participants);
+        List<TeamMember> members = teamMemberService.getMembers(team.getId());
+        combineSkills(user, team, members);
     }
 
     @Override
@@ -44,10 +49,10 @@ public class SkillCombinationServiceImpl implements SkillCombinationService {
         List<AuxiliarySkillCombination> list = new ArrayList<>();
         user.getSkills().forEach(skill -> {
             List<SkillCombination> combinations = skillCombinationRepository.findBySkillId(skill.getId());
-            long combinationCount = 0;
-            for (SkillCombination combination : combinations) {
-                combinationCount += combination.getCountOfCombination();
-            }
+            long combinationCount = combinations.stream()
+                    .mapToLong(SkillCombination::getCountOfCombination)
+                    .sum();
+
             for (SkillCombination combination : combinations) {
                 double probability = (double) combination.getCountOfCombination() / combinationCount;
                 list.add(AuxiliarySkillCombination.builder()
@@ -58,33 +63,39 @@ public class SkillCombinationServiceImpl implements SkillCombinationService {
             }
         });
 
-        List<Long> sortedList = list.stream()
-                .sorted(Comparator.comparing(AuxiliarySkillCombination::getProbability).reversed())
+        return list.stream()
+                .sorted(comparing(AuxiliarySkillCombination::getProbability).reversed())
                 .map(AuxiliarySkillCombination::getSkillUsedWithId)
+                .map(id -> skillService.get(id))
                 .collect(Collectors.toList());
-
-        List<Skill> orderedByProbability = new ArrayList<>();
-        // FIXME: 12/27/19 think of better way to add ordered list
-        sortedList.forEach(id -> orderedByProbability.add(skillService.get(id)));
-        return orderedByProbability;
-//        return new ArrayList<>(skillService.getByIds(sortedList));
     }
 
+    @Override
+    public void recalculate(Team team, TeamMember teamMember) {
+        List<TeamMember> members = teamMemberService.getMembers(team.getId());
+        members.remove(teamMember);
+
+        members.forEach(member ->
+                member.getSkills().forEach(skill ->
+                        teamMember.getSkills().forEach(skill1 ->
+                                decreaseCount(skill.getId(), skill1.getId())))
+        );
+        combineSkills(teamMember.getUser(), team, members);
+    }
 
     /**
-     * combines skills which are used by participants in team
+     * combines skills which are used by members in team
      *
-     * @param user         - user whose skills to combine
-     * @param participants - team participants to combine skills with
+     * @param user    - user whose skills to combine
+     * @param members - team members to combine skills with
      */
-    private void combineSkills(User user, List<User> participants) {
-        Set<User> otherParticipants = participants.stream()
-                .filter(participant -> !participant.equals(user))
-                .collect(Collectors.toSet());
+    private void combineSkills(User user, Team team, List<TeamMember> members) {
+        TeamMember member = teamMemberService.getMemberByUserIdAndTeamId(user.getId(), team.getId());
+        members.remove(member);
 
-        user.getSkills().forEach(skill ->
-                otherParticipants.forEach(op ->
-                        op.getSkills().forEach(ops -> {
+        member.getSkills().forEach(skill ->
+                members.forEach(m ->
+                        m.getSkills().forEach(ops -> {
                             if (!skill.equals(ops))
                                 createIfNotExistsAndIncreaseCount(skill.getId(), ops.getId());
                         })
@@ -92,16 +103,26 @@ public class SkillCombinationServiceImpl implements SkillCombinationService {
         );
     }
 
-    private SkillCombination createIfNotExistsAndIncreaseCount(Long skill, Long skillUsedWith) {
+    private void createIfNotExistsAndIncreaseCount(Long skill, Long skillUsedWith) {
         SkillCombination combination = skillCombinationRepository.findBySkillIdAndSkillUsedWith(skill, skillUsedWith);
-        if (combination == null)
+        if (combination == null) {
             combination = SkillCombination.builder()
                     .skillId(skill)
                     .skillUsedWith(skillUsedWith)
                     .countOfCombination(1L)
                     .build();
-        else
+        } else {
             combination.setCountOfCombination(combination.getCountOfCombination() + 1);
-        return skillCombinationRepository.save(combination);
+        }
+        skillCombinationRepository.save(combination);
+    }
+
+    private void decreaseCount(Long skill, Long skillUsedWith) {
+        SkillCombination combination = skillCombinationRepository.findBySkillIdAndSkillUsedWith(skill, skillUsedWith);
+        if (combination == null) {
+            return;
+        }
+        combination.setCountOfCombination(combination.getCountOfCombination() - 1);
+        skillCombinationRepository.save(combination);
     }
 }

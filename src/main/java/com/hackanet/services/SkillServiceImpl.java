@@ -31,7 +31,9 @@ public class SkillServiceImpl implements SkillService {
 
             skill = skillRepository.save(skill);
             return skill;
-        } else throw new BadRequestException("Name is empty or null");
+        } else {
+            throw new BadRequestException("Name is empty or null");
+        }
     }
 
     @Override

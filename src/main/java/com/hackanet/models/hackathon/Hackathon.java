@@ -30,9 +30,6 @@ public class Hackathon extends AbstractEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "name_lc")
-    private String nameLc;
-
     @Column(name = "description", nullable = false, length = 1024)
     private String description;
 
@@ -42,8 +39,9 @@ public class Hackathon extends AbstractEntity {
     @Column(name = "end_date", nullable = false)
     private Date endDate;
 
-    //    @Column(nullable = false)
-    private Integer prize;
+    // TODO: 2/13/20 nullable?
+    @Column(name = "prize_fund")
+    private Integer prizeFund;
 
     @Enumerated(EnumType.STRING)
     private Currency currency;
@@ -72,6 +70,7 @@ public class Hackathon extends AbstractEntity {
 
     @OneToMany(mappedBy = "hackathon")
     private List<Chat> chats;
+
 
     @OneToMany(mappedBy = "hackathon", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Track> tracks;

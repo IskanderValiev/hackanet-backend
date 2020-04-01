@@ -2,7 +2,7 @@ package com.hackanet.services;
 
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.PasswordChangeRequest;
-import com.hackanet.models.Team;
+import com.hackanet.models.team.Team;
 import com.hackanet.models.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

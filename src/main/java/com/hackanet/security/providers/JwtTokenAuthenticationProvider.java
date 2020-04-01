@@ -6,6 +6,7 @@ import com.hackanet.models.UserToken;
 import com.hackanet.security.authentication.JwtTokenAuthentication;
 import com.hackanet.security.details.UserDetailsImpl;
 import com.hackanet.services.UserService;
+import com.hackanet.services.UserTokenService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -28,7 +29,7 @@ public class JwtTokenAuthenticationProvider implements AuthenticationProvider {
     @Autowired
     private JwtConfig jwtConfig;
     @Autowired
-    private UserService userService;
+    private UserTokenService userTokenService;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -46,11 +47,11 @@ public class JwtTokenAuthenticationProvider implements AuthenticationProvider {
             }
 
             long userId = Long.parseLong(body.get("sub").toString());
-            UserToken token = userService.getByUserId(userId);
+            UserToken token = userTokenService.getByUserId(userId);
             if (token == null)
                 throw new NotFoundException("Token not found");
 
-            if (userService.userTokenExpired(token, true)) {
+            if (userTokenService.userTokenExpired(token, true)) {
                 tokenAuthentication.setAuthenticated(false);
                 return tokenAuthentication;
             }

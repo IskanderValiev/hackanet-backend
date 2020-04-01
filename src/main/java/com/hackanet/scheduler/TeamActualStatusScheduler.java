@@ -1,8 +1,7 @@
 package com.hackanet.scheduler;
 
-import com.hackanet.models.Team;
-import com.hackanet.services.HackathonService;
-import com.hackanet.services.TeamService;
+import com.hackanet.models.team.Team;
+import com.hackanet.services.team.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

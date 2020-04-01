@@ -16,6 +16,11 @@ import java.util.stream.Stream;
  */
 public class StringUtils {
 
+    public static String formatTitle(String s) {
+        s = org.apache.commons.lang.StringUtils.trimToEmpty(s);
+        return org.apache.commons.lang.StringUtils.capitalize(s);
+    }
+
     public static String generateRandomString() {
         return UUID.randomUUID().toString();
     }

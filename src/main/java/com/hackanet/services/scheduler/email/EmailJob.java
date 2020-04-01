@@ -1,10 +1,10 @@
 package com.hackanet.services.scheduler.email;
 
 import com.hackanet.exceptions.NotFoundException;
-import com.hackanet.models.Team;
+import com.hackanet.models.team.Team;
 import com.hackanet.models.User;
 import com.hackanet.services.EmailService;
-import com.hackanet.services.TeamService;
+import com.hackanet.services.team.TeamService;
 import com.hackanet.services.UserService;
 import com.hackanet.services.scheduler.JobType;
 import lombok.extern.slf4j.Slf4j;

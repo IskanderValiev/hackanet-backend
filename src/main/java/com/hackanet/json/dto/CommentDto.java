@@ -28,4 +28,7 @@ public class CommentDto {
     private List<CommentLikeDto> likes;
 
     private List<CommentDto> replies;
+
+    @Builder.Default
+    private Boolean edited = false;
 }

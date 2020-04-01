@@ -1,11 +1,15 @@
-package com.hackanet.services;
+package com.hackanet.services.team;
 
 import com.hackanet.exceptions.NotFoundException;
-import com.hackanet.models.Team;
-import com.hackanet.models.TeamInvitation;
+import com.hackanet.models.team.Team;
+import com.hackanet.models.team.TeamInvitation;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.TeamInvitationStatus;
 import com.hackanet.repositories.TeamInvitationRepository;
+import com.hackanet.services.HackathonService;
+import com.hackanet.services.JoinToHackathonRequestService;
+import com.hackanet.services.SkillCombinationService;
+import com.hackanet.services.UserService;
 import com.hackanet.services.chat.ChatService;
 import com.hackanet.services.scheduler.JobRunner;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
-import static com.hackanet.security.utils.SecurityUtils.*;
+import static com.hackanet.security.utils.SecurityUtils.checkTeamAccessAsTeamLeader;
 import static com.hackanet.security.utils.SecurityUtils.checkTeamInvitationAccess;
 
 /**
@@ -42,12 +47,6 @@ public class TeamInvitationServiceImpl implements TeamInvitationService {
     private SkillCombinationService skillCombinationService;
 
     @Autowired
-    private HackathonService hackathonService;
-
-    @Autowired
-    private JoinToHackathonRequestService joinToHackathonRequestService;
-
-    @Autowired
     private JobRunner jobRunner;
 
     @Override
@@ -57,15 +56,10 @@ public class TeamInvitationServiceImpl implements TeamInvitationService {
         teamService.throwExceptionIfTeamIsNotActual(team);
         User user = userService.get(userId);
         TeamInvitation invitation = repository.getByUserIdAndTeamId(userId, teamId);
-        if (invitation != null)
+        if (invitation != null) {
             return invitation;
-
-        invitation = TeamInvitation.builder()
-                .team(team)
-                .user(user)
-                .time(LocalDateTime.now())
-                .status(TeamInvitationStatus.WAITING)
-                .build();
+        }
+        invitation = build(user, team);
         invitation = repository.save(invitation);
         jobRunner.addTeamInvitationNotification(null, invitation);
         return invitation;
@@ -91,10 +85,7 @@ public class TeamInvitationServiceImpl implements TeamInvitationService {
         teamService.throwExceptionIfTeamIsNotActual(invitation.getTeam());
         user = userService.get(user.getId());
         if (status.equals(TeamInvitationStatus.ACCEPTED)) {
-            Team team = invitation.getTeam();
-            teamService.addUser(team, user);
-            chatService.addOrRemoveUser(team.getChat().getId(), user.getId(), null, true);
-            skillCombinationService.updateIfUserJoinedToTeam(user, team);
+            acceptInvitation(user, invitation);
         }
         invitation.setStatus(status);
         invitation = repository.save(invitation);
@@ -112,5 +103,27 @@ public class TeamInvitationServiceImpl implements TeamInvitationService {
     @Override
     public TeamInvitation get(Long id) {
         return repository.findById(id).orElseThrow(() -> new NotFoundException("Team invitation with id=" + id + " not found"));
+    }
+
+    @Override
+    public void sendInvitations(Set<User> participants, User user, Team team) {
+        participants
+                .forEach(p -> createIfNotExists(user, p.getId(), team.getId()));
+    }
+
+    private TeamInvitation build(User user, Team team) {
+        return TeamInvitation.builder()
+                .team(team)
+                .user(user)
+                .time(LocalDateTime.now())
+                .status(TeamInvitationStatus.WAITING)
+                .build();
+    }
+
+    private void acceptInvitation(User user, TeamInvitation invitation) {
+        Team team = invitation.getTeam();
+        teamService.addUser(team, user);
+        chatService.addOrRemoveUser(team.getChat().getId(), user.getId(), null, true);
+        skillCombinationService.updateIfUserJoinedToTeam(user, team);
     }
 }

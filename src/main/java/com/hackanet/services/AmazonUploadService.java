@@ -11,10 +11,8 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.hackanet.config.AmazonStorageConfig;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.ForbiddenException;
-import com.hackanet.json.mappers.FileInfoMapper;
 import com.hackanet.models.FileInfo;
 import com.hackanet.models.User;
-import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.utils.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.util.Objects;
 
 import static com.hackanet.security.utils.SecurityUtils.checkFileAccess;
 
@@ -72,34 +66,22 @@ public class AmazonUploadService implements UploadService {
     * */
     @Transactional
     public FileInfo uploadFile(User user, MultipartFile multipartFile) {
-        String fileUrl = "";
         File file = FileUtil.convertMultipartToFile(multipartFile);
         String filename = multipartFile.getOriginalFilename();
-        fileUrl = config.getEndpointUrl() + "/" + config.getBucketName() + "/" + filename;
+        String fileUrl = config.getEndpointUrl() + "/" + config.getBucketName() + "/" + filename;
         uploadFileToS3bucket(filename, file);
         file.delete();
 
-        try {
-            BufferedImage image = ImageIO.read(multipartFile.getInputStream());
-            if (Objects.isNull(image))
-                throw BadRequestException.forUploadingFile();
+        FileInfo fileInfo = FileInfo.builder()
+                .name(filename)
+                .previewLink(fileUrl)
+                .user(user)
+                .size(multipartFile.getSize())
+                .type(multipartFile.getContentType())
+                .build();
 
-            FileInfo fileInfo = FileInfo.builder()
-                    .name(filename)
-                    .previewLink(fileUrl)
-                    .user(user)
-                    .height(image.getHeight())
-                    .width(image.getWidth())
-                    .size(multipartFile.getSize())
-                    .type(multipartFile.getContentType())
-                    .build();
-
-            fileInfo = fileInfoService.save(fileInfo);
-            return fileInfo;
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-        return null;
+        fileInfo = fileInfoService.save(fileInfo);
+        return fileInfo;
     }
 
     /**
