@@ -112,8 +112,8 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
         throwIfExistsByEmail(email);
         String phone = PhoneUtil.formatPhone(form.getPhone());
         throwIfExistsByPhone(phone);
-        User user = getUser(form);
 
+        User user = getUser(form);
         if (form.getSkills() != null && !form.getSkills().isEmpty())
             user.setSkills(skillService.getByIds(form.getSkills()));
         user = userRepository.save(user);
@@ -399,6 +399,7 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
 
     @Override
     public void updateLastRequestTime(User user) {
+        user = get(user.getId());
         user.setLastRequestTime(LocalDateTime.now());
         userRepository.save(user);
     }

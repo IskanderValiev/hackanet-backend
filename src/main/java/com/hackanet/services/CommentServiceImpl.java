@@ -45,6 +45,7 @@ public class CommentServiceImpl implements CommentService {
                 .user(userService.get(form.getUserId()))
                 .date(DateTimeUtil.epochToLocalDateTime(System.currentTimeMillis()))
                 .replyParent(get(form.getReplyParentId()))
+                .edited(false)
                 .build();
         return commentRepository.save(comment);
     }
@@ -54,6 +55,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = get(id);
         SecurityUtils.checkCommentAccess(comment, user);
         comment.setText(form.getText());
+        comment.setEdited(true);
         return commentRepository.save(comment);
     }
 

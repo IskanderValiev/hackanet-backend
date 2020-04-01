@@ -25,10 +25,13 @@ public class HackathonJobDescriptionServiceImpl implements HackathonJobDescripti
 
     @Autowired
     private HackathonJobDescriptionRepository hackathonJobDescriptionRepository;
+
     @Autowired
     private HackathonService hackathonService;
+
     @Autowired
     private TeamService teamService;
+
     @Autowired
     private PortfolioService portfolioService;
 
@@ -39,8 +42,9 @@ public class HackathonJobDescriptionServiceImpl implements HackathonJobDescripti
 
         Long userId = form.getUserId();
         boolean contains = teamService.teamContainsUser(team, userId);
-        if (!contains)
+        if (!contains) {
             throw new BadRequestException("The user is not in the team");
+        }
 
         HackathonJobDescription hackathonJobDescription = HackathonJobDescription.builder()
                 .description(form.getDescription())

@@ -26,7 +26,7 @@ import java.util.List;
 import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
 import static com.hackanet.security.utils.SecurityUtils.checkTeamAccessAsTeamLeader;
 import static com.hackanet.utils.DateTimeUtil.now;
-import static com.hackanet.utils.validators.HackathonUtils.registrationIsAvailable;
+import static com.hackanet.utils.validators.HackathonRegistrationDateValidator.registrationIsAvailable;
 
 /**
  * @author Iskander Valiev

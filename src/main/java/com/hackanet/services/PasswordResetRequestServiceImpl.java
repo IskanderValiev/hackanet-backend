@@ -1,6 +1,5 @@
 package com.hackanet.services;
 
-import com.hackanet.application.Patterns;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.models.PasswordChangeRequest;
@@ -10,6 +9,7 @@ import com.hackanet.repositories.UserRepository;
 import com.hackanet.security.utils.PasswordUtil;
 import com.hackanet.utils.DateTimeUtil;
 import com.hackanet.utils.RandomString;
+import com.hackanet.utils.validators.ChangePasswordParamsValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 /**
  * @author Iskander Valiev
@@ -29,7 +28,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class PasswordResetRequestServiceImpl implements PasswordResetRequestService {
 
-    private static final Integer PASSWORD_REQUEST_EXPIRED_TIME = 15;
+    public static final Integer PASSWORD_REQUEST_EXPIRED_TIME = 15;
 
     @Autowired
     private EmailService emailService;
@@ -46,6 +45,8 @@ public class PasswordResetRequestServiceImpl implements PasswordResetRequestServ
     @Autowired
     private PasswordUtil passwordUtil;
 
+    @Autowired
+    private ChangePasswordParamsValidator validator;
 
     @Override
     public void passwordResetRequest(String email) {
@@ -90,31 +91,14 @@ public class PasswordResetRequestServiceImpl implements PasswordResetRequestServ
     @Override
     @Transactional
     public void changePassword(String code, String newPassword, String email) {
-        if (StringUtils.isBlank(code))
-            throw new BadRequestException("Code is empty or null");
-
-        if (StringUtils.isBlank(email))
-            throw new BadRequestException("Email is empty");
-
-        boolean matches = Pattern.matches(Patterns.VALID_PASSWORD_REGEX, newPassword.trim());
-        if (!matches)
-            throw new BadRequestException("Password is invalid");
-
-        PasswordChangeRequest passwordRequest = passwordChangeRequestRepository.findByCode(code)
-                .orElseThrow(() -> new NotFoundException("Password change request not found"));
-
-        if (Boolean.TRUE.equals(passwordRequest.getUsed()))
-            throw new BadRequestException("The password change request has been already used");
-
-        LocalDateTime now = LocalDateTime.now();
-        long minutes = DateTimeUtil.getDifferenceBetweenLocalDateTimes(passwordRequest.getCreatedDate(), now);
-        if (minutes > PASSWORD_REQUEST_EXPIRED_TIME) {
-            throw new BadRequestException("Password reset request has expired");
-        }
+        validator.validate(code, newPassword, email);
+        PasswordChangeRequest passwordRequest = getByCode(code);
+        validator.validate(passwordRequest);
 
         User user = userService.get(passwordRequest.getUserId());
-        if (passwordUtil.matches(newPassword, user.getHashedPassword()))
+        if (passwordUtil.matches(newPassword, user.getHashedPassword())) {
             throw new BadRequestException("You can't use old password as a new one");
+        }
         if (!user.getEmail().equals(email)) {
             throw new BadRequestException("Emails are not the same");
         }
@@ -124,5 +108,10 @@ public class PasswordResetRequestServiceImpl implements PasswordResetRequestServ
 
         passwordRequest.setUsed(Boolean.TRUE);
         passwordChangeRequestRepository.save(passwordRequest);
+    }
+
+    private PasswordChangeRequest getByCode(String code) {
+        return passwordChangeRequestRepository.findByCode(code)
+                .orElseThrow(() -> new NotFoundException("Password change request not found"));
     }
 }
