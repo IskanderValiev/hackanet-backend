@@ -77,8 +77,11 @@ public class SkillCombinationServiceImpl implements SkillCombinationService {
 
         members.forEach(member ->
                 member.getSkills().forEach(skill ->
-                        teamMember.getSkills().forEach(skill1 ->
-                                decreaseCount(skill.getId(), skill1.getId())))
+                        teamMember.getSkills().forEach(skill1 -> {
+                            decreaseCount(skill.getId(), skill1.getId());
+                            decreaseCount(skill1.getId(), skill.getId());
+                        })
+                )
         );
         combineSkills(teamMember.getUser(), team, members);
     }
@@ -96,8 +99,10 @@ public class SkillCombinationServiceImpl implements SkillCombinationService {
         member.getSkills().forEach(skill ->
                 members.forEach(m ->
                         m.getSkills().forEach(ops -> {
-                            if (!skill.equals(ops))
+                            if (!skill.equals(ops)) {
                                 createIfNotExistsAndIncreaseCount(skill.getId(), ops.getId());
+                                createIfNotExistsAndIncreaseCount(ops.getId(), skill.getId());
+                            }
                         })
                 )
         );
