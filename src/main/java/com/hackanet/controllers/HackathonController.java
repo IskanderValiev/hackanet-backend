@@ -166,7 +166,7 @@ public class HackathonController {
                                               @RequestParam Date to,
                                               @PathVariable Long id,
                                               HttpServletRequest request) {
-        return ResponseEntity.ok(hackathonProfileViewService.countsOfUniqueViewInPeriod(user, id, from, to));
+        return ResponseEntity.ok(hackathonProfileViewService.countOfUniqueViewsInPeriod(user, id, from, to));
     }
 
     @GetMapping(FRIENDS)

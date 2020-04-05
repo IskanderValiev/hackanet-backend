@@ -5,13 +5,11 @@ import com.hackanet.models.FileInfo;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.Skill;
 import com.hackanet.models.User;
+import com.hackanet.services.HackathonLikeService;
+import com.hackanet.services.HackathonProfileViewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 import static com.hackanet.utils.DateTimeUtil.localDateTimeToLong;
 
@@ -44,6 +42,12 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
     @Autowired
     private SponsorMapper sponsorMapper;
 
+    @Autowired
+    private HackathonLikeService hackathonLikeService;
+
+    @Autowired
+    private HackathonProfileViewService hackathonProfileViewService;
+
     @Override
     public HackathonDto map(Hackathon from) {
         if (from == null) {
@@ -69,6 +73,8 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
                 .picture(fileMapper.map(from.getLogo()))
                 .requiredSkills(skillMapper.map(from.getRequiredSkills()))
                 .participants(userSimpleMapper.map(from.getParticipants()))
+                .likesCount(hackathonLikeService.countByHackathonId(from.getId()))
+                .viewsCount(hackathonProfileViewService.countByHackathonId(from.getId()))
                 .build();
         if (from.getRegistrationStartDate() != null) {
             hackathon.setRegistrationStartDate(localDateTimeToLong(from.getRegistrationStartDate()));

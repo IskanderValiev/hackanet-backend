@@ -38,9 +38,14 @@ public class HackathonProfileViewServiceImpl implements HackathonProfileViewServ
     }
 
     @Override
-    public Long countsOfUniqueViewInPeriod(User user, Long hackathonId, Date from, Date to) {
+    public Long countOfUniqueViewsInPeriod(User user, Long hackathonId, Date from, Date to) {
         Hackathon hackathon = hackathonService.get(hackathonId);
         checkHackathonAccess(hackathon, user);
         return hackathonProfileViewRepository.countOfUniqueViewsInPeriod(hackathonId, from, to);
+    }
+
+    @Override
+    public Long countByHackathonId(Long hackathonId) {
+        return hackathonProfileViewRepository.countAllByHackathonId(hackathonId);
     }
 }
