@@ -1,12 +1,10 @@
 package com.hackanet.services;
 
-import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.models.ConnectionInvitation;
 import com.hackanet.models.User;
 import com.hackanet.models.enums.ConnectionInvitationStatus;
 import com.hackanet.repositories.ConnectionInvitationRepository;
-import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.scheduler.JobRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
-import static com.hackanet.security.utils.SecurityUtils.*;
+import static com.hackanet.security.utils.SecurityUtils.checkConnectionInvitationAccess;
+import static com.hackanet.security.utils.SecurityUtils.containedInBlackList;
 
 /**
  * @author Iskander Valiev
@@ -37,13 +36,16 @@ public class ConnectionInvitationServiceImpl implements ConnectionInvitationServ
     private JobRunner jobRunner;
 
     @Override
-    public ConnectionInvitation sendInvitation(User user, Long invitedUser) {
-        ConnectionInvitation invitation = connectionInvitationRepository.findByUserIdAndInvitedUserId(user.getId(), invitedUser);
-        if (invitation != null)
+    public ConnectionInvitation sendInvitation(User user, Long invitedUserId) {
+        User invitedUser = userService.get(invitedUserId);
+        containedInBlackList(invitedUser, user);
+        ConnectionInvitation invitation = connectionInvitationRepository.findByUserIdAndInvitedUserId(user.getId(), invitedUserId);
+        if (invitation != null) {
             return invitation;
+        }
         invitation = ConnectionInvitation.builder()
                 .user(user)
-                .invitedUser(userService.get(invitedUser))
+                .invitedUser(invitedUser)
                 .status(ConnectionInvitationStatus.NEW)
                 .build();
         return connectionInvitationRepository.save(invitation);

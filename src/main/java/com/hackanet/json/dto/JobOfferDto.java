@@ -15,7 +15,7 @@ import lombok.Data;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class JobOfferDto {
     private Long id;
-    private UserSimpleDto userSimpleDto;
-    private CompanyDto companyDto;
+    private UserSimpleDto userSimple;
+    private CompanyDto company;
     private Long time;
 }

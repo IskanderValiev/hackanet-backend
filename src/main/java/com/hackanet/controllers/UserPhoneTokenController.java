@@ -32,8 +32,10 @@ public class UserPhoneTokenController {
 
     @Autowired
     private UserPhoneTokenService userPhoneTokenService;
+
     @Autowired
     private UserPhoneTokenMapper userPhoneTokenMapper;
+
     @Autowired
     private RabbitMQPushNotificationService rabbitMQPushNotificationService;
 
@@ -52,6 +54,7 @@ public class UserPhoneTokenController {
     }
 
     @GetMapping("/send")
+    @ApiOperation("FOR TESTS")
     public ResponseEntity<String> send() {
         rabbitMQPushNotificationService.sendTestNotification();
         return ResponseEntity.ok("OK");

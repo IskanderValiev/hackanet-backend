@@ -8,7 +8,6 @@ import com.hackanet.models.chat.Message;
 import com.hackanet.services.FileInfoService;
 import com.hackanet.services.UserService;
 import com.hackanet.services.chat.ChatMessageServiceElasticsearchImpl;
-import com.hackanet.utils.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,7 +50,7 @@ public class MessageMapper {
         return MessageDto.builder()
                 .id(from.getId())
                 .text(from.getText())
-                .timestamp(localDateTimeToLong(from.getTimestamp()))
+                .date(localDateTimeToLong(from.getTimestamp()))
                 .attachments(files)
                 .chatId(from.getChatId())
                 .replies(map(chatMessageService.getReplies(from.getId())))

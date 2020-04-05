@@ -67,14 +67,9 @@ public class HackathonMapper implements Mapper<Hackathon, HackathonDto> {
                 .approved(Boolean.TRUE.equals(from.getApproved()))
                 .sponsors(sponsorMapper.map(from.getSponsors()))
                 .picture(fileMapper.map(from.getLogo()))
+                .requiredSkills(skillMapper.map(from.getRequiredSkills()))
+                .participants(userSimpleMapper.map(from.getParticipants()))
                 .build();
-        List<Skill> requiredSkills = from.getRequiredSkills();
-        if (requiredSkills != null)
-            hackathon.setRequiredSkills(skillMapper.map(requiredSkills));
-        Set<User> participants = from.getParticipants();
-        if (participants != null) {
-            hackathon.setParticipants(userSimpleMapper.map(new ArrayList<>(participants)));
-        }
         if (from.getRegistrationStartDate() != null) {
             hackathon.setRegistrationStartDate(localDateTimeToLong(from.getRegistrationStartDate()));
         }

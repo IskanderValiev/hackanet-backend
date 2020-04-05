@@ -26,6 +26,12 @@ public class SecurityUtils {
         }
     }
 
+    public static void containedInBlackList(User user, User userToCheck) {
+        if (user.getBlockedUsers().contains(userToCheck)) {
+            throw new BlackListException("The user with email = " + userToCheck.getEmail() + " is in black list");
+        }
+    }
+
     public static void checkUserProfileForViewing(User profileOwner, User user) {
         if (profileOwner.getBlockedUsers().contains(user))
             throw new BlackListException("You are in the black list");

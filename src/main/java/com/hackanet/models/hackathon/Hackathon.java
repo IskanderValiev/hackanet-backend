@@ -100,4 +100,8 @@ public class Hackathon extends AbstractEntity {
     public List<Track> getTracks() {
         return tracks == null ? Lists.newArrayList() : tracks;
     }
+
+    public List<Skill> getRequiredSkills() {
+        return requiredSkills == null ? Lists.newArrayList() : requiredSkills;
+    }
 }

@@ -42,7 +42,7 @@ public class JobOfferController {
             @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
                     required = true, dataType = "string", paramType = "header")
     })
-    @ApiOperation("Update chat settings for the user")
+    @ApiOperation("Send a job offer")
     @PreAuthorize("hasAuthority('COMPANY_ADMIN')")
     public ResponseEntity<JobOfferDto> send(@RequestParam Long userId,
                                             @AuthenticationPrincipal User user) {
@@ -55,7 +55,7 @@ public class JobOfferController {
             @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
                     required = true, dataType = "string", paramType = "header")
     })
-    @ApiOperation("Update chat settings for the user")
+    @ApiOperation("Delete a job offer")
     @PreAuthorize("hasAnyAuthority('COMPANY_ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<String> delete(@PathVariable Long id,
                                          @AuthenticationPrincipal User user) {
@@ -68,7 +68,7 @@ public class JobOfferController {
             @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
                     required = true, dataType = "string", paramType = "header")
     })
-    @ApiOperation("Update chat settings for the user")
+    @ApiOperation("Delete a job offer for user")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<JobOfferDto> deleteForUser(@PathVariable Long id,
                                                      @AuthenticationPrincipal User user) {
@@ -81,7 +81,7 @@ public class JobOfferController {
             @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
                     required = true, dataType = "string", paramType = "header")
     })
-    @ApiOperation("Update chat settings for the user")
+    @ApiOperation("Accept a job offer")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<String> accept(@PathVariable Long id,
                                          @AuthenticationPrincipal User user) {

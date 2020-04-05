@@ -18,8 +18,8 @@ import java.time.LocalDateTime;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class TeamInvitationDto {
     private Long id;
-    private UserSimpleDto userSimpleDto;
-    private TeamSimpleDto teamSimpleDto;
+    private UserSimpleDto userSimple;
+    private TeamSimpleDto teamSimple;
     private Long localDateTime;
     private TeamInvitationStatus status;
 }

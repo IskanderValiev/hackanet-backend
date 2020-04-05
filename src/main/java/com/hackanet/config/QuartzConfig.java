@@ -1,6 +1,5 @@
 package com.hackanet.config;
 
-import com.hackanet.services.scheduler.SchedulerJobFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronTrigger;
 import org.quartz.JobDetail;
@@ -8,17 +7,13 @@ import org.quartz.SimpleTrigger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.quartz.QuartzProperties;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
-import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
 
 import javax.sql.DataSource;
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.Properties;
 
 /**
  * @author Iskander Valiev

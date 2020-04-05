@@ -15,6 +15,6 @@ import lombok.Data;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class SubscriptionDto {
     private Long id;
-    private HackathonDto hackathonDto;
+    private HackathonDto hackathon;
     private Long userId;
 }

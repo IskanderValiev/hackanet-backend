@@ -72,10 +72,10 @@ public class ConnectionInvitationController {
             @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
                     required = true, dataType = "string", paramType = "header")
     })
-    @ApiOperation("Get all invitations by invited user")
+    @ApiOperation("Send invitation")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ConnectionInvitationDto> getByInvitedUser(@AuthenticationPrincipal User user,
-                                                   @RequestParam("invitedUserId") Long id) {
+    public ResponseEntity<ConnectionInvitationDto> sendInvitation(@AuthenticationPrincipal User user,
+                                                                  @RequestParam("invitedUserId") Long id) {
         ConnectionInvitation invitation = connectionInvitationService.sendInvitation(user, id);
         return ResponseEntity.ok(connectionInvitationMapper.map(invitation));
     }

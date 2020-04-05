@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class TokenDto implements Serializable {
 
     private static final long serialVersionUID = -5534236268551559040L;

@@ -16,7 +16,7 @@ import lombok.Data;
 public class UserReviewDto {
     private Long id;
     private UserSimpleDto user;
-    private TeamDto teamDto;
+    private TeamDto team;
     private String reviewMessage;
     private Boolean anonymously;
     private Integer mark;
