@@ -25,7 +25,7 @@ public class UserReviewMapper implements Mapper<UserReview, UserReviewDto> {
         }
         UserReviewDto dto = UserReviewDto.builder()
                 .id(from.getId())
-                .teamDto(teamMapper.map(from.getTeam()))
+                .team(teamMapper.map(from.getTeam()))
                 .mark(from.getMark())
                 .reviewMessage(from.getReviewMessage())
                 .anonymously(Boolean.TRUE.equals(from.isAnonymously()))

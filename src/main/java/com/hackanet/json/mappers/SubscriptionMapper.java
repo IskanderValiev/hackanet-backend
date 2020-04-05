@@ -20,7 +20,7 @@ public class SubscriptionMapper implements Mapper<Subscription, SubscriptionDto>
     public SubscriptionDto map(Subscription from) {
         return SubscriptionDto.builder()
                 .id(from.getId())
-                .hackathonDto(hackathonMapper.map(from.getHackathon()))
+                .hackathon(hackathonMapper.map(from.getHackathon()))
                 .userId(from.getUser().getId())
                 .build();
     }

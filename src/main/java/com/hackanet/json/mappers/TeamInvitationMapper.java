@@ -28,8 +28,8 @@ public class TeamInvitationMapper implements Mapper<TeamInvitation, TeamInvitati
         return TeamInvitationDto.builder()
                 .id(from.getId())
                 .localDateTime(DateTimeUtil.localDateTimeToLong(from.getTime()))
-                .teamSimpleDto(teamSimpleMapper.map(from.getTeam()))
-                .userSimpleDto(userSimpleMapper.map(from.getUser()))
+                .teamSimple(teamSimpleMapper.map(from.getTeam()))
+                .userSimple(userSimpleMapper.map(from.getUser()))
                 .status(from.getStatus())
                 .build();
     }
