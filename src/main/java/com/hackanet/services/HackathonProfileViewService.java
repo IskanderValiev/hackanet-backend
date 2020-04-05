@@ -13,5 +13,6 @@ import java.sql.Date;
  */
 public interface HackathonProfileViewService {
     HackathonProfileView addView(User user, Hackathon hackathon);
-    Long countsOfUniqueViewInPeriod(User user, Long hackathonId, Date from, Date to);
+    Long countOfUniqueViewsInPeriod(User user, Long hackathonId, Date from, Date to);
+    Long countByHackathonId(Long hackathonId);
 }

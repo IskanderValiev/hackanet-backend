@@ -44,4 +44,5 @@ public class HackathonDto {
     private Boolean approved;
     private List<SponsorDto> sponsors;
     private Long likesCount;
+    private Long viewsCount;
 }
