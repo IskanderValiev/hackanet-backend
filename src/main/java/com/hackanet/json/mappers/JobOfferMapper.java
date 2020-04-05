@@ -28,8 +28,8 @@ public class JobOfferMapper implements Mapper<JobOffer, JobOfferDto> {
         return JobOfferDto.builder()
                 .id(from.getId())
                 .time(DateTimeUtil.localDateTimeToLong(from.getTime()))
-                .companyDto(companyMapper.map(from.getCompany()))
-                .userSimpleDto(userSimpleMapper.map(from.getUser()))
+                .company(companyMapper.map(from.getCompany()))
+                .userSimple(userSimpleMapper.map(from.getUser()))
                 .build();
     }
 }
