@@ -14,6 +14,10 @@ import lombok.Data;
 @Builder
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class FileInfoDto {
+
     private Long id;
+    private String name;
     private String previewLink;
+    private Long size;
+    private String mimeType;
 }

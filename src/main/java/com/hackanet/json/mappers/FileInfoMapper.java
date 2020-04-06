@@ -22,6 +22,9 @@ public class FileInfoMapper implements Mapper<FileInfo, FileInfoDto> {
 
         return FileInfoDto.builder()
                 .id(from.getId())
+                .name(from.getName())
+                .size(from.getSize())
+                .mimeType(from.getType())
                 .previewLink(from.getPreviewLink())
                 .build();
     }
