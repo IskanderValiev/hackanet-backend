@@ -24,13 +24,15 @@ public class UserDto {
     private String email;
     private String phone;
     private String about;
+    private String university;
     private String name;
     private String lastname;
     private String country;
     private String city;
-    private FileInfoDto image;
+    private FileInfoDto picture;
     private List<SkillDto> skills;
     private Long reviewCount;
     private Double rating;
     private Long lastRequestTime;
+    private PositionDto position;
 }

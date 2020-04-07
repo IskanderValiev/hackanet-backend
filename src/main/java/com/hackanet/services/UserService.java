@@ -17,7 +17,6 @@ public interface UserService extends RetrieveService<User> {
     TokenDto register(UserRegistrationForm form);
     TokenDto login(UserLoginForm form);
     Boolean exists(String email);
-    Boolean existsByPhone(String phone);
     User get(String email);
     User getUserInfo(Long id, User currentUser);
     Set<User> getByIds(List<Long> ids);
@@ -29,4 +28,5 @@ public interface UserService extends RetrieveService<User> {
     TokenDto getTokenDtoFromString(String string);
     User get(User jwtData);
     void updateLastRequestTime(User user);
+    void confirmEmail(String code);
 }

@@ -10,6 +10,7 @@ public interface EmailService {
     void send(String text, String subject, String email);
     void test(String email);
     void sendWelcomeEmail(User user);
+    void sendEmailConfirmation(User user);
     void sendPasswordResetEmail(User user, PasswordChangeRequest request);
     void sendTeamWelcomeEmail(User user, Team team);
     void sendTeamRejectEmail(User user, Team team);

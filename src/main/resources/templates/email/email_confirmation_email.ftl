@@ -9,6 +9,7 @@
     <meta name="author" content="Iskander Valiev">
 </head>
 <body>
-<h1>Welcome to the club, buddy</h1>
+You have successfully created an account on Hackanet.
+To complete registration, please, follow this link: ${link}
 </body>
 </html>

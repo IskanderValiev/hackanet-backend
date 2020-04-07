@@ -27,9 +27,8 @@ public class PostDto {
     private String title;
     private String content;
     private UserSimpleDto author;
-    private HackathonDto hackathonDto;
+    private HackathonSimpleDto hackathon;
     private FileInfoDto picture;
-    private List<FileInfoDto> images;
     private Long date;
     private Long likesCount;
     private Long dislikesCount;

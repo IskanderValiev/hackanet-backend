@@ -1,10 +1,7 @@
 package com.hackanet.json.mappers;
 
-import com.hackanet.json.dto.*;
-import com.hackanet.models.FileInfo;
-import com.hackanet.models.hackathon.Hackathon;
+import com.hackanet.json.dto.PostDto;
 import com.hackanet.models.Post;
-import com.hackanet.models.User;
 import com.hackanet.models.enums.LikeType;
 import com.hackanet.services.CommentService;
 import com.hackanet.services.PostLikeService;
@@ -22,13 +19,13 @@ import org.springframework.stereotype.Component;
 public class PostMapper implements Mapper<Post, PostDto> {
 
     @Autowired
-    private Mapper<User, UserSimpleDto> userMapper;
+    private UserSimpleMapper userMapper;
 
     @Autowired
-    private Mapper<Hackathon, HackathonDto> hackathonMapper;
+    private HackathonSimpleMapper hackathonMapper;
 
     @Autowired
-    private Mapper<FileInfo, FileInfoDto> fileMapper;
+    private FileInfoMapper fileMapper;
 
     @Autowired
     private PostLikeService postLikeService;
@@ -44,7 +41,7 @@ public class PostMapper implements Mapper<Post, PostDto> {
         if (from == null) {
             return null;
         }
-        PostDto postDto = PostDto.builder()
+        return PostDto.builder()
                 .id(from.getId())
                 .title(from.getTitle())
                 .content(from.getContent())
@@ -55,13 +52,7 @@ public class PostMapper implements Mapper<Post, PostDto> {
                 .views(postViewService.countOfUniqueViews(from.getId()))
                 .picture(fileMapper.map(from.getPicture()))
                 .commentsCount(commentService.getByPost(from.getId()).size())
+                .hackathon(hackathonMapper.map(from.getHackathon()))
                 .build();
-
-        if (from.getHackathon() != null)
-            postDto.setHackathonDto(hackathonMapper.map(from.getHackathon()));
-        if (from.getImages() != null && !from.getImages().isEmpty()) {
-            postDto.setImages(fileMapper.map(from.getImages()));
-        }
-        return postDto;
     }
 }

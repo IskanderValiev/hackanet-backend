@@ -14,4 +14,5 @@ public interface TemplateService {
     String prepareTeamRejectEmail(User user, Team team);
     String prepareHackathonWelcomeEmail(User user, Hackathon hackathon);
     String prepareHackathonJobReviewRequestEmail(User user, Team team);
+    String prepareEmailConfirmation(User user);
 }

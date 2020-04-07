@@ -53,7 +53,6 @@ public class PortfolioServiceImpl implements PortfolioService {
         Portfolio portfolio = Portfolio.builder()
                 .user(userService.get(userId))
                 .build();
-
         return portfolioRepository.save(portfolio);
     }
 

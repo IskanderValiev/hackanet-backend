@@ -3,9 +3,6 @@ package com.hackanet.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.hackanet.application.AppConstants;
-import com.hackanet.application.Patterns;
-import com.hackanet.config.JwtConfig;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.dto.TokenDto;
@@ -13,18 +10,13 @@ import com.hackanet.json.forms.*;
 import com.hackanet.models.*;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.push.enums.ClientType;
-import com.hackanet.repositories.PasswordChangeRequestRepository;
 import com.hackanet.repositories.UserPhoneTokenRepository;
 import com.hackanet.repositories.UserRepository;
 import com.hackanet.repositories.UserTokenRepository;
 import com.hackanet.security.enums.Role;
-import com.hackanet.security.enums.TokenType;
 import com.hackanet.security.utils.PasswordUtil;
 import com.hackanet.security.utils.SecurityUtils;
-import com.hackanet.utils.PhoneUtil;
 import com.hackanet.utils.RandomString;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -61,16 +53,12 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
 
     // FIXME: 10/21/19 change the value
     private static final Integer DEFAULT_LIMIT = 10;
-    private static final Integer PASSWORD_REQUEST_EXPIRED_TIME = 15;
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private PasswordUtil passwordUtil;
-
-    @Autowired
-    private JwtConfig jwtConfig;
 
     @Autowired
     private EntityManager entityManager;
@@ -88,9 +76,6 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
     private EmailService emailService;
 
     @Autowired
-    private PasswordChangeRequestRepository passwordChangeRequestRepository;
-
-    @Autowired
     private PortfolioService portfolioService;
 
     @Autowired
@@ -105,22 +90,19 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
     @Autowired
     private UserTokenService userTokenService;
 
+    @Autowired
+    private PositionService positionService;
+
     @Override
     @Transactional
     public TokenDto register(UserRegistrationForm form) {
         String email = form.getEmail().toLowerCase();
-        throwIfExistsByEmail(email);
-        String phone = PhoneUtil.formatPhone(form.getPhone());
-        throwIfExistsByPhone(phone);
-
-        User user = getUser(form);
-        if (form.getSkills() != null && !form.getSkills().isEmpty())
-            user.setSkills(skillService.getByIds(form.getSkills()));
-        user = userRepository.save(user);
-
+        checkIfExistsByEmail(email);
+        User user = userRepository.save(buildUser(form));
         userNotificationSettingsService.getOrCreateDefaultsSettingsForUser(user);
         portfolioService.getByUserId(user.getId());
         emailService.sendWelcomeEmail(user);
+        emailService.sendEmailConfirmation(user);
         return userTokenService.getTokenByUser(user);
     }
 
@@ -151,14 +133,9 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
     }
 
     @Override
-    public Boolean existsByPhone(String phone) {
-        phone = PhoneUtil.formatPhone(phone);
-        return userRepository.existsByPhone(phone);
-    }
-
-    @Override
     public User get(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> NotFoundException.forUser(email));
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> NotFoundException.forUser(email));
     }
 
     @Override
@@ -173,7 +150,8 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
 
     @Override
     public User get(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> NotFoundException.forUser(id));
+        return userRepository.findById(id)
+                .orElseThrow(() -> NotFoundException.forUser(id));
     }
 
     @Override
@@ -342,11 +320,13 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
         user.setName(form.getName());
         user.setLastname(form.getLastname());
         user.setAbout(form.getAbout());
-        user.setAbout(form.getCity());
-        user.setCountry(form.getCountry());
+        user.setCity(StringUtils.capitalize(form.getCity().toLowerCase()));
+        user.setCountry(StringUtils.capitalize(form.getCity().toLowerCase()));
         user.setPicture(fileInfoService.get(form.getImage()));
         user.setSkills(skillService.getByIds(form.getSkills()));
         user.setLookingForTeam(form.getLookingForTeam());
+        user.setPosition(positionService.get(form.getPositionId()));
+        user.setUniversity(form.getUniversity());
         user = userRepository.save(user);
         return user;
     }
@@ -392,7 +372,7 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
         return get(jwtData.getId());
     }
 
-    private void throwIfExistsByEmail(String email) {
+    private void checkIfExistsByEmail(String email) {
         if (exists(email))
             throw new BadRequestException("User with such email already exists");
     }
@@ -404,9 +384,16 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
         userRepository.save(user);
     }
 
-    private void throwIfExistsByPhone(String phone) {
-        if (existsByPhone(phone))
-            throw new BadRequestException("User with such phone already exists");
+    @Override
+    public void confirmEmail(String code) {
+        final User user = getByEmailConfirmationCode(code);
+        user.setEmailConfirmed(Boolean.TRUE);
+        userRepository.save(user);
+    }
+
+    private User getByEmailConfirmationCode(String code) {
+        return userRepository.findByEmailConfirmationCode(code)
+                .orElseThrow(() -> NotFoundException.throwNFE(User.class, "email confirmation code", code));
     }
 
     private CriteriaQuery<User> getUsersListQuery(CriteriaBuilder criteriaBuilder, UserSearchForm form) {
@@ -451,20 +438,17 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
         return query;
     }
 
-    private User getUser(UserRegistrationForm form) {
+    private User buildUser(UserRegistrationForm form) {
         return User.builder()
                 .email(form.getEmail().toLowerCase())
                 .hashedPassword(passwordUtil.hash(form.getPassword()))
-                .phone(PhoneUtil.formatPhone(form.getPhone().trim()))
-                .name(form.getName())
-                .lastname(form.getLastname())
-                .city(form.getCity())
-                .country(form.getCountry())
-                .about(form.getAbout())
                 .role(Role.USER)
                 .lookingForTeam(Boolean.FALSE)
                 .accessTokenParam(new RandomString().nextString())
                 .refreshTokenParam(new RandomString().nextString())
+                .emailConfirmationCode(new RandomString().nextString())
+                .lastRequestTime(LocalDateTime.now())
+                .emailConfirmed(Boolean.FALSE)
                 .build();
     }
 }
