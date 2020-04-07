@@ -27,6 +27,7 @@ public class UserDto {
     private String university;
     private String name;
     private String lastname;
+    private String nickname;
     private String country;
     private String city;
     private FileInfoDto picture;

@@ -27,9 +27,9 @@ public class UserSimpleMapper implements Mapper<User, UserSimpleDto> {
                 .id(from.getId())
                 .name(from.getName())
                 .lastname(from.getLastname())
+                .nickname(from.getNickname())
+                .picture(mapper.map(from.getPicture()))
                 .build();
-        if (from.getPicture() != null)
-            userDto.setImage(mapper.map(from.getPicture()));
         return userDto;
     }
 }

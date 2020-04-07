@@ -36,6 +36,8 @@ public class UserUpdateForm {
     @Pattern(regexp = "\\w", message = "Last name must be containing only letters")
     private String lastname;
 
+    private String nickname;
+
     private Long image;
 
     private String about;

@@ -3,6 +3,7 @@ package com.hackanet.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.hackanet.exceptions.AlreadyExistException;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.dto.TokenDto;
@@ -317,16 +318,32 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
     public User update(@NotNull Long id, @NotNull User currentUser, @NotNull UserUpdateForm form) {
         User user = get(id);
         SecurityUtils.checkProfileAccess(currentUser, user);
+        if (form.getNickname() != null) {
+            checkIfExistsByNickname(form.getNickname().toLowerCase());
+            user.setNickname(form.getNickname().toLowerCase());
+        } else {
+            user.setNickname(form.getNickname());
+        }
         user.setName(form.getName());
         user.setLastname(form.getLastname());
         user.setAbout(form.getAbout());
-        user.setCity(StringUtils.capitalize(form.getCity().toLowerCase()));
-        user.setCountry(StringUtils.capitalize(form.getCity().toLowerCase()));
         user.setPicture(fileInfoService.get(form.getImage()));
         user.setSkills(skillService.getByIds(form.getSkills()));
         user.setLookingForTeam(form.getLookingForTeam());
         user.setPosition(positionService.get(form.getPositionId()));
         user.setUniversity(form.getUniversity());
+        user.setCity(StringUtils.capitalize(form.getCity().toLowerCase()));
+        user.setCountry(StringUtils.capitalize(form.getCity().toLowerCase()));
+        if (form.getCity() != null) {
+            user.setCity(StringUtils.capitalize(form.getCity().toLowerCase()));
+        } else {
+            user.setCity(form.getCity());
+        }
+        if (form.getCountry() != null) {
+            user.setCountry(StringUtils.capitalize(form.getCountry().toLowerCase()));
+        } else {
+            user.setCountry(form.getCountry());
+        }
         user = userRepository.save(user);
         return user;
     }
@@ -396,6 +413,11 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
                 .orElseThrow(() -> NotFoundException.throwNFE(User.class, "email confirmation code", code));
     }
 
+    private void checkIfExistsByNickname(String nickname) {
+        userRepository.findByNickname(nickname)
+                .ifPresent((user) -> AlreadyExistException.throwException(user.getClass(), "nickname", nickname));
+    }
+
     private CriteriaQuery<User> getUsersListQuery(CriteriaBuilder criteriaBuilder, UserSearchForm form) {
         CriteriaQuery<User> query = criteriaBuilder.createQuery(User.class);
         Root<User> root = query.from(User.class);
@@ -407,6 +429,9 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
             } else {
                 predicates.add(criteriaBuilder.isFalse(root.get("lookingForTeam")));
             }
+        }
+        if (!StringUtils.isBlank(form.getNickname())) {
+            predicates.add(criteriaBuilder.like(root.get("nickname"), "%" +form.getNickname() + "%"));
         }
         if (!StringUtils.isBlank(form.getName())) {
             Expression<String> nameInLowerCase = criteriaBuilder.lower(root.get("name"));

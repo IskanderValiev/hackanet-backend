@@ -40,6 +40,7 @@ public class UserMapper implements Mapper<User, UserDto> {
                 .lastname(from.getLastname())
                 .country(from.getCountry())
                 .city(from.getCity())
+                .nickname(from.getNickname())
                 .about(from.getAbout())
                 .university(from.getUniversity())
                 .reviewCount(rating.getCount())

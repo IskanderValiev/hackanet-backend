@@ -19,5 +19,6 @@ public class UserSimpleDto {
     private Long id;
     private String name;
     private String lastname;
-    private FileInfoDto image;
+    private FileInfoDto picture;
+    private String nickname;
 }

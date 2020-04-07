@@ -19,6 +19,7 @@ import java.util.List;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class UserSearchForm {
     private String name;
+    private String nickname;
     private String country;
     private String city;
     private String email;
