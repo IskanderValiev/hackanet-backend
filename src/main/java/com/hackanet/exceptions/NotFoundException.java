@@ -44,4 +44,8 @@ public class NotFoundException extends RuntimeException {
     public static NotFoundException forUser(Long id) {
         return new NotFoundException("User with id=" + id + " not found");
     }
+
+    public static NotFoundException throwNFE(Class<?> aClass, String paramName, Object value) {
+        return new NotFoundException(aClass.getName() + " with " + paramName + " = " + value + " not found");
+    }
 }

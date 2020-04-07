@@ -1,12 +1,7 @@
 package com.hackanet.json.mappers;
 
-import com.hackanet.json.dto.FileInfoDto;
-import com.hackanet.json.dto.SkillDto;
 import com.hackanet.json.dto.UserDto;
-import com.hackanet.models.FileInfo;
-import com.hackanet.models.ReviewStatistic;
-import com.hackanet.models.Skill;
-import com.hackanet.models.User;
+import com.hackanet.models.*;
 import com.hackanet.services.UserReviewService;
 import com.hackanet.utils.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +16,16 @@ import org.springframework.stereotype.Component;
 public class UserMapper implements Mapper<User, UserDto> {
 
     @Autowired
-    private Mapper<FileInfo, FileInfoDto> mapper;
+    private FileInfoMapper fileInfoMapper;
+
     @Autowired
-    private Mapper<Skill, SkillDto> skillMapper;
+    private SkillMapper skillMapper;
+
     @Autowired
     private UserReviewService userReviewService;
+
+    @Autowired
+    private PositionMapper positionMapper;
 
     @Override
     public UserDto map(User from) {
@@ -33,23 +33,21 @@ public class UserMapper implements Mapper<User, UserDto> {
             return null;
         }
         ReviewStatistic rating = userReviewService.getReviewsCountAndUserRating(from.getId());
-        UserDto user = UserDto.builder()
+        return UserDto.builder()
                 .id(from.getId())
                 .email(from.getEmail())
-                .phone(from.getPhone())
                 .name(from.getName())
                 .lastname(from.getLastname())
                 .country(from.getCountry())
                 .city(from.getCity())
                 .about(from.getAbout())
+                .university(from.getUniversity())
                 .reviewCount(rating.getCount())
                 .rating(rating.getAverage())
                 .lastRequestTime(DateTimeUtil.localDateTimeToLong(from.getLastRequestTime()))
+                .position(positionMapper.map(from.getPosition()))
+                .picture(fileInfoMapper.map(from.getPicture()))
+                .skills(skillMapper.map(from.getSkills()))
                 .build();
-        if (from.getPicture() != null)
-            user.setImage(mapper.map(from.getPicture()));
-        if (from.getSkills() != null)
-            user.setSkills(skillMapper.map(from.getSkills()));
-        return user;
     }
 }

@@ -27,18 +27,16 @@ import java.util.Set;
 @Table(name = "users")
 public class User extends AbstractEntity {
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", length = 50)
     private String name;
 
-    @Column(name = "lastname")
+    @Column(name = "lastname", length = 100)
     private String lastname;
 
-    @Column(nullable = false)
+    @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
-    private String phone;
-
-    @Column(name = "hashed_password")
+    @Column(name = "hashed_password", nullable = false)
     private String hashedPassword;
 
     @Enumerated(EnumType.STRING)
@@ -74,12 +72,13 @@ public class User extends AbstractEntity {
 
     @ManyToMany(mappedBy = "admins")
     private List<Chat> chatsOwner;
+
     private Boolean lookingForTeam;
 
-    @Column(unique = true)
+    @Column(name = "access_token_param", nullable = false, unique = true)
     private String accessTokenParam;
 
-    @Column(unique = true)
+    @Column(name = "refresh_token_param", nullable = false, unique = true)
     private String refreshTokenParam;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -94,11 +93,21 @@ public class User extends AbstractEntity {
             inverseJoinColumns = @JoinColumn(name = "blocked_user_ud"))
     private Set<User> blockedUsers;
 
-    @Column(name = "last_request_time")
+    @Column(name = "last_request_time", nullable = false)
     private LocalDateTime lastRequestTime;
 
-    @Column(name = "email_confirmed")
-    private Boolean email_confirmed;
+    @Column(name = "email_confirmed", nullable = false)
+    private Boolean emailConfirmed;
+
+    @Column(name = "email_confirmation_code", nullable = false, unique = true)
+    private String emailConfirmationCode;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "position_id")
+    private Position position;
+
+    @Column(name = "university", length = 100)
+    private String university;
 
     public List<FileInfo> getFiles() {
         return files == null ? new ArrayList<>() : files;

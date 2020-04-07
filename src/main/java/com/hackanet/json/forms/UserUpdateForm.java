@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,29 +28,31 @@ public class UserUpdateForm {
 
     @NotNull
     @NotEmpty
+    @Pattern(regexp = "\\w", message = "Name must be containing only letters")
     private String name;
 
     @NotNull
     @NotEmpty
+    @Pattern(regexp = "\\w", message = "Last name must be containing only letters")
     private String lastname;
 
     private Long image;
 
-    @NotNull
-    @NotEmpty
     private String about;
 
-    @NotNull
-    @NotEmpty
+    @Pattern(regexp = "\\p{L}", message = "Country must be containing only letters")
     private String country;
 
-    @NotNull
-    @NotEmpty
+    @Pattern(regexp = "\\p{L}", message = "City must be containing only letters")
     private String city;
 
     private List<Long> skills;
 
+    private Long positionId;
+
     private Boolean lookingForTeam;
+
+    private String university;
 
     public Long getImage() {
         // TODO: 1/21/20 return default value if image is null

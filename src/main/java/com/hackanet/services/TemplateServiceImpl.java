@@ -35,6 +35,7 @@ public class TemplateServiceImpl implements TemplateService {
     private static final String TEAM_REJECT_TEMPLATE = "team_reject.ftl";
     private static final String HACKATHON_WELCOME_TEMPLATE = "hackathon_welcome.ftl";
     private static final String HACKATHON_JOB_REVIEW_REQUEST_TEMPLATE = "hackathon_job_review_request.ftl";
+    private static final String EMAIL_CONFIRMATION_TEMPLATE = "email_confirmation_email.ftl";
 
     @Autowired
     private AppConfig appConfig;
@@ -85,7 +86,6 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public String prepareWelcomeEmail(User user) {
         Map<String, Object> dataModel = new HashMap<>();
-        dataModel.put("name", user.getName());
         log.info("Preparing welcome email");
         return resolveTemplate(dataModel, WELCOME_EMAIL_TEMPLATE, null);
     }
@@ -134,6 +134,14 @@ public class TemplateServiceImpl implements TemplateService {
         dataModel.put("team", team);
         log.info("Preparing hackathon job review request email");
         return resolveTemplate(dataModel, HACKATHON_JOB_REVIEW_REQUEST_TEMPLATE, null);
+    }
+
+    @Override
+    public String prepareEmailConfirmation(User user) {
+        Map<String, Object> dataModel = new HashMap<>();
+        dataModel.put("link", String.format(appConfig.getMainUrl() + appConfig.getConfirmLink(), user.getEmailConfirmationCode()));
+        log.info("Preparing email confirmation");
+        return resolveTemplate(dataModel, EMAIL_CONFIRMATION_TEMPLATE, null);
     }
 
 }

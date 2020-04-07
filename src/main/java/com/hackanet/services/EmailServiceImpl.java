@@ -26,10 +26,13 @@ public class EmailServiceImpl implements EmailService {
 
     @Autowired
     private TemplateService templateService;
+
     @Autowired
     private JavaMailSender javaMailSender;
+
     @Autowired
     private UserService userService;
+
     private ExecutorService executorService = Executors.newCachedThreadPool();
 
     @Override
@@ -63,6 +66,12 @@ public class EmailServiceImpl implements EmailService {
     public void sendWelcomeEmail(User user) {
         String s = templateService.prepareWelcomeEmail(user);
         send(s, "Welcome to Hackanet", user.getEmail());
+    }
+
+    @Override
+    public void sendEmailConfirmation(User user) {
+        String s = templateService.prepareEmailConfirmation(user);
+        send(s, "Email Confirmation", user.getEmail());
     }
 
     @Override

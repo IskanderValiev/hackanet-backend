@@ -25,30 +25,14 @@ import java.util.List;
 @Builder
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class UserRegistrationForm {
+
     @NotNull
     @NotEmpty
     @Pattern(regexp = Patterns.VALID_EMAIL_REGEX, message = HttpResponse.BAD_EMAIL)
     private String email;
+
     @NotNull
     @NotEmpty
     @Pattern(regexp = Patterns.VALID_PASSWORD_REGEX, message = HttpResponse.BAD_PASSWORD)
     private String password;
-    @NotNull
-    @NotEmpty
-    @Pattern(regexp = Patterns.VALID_PHONE_REGEX, message = HttpResponse.BAD_PHONE)
-    private String phone;
-    @NotNull
-    @NotEmpty
-    private String name;
-    @NotNull
-    @NotEmpty
-    private String lastname;
-    @NotNull
-    @NotEmpty
-    private String country;
-    @NotNull
-    @NotEmpty
-    private String city;
-    private List<Long> skills;
-    private String about;
 }

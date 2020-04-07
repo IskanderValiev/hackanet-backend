@@ -1,6 +1,7 @@
 package com.hackanet.controllers;
 
 import com.hackanet.services.EmailService;
+import com.hackanet.services.UserService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +23,18 @@ public class EmailController {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private UserService userService;
+
     @GetMapping
     public ResponseEntity<String> test(@RequestParam String email) {
         emailService.test(email);
+        return ResponseEntity.ok("OK");
+    }
+
+    @GetMapping("/confirm")
+    public ResponseEntity<String> confirm(@RequestParam String code) {
+        userService.confirmEmail(code);
         return ResponseEntity.ok("OK");
     }
 }
