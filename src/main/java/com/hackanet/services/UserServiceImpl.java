@@ -3,6 +3,7 @@ package com.hackanet.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.hackanet.application.AppConstants;
 import com.hackanet.exceptions.AlreadyExistException;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
@@ -18,9 +19,9 @@ import com.hackanet.security.enums.Role;
 import com.hackanet.security.utils.PasswordUtil;
 import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.utils.RandomString;
+import com.hackanet.utils.validators.UserUpdateFormValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -93,6 +94,9 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
 
     @Autowired
     private PositionService positionService;
+
+    @Autowired
+    private UserUpdateFormValidator userUpdateFormValidator;
 
     @Override
     @Transactional
@@ -315,25 +319,24 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
     }
 
     @Override
-    public User update(@NotNull Long id, @NotNull User currentUser, @NotNull UserUpdateForm form) {
+    public User update(Long id, User currentUser, UserUpdateForm form) {
+        userUpdateFormValidator.validateUpdateForm(form);
         User user = get(id);
         SecurityUtils.checkProfileAccess(currentUser, user);
         if (form.getNickname() != null) {
-            checkIfExistsByNickname(form.getNickname().toLowerCase());
+            checkIfExistsByNickname(currentUser, form.getNickname().toLowerCase());
             user.setNickname(form.getNickname().toLowerCase());
         } else {
             user.setNickname(form.getNickname());
         }
-        user.setName(form.getName());
-        user.setLastname(form.getLastname());
+        user.setName(StringUtils.capitalize(form.getName().toLowerCase()));
+        user.setLastname(StringUtils.capitalize(form.getLastname()).toLowerCase());
         user.setAbout(form.getAbout());
-        user.setPicture(fileInfoService.get(form.getImage()));
         user.setSkills(skillService.getByIds(form.getSkills()));
         user.setLookingForTeam(form.getLookingForTeam());
         user.setPosition(positionService.get(form.getPositionId()));
         user.setUniversity(form.getUniversity());
-        user.setCity(StringUtils.capitalize(form.getCity().toLowerCase()));
-        user.setCountry(StringUtils.capitalize(form.getCity().toLowerCase()));
+        user.setPicture(fileInfoService.get(form.getPicture()));
         if (form.getCity() != null) {
             user.setCity(StringUtils.capitalize(form.getCity().toLowerCase()));
         } else {
@@ -344,8 +347,7 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
         } else {
             user.setCountry(form.getCountry());
         }
-        user = userRepository.save(user);
-        return user;
+        return userRepository.save(user);
     }
 
     @Override
@@ -413,9 +415,13 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
                 .orElseThrow(() -> NotFoundException.throwNFE(User.class, "email confirmation code", code));
     }
 
-    private void checkIfExistsByNickname(String nickname) {
+    private void checkIfExistsByNickname(User currentUser, String nickname) {
         userRepository.findByNickname(nickname)
-                .ifPresent((user) -> AlreadyExistException.throwException(user.getClass(), "nickname", nickname));
+                .ifPresent((user) -> {
+                    if (!currentUser.equals(user)) {
+                        AlreadyExistException.throwException(user.getClass(), "nickname", nickname);
+                    }
+                });
     }
 
     private CriteriaQuery<User> getUsersListQuery(CriteriaBuilder criteriaBuilder, UserSearchForm form) {
@@ -431,7 +437,7 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
             }
         }
         if (!StringUtils.isBlank(form.getNickname())) {
-            predicates.add(criteriaBuilder.like(root.get("nickname"), "%" +form.getNickname() + "%"));
+            predicates.add(criteriaBuilder.like(root.get("nickname"), "%" + form.getNickname() + "%"));
         }
         if (!StringUtils.isBlank(form.getName())) {
             Expression<String> nameInLowerCase = criteriaBuilder.lower(root.get("name"));
@@ -474,6 +480,7 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
                 .emailConfirmationCode(new RandomString().nextString())
                 .lastRequestTime(LocalDateTime.now())
                 .emailConfirmed(Boolean.FALSE)
+                .picture(fileInfoService.get(AppConstants.DEFAULT_PROFILE_IMAGE_ID))
                 .build();
     }
 }

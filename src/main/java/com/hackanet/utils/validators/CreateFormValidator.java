@@ -1,6 +1,5 @@
 package com.hackanet.utils.validators;
 
-public interface FormValidator<CF, UF> {
+public interface CreateFormValidator<CF> {
     void validateCreateForm(CF createForm);
-    void validateUpdateForm(UF updateForm);
 }

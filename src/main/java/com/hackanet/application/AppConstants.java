@@ -8,5 +8,5 @@ public interface AppConstants {
     ZoneOffset MOSCOW_ZONE_OFFSET = ZoneOffset.of("+03:00");
     Integer ACCESS_TOKEN_EXPIRING_TIME_IN_HOURS = 4;
     Integer REFRESH_TOKEN_EXPIRING_TIME_IN_DAYS = 180;
-    Long DEFAULT_PROFILE_IMAGE_ID = 16L;
+    Long DEFAULT_PROFILE_IMAGE_ID = 1L;
 }

@@ -52,6 +52,7 @@ public class User extends AbstractEntity {
     private List<Hackathon> hackathons;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "picture_id", columnDefinition = "bigint DEFAULT 1")
     private FileInfo picture;
 
     @Column(name = "about", length = 1024)

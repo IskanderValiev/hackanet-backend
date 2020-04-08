@@ -15,8 +15,7 @@ import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.*;
 import com.hackanet.services.chat.ChatService;
 import com.hackanet.services.scheduler.JobRunner;
-import com.hackanet.utils.SwearWordsFilter;
-import com.hackanet.utils.validators.TeamFormValidator;
+import com.hackanet.utils.validators.TeamCreateFormValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +78,7 @@ public class TeamServiceImpl implements TeamService {
     private TeamMemberService teamMemberService;
 
     @Autowired
-    private TeamFormValidator teamFormValidator;
+    private TeamCreateFormValidator teamFormValidator;
 
     @Override
     public Team save(Team team) {

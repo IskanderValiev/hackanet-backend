@@ -16,7 +16,7 @@ import static java.lang.System.currentTimeMillis;
  * on 1/3/20
  */
 @Service
-public class HackathonCreateFormValidator implements FormValidator<HackathonCreateForm, HackathonUpdateForm> {
+public class HackathonCreateCreateFormValidator implements CreateFormValidator<HackathonCreateForm>, UpdateFormValidator<HackathonUpdateForm> {
 
     @Override
     public void validateCreateForm(HackathonCreateForm createForm) {

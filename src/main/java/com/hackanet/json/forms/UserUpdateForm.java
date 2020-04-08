@@ -2,7 +2,6 @@ package com.hackanet.json.forms;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.hackanet.application.AppConstants;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,24 +27,21 @@ public class UserUpdateForm {
 
     @NotNull
     @NotEmpty
-    @Pattern(regexp = "\\w", message = "Name must be containing only letters")
     private String name;
 
     @NotNull
     @NotEmpty
-    @Pattern(regexp = "\\w", message = "Last name must be containing only letters")
     private String lastname;
 
+    @Pattern(regexp = "[0-9a-zA-Z\\-_]+", message = "Nickname can be containing only letters, numbers, - and _")
     private String nickname;
 
-    private Long image;
+    private Long picture;
 
     private String about;
 
-    @Pattern(regexp = "\\p{L}", message = "Country must be containing only letters")
     private String country;
 
-    @Pattern(regexp = "\\p{L}", message = "City must be containing only letters")
     private String city;
 
     private List<Long> skills;
@@ -56,9 +52,8 @@ public class UserUpdateForm {
 
     private String university;
 
-    public Long getImage() {
-        // TODO: 1/21/20 return default value if image is null
-        return image;
+    public Long getPicture() {
+        return picture == null ? 1 : picture;
     }
 
     public List<Long> getSkills() {

@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
  * on 10/20/19
  */
 @Slf4j
-public class BadRequestException extends RuntimeException {
+public class BadRequestException extends IllegalArgumentException {
 
     public BadRequestException() {
         log.error("Bad request exception has been thrown");

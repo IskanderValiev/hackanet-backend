@@ -13,7 +13,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * on 3/29/20
  */
 @Service
-public class TeamFormValidator implements FormValidator<TeamCreateForm, TeamUpdateForm> {
+public class TeamCreateFormValidator implements CreateFormValidator<TeamCreateForm>, UpdateFormValidator<TeamUpdateForm> {
 
     @Override
     public void validateCreateForm(TeamCreateForm createForm) {

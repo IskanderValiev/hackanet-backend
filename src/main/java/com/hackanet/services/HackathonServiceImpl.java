@@ -2,8 +2,6 @@ package com.hackanet.services;
 
 import com.hackanet.application.AppConstants;
 import com.hackanet.components.Profiling;
-import com.hackanet.exceptions.BadFormTypeException;
-import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.HackathonCreateForm;
 import com.hackanet.json.forms.HackathonSearchForm;
@@ -15,7 +13,7 @@ import com.hackanet.models.User;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.repositories.HackathonRepository;
 import com.hackanet.services.chat.ChatService;
-import com.hackanet.utils.validators.HackathonCreateFormValidator;
+import com.hackanet.utils.validators.HackathonCreateCreateFormValidator;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +62,7 @@ public class HackathonServiceImpl implements HackathonService {
     private ChatService chatService;
 
     @Autowired
-    private HackathonCreateFormValidator createFormValidator;
+    private HackathonCreateCreateFormValidator createFormValidator;
 
     @Cacheable(value = "hackathons")
     @Override

@@ -53,4 +53,9 @@ public class FileInfoServiceImpl implements FileInfoService {
                 .build();
         return fileInfoRepository.save(fileInfo);
     }
+
+    @Override
+    public boolean isImage(FileInfo fileInfo) {
+        return fileInfo.getType().contains("image");
+    }
 }

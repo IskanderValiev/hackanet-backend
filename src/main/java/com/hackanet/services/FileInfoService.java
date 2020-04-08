@@ -11,4 +11,5 @@ public interface FileInfoService extends RetrieveService<FileInfo> {
     FileInfo save(FileInfo fileInfo);
     List<FileInfo> getByIdsIn(List<Long> ids);
     FileInfo createAndSave(User user, String url);
+    boolean isImage(FileInfo fileInfo);
 }
