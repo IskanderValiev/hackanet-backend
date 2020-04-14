@@ -3,7 +3,7 @@ package com.hackanet.json.mappers;
 import com.hackanet.json.dto.FileInfoDto;
 import com.hackanet.json.dto.UserSimpleDto;
 import com.hackanet.models.FileInfo;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

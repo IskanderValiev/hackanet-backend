@@ -2,7 +2,7 @@ package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.HackathonSimpleDto;
 import com.hackanet.models.hackathon.Hackathon;
-import com.hackanet.services.HackathonLikeService;
+import com.hackanet.services.hackathon.HackathonLikeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

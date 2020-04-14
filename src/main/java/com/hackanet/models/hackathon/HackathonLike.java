@@ -1,7 +1,7 @@
 package com.hackanet.models.hackathon;
 
 import com.hackanet.models.AbstractEntity;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import lombok.*;
 
 import javax.persistence.CascadeType;

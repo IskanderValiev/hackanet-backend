@@ -1,7 +1,7 @@
 package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.ChatUserDto;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -5,7 +5,7 @@ import com.hackanet.json.forms.CompanyCreateForm;
 import com.hackanet.json.forms.CompanySearchForm;
 import com.hackanet.json.forms.CompanyUpdateForm;
 import com.hackanet.models.Company;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 
 import java.util.List;
 

@@ -4,7 +4,7 @@ import com.hackanet.json.dto.ReportDto;
 import com.hackanet.json.forms.ReportCreateFrom;
 import com.hackanet.json.mappers.ReportMapper;
 import com.hackanet.models.Report;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.models.enums.ReportStatus;
 import com.hackanet.services.ReportService;
 import io.swagger.annotations.Api;

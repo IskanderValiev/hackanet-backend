@@ -1,6 +1,6 @@
 package com.hackanet.repositories.chat;
 
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.models.chat.Chat;
 import org.springframework.data.jpa.repository.JpaRepository;
 

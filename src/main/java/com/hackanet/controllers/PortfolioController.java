@@ -2,7 +2,7 @@ package com.hackanet.controllers;
 
 import com.hackanet.json.dto.PortfolioDto;
 import com.hackanet.json.mappers.PortfolioMapper;
-import com.hackanet.models.Portfolio;
+import com.hackanet.models.user.Portfolio;
 import com.hackanet.services.PortfolioService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;

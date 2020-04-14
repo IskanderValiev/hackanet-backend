@@ -1,6 +1,6 @@
 package com.hackanet.utils.log;
 
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.logging.LogLevel;
 

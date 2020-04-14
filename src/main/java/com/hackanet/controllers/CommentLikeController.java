@@ -2,10 +2,10 @@ package com.hackanet.controllers;
 
 import com.hackanet.json.dto.CommentLikeDto;
 import com.hackanet.json.mappers.CommentLikeMapper;
-import com.hackanet.models.CommentLike;
-import com.hackanet.models.User;
+import com.hackanet.models.comment.CommentLike;
+import com.hackanet.models.user.User;
 import com.hackanet.models.enums.LikeType;
-import com.hackanet.services.CommentLikeService;
+import com.hackanet.services.comment.CommentLikeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

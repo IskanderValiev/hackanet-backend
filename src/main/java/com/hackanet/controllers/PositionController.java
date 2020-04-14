@@ -2,9 +2,9 @@ package com.hackanet.controllers;
 
 import com.hackanet.json.dto.PositionDto;
 import com.hackanet.json.mappers.PositionMapper;
-import com.hackanet.models.Position;
-import com.hackanet.models.User;
-import com.hackanet.services.PositionService;
+import com.hackanet.models.user.Position;
+import com.hackanet.models.user.User;
+import com.hackanet.services.user.PositionService;
 import com.hackanet.services.VKUniversityAPIServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;

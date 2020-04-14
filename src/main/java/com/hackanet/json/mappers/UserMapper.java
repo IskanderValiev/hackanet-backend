@@ -2,7 +2,8 @@ package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.UserDto;
 import com.hackanet.models.*;
-import com.hackanet.services.UserReviewService;
+import com.hackanet.models.user.User;
+import com.hackanet.services.user.UserReviewService;
 import com.hackanet.utils.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -49,6 +50,7 @@ public class UserMapper implements Mapper<User, UserDto> {
                 .position(positionMapper.map(from.getPosition()))
                 .picture(fileInfoMapper.map(from.getPicture()))
                 .skills(skillMapper.map(from.getSkills()))
+                .role(from.getRole())
                 .build();
     }
 }

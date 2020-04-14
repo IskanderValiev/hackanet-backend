@@ -1,7 +1,7 @@
 package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.TrackDto;
-import com.hackanet.models.Track;
+import com.hackanet.models.hackathon.Track;
 import org.springframework.stereotype.Component;
 
 /**

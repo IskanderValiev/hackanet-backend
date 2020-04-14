@@ -1,7 +1,7 @@
 package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.PositionDto;
-import com.hackanet.models.Position;
+import com.hackanet.models.user.Position;
 import org.springframework.stereotype.Component;
 
 /**

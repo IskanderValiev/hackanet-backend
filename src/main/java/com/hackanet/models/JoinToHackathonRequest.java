@@ -3,6 +3,7 @@ package com.hackanet.models;
 import com.hackanet.models.enums.JoinType;
 import com.hackanet.models.enums.RequestStatus;
 import com.hackanet.models.hackathon.Hackathon;
+import com.hackanet.models.hackathon.Track;
 import lombok.*;
 
 import javax.persistence.*;

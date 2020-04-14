@@ -3,7 +3,7 @@ package com.hackanet.controllers;
 import com.hackanet.json.dto.MessageDto;
 import com.hackanet.json.forms.MessageSearchForm;
 import com.hackanet.json.mappers.MessageMapper;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.models.chat.Message;
 import com.hackanet.services.chat.ChatMessageServiceElasticsearchImpl;
 import io.swagger.annotations.Api;

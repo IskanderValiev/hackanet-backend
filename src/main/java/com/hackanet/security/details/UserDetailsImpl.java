@@ -1,7 +1,7 @@
 package com.hackanet.security.details;
 
-import com.hackanet.models.User;
-import com.hackanet.models.UserToken;
+import com.hackanet.models.user.User;
+import com.hackanet.models.user.UserToken;
 import com.hackanet.security.enums.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

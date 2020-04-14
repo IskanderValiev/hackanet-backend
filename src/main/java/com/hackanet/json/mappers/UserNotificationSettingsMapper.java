@@ -1,8 +1,7 @@
 package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.UserNotificationSettingsDto;
-import com.hackanet.models.UserNotificationSettings;
-import com.hackanet.utils.DateTimeUtil;
+import com.hackanet.models.user.UserNotificationSettings;
 import org.springframework.stereotype.Component;
 
 import static com.hackanet.utils.DateTimeUtil.localTimeToLong;

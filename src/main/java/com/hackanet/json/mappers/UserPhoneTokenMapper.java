@@ -1,7 +1,7 @@
 package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.UserPhoneTokenDto;
-import com.hackanet.models.UserPhoneToken;
+import com.hackanet.models.user.UserPhoneToken;
 import org.springframework.stereotype.Component;
 
 /**

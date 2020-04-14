@@ -5,10 +5,10 @@ import com.hackanet.json.dto.activity.log.UserLocationInfo;
 import com.hackanet.json.mappers.activity.log.ActivityUserMapper;
 import com.hackanet.json.mappers.activity.log.RequestMapper;
 import com.hackanet.json.mappers.activity.log.UserLocationInfoMapper;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.models.log.ActivityLog;
 import com.hackanet.repositories.log.ActivityLogRepository;
-import com.hackanet.services.UserService;
+import com.hackanet.services.user.UserService;
 import com.hackanet.utils.StringUtils;
 import com.maxmind.geoip2.model.CityResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +69,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
             }
         }
         ActivityLog build = activityLogBuilder.build();
-        activityLogRepository.save(build);
+//        activityLogRepository.save(build);
     }
 
     @Override

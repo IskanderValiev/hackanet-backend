@@ -2,7 +2,7 @@ package com.hackanet.services;
 
 import com.hackanet.json.forms.ReportCreateFrom;
 import com.hackanet.models.Report;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.models.enums.ReportStatus;
 
 import java.util.List;

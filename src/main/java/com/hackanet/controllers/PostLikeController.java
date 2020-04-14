@@ -2,10 +2,10 @@ package com.hackanet.controllers;
 
 import com.hackanet.json.dto.PostLikeDto;
 import com.hackanet.json.mappers.PostLikeMapper;
-import com.hackanet.models.PostLike;
-import com.hackanet.models.User;
+import com.hackanet.models.post.PostLike;
+import com.hackanet.models.user.User;
 import com.hackanet.models.enums.LikeType;
-import com.hackanet.services.PostLikeService;
+import com.hackanet.services.post.PostLikeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

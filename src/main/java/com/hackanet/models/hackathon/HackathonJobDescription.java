@@ -1,7 +1,7 @@
 package com.hackanet.models.hackathon;
 
 import com.hackanet.models.AbstractEntity;
-import com.hackanet.models.Portfolio;
+import com.hackanet.models.user.Portfolio;
 import com.hackanet.models.team.Team;
 import lombok.*;
 

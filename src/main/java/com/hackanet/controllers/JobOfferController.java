@@ -3,7 +3,7 @@ package com.hackanet.controllers;
 import com.hackanet.json.dto.JobOfferDto;
 import com.hackanet.json.mappers.JobOfferMapper;
 import com.hackanet.models.JobOffer;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.services.JobOfferService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;

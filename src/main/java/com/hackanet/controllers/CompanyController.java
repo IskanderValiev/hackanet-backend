@@ -7,7 +7,7 @@ import com.hackanet.json.forms.CompanySearchForm;
 import com.hackanet.json.forms.CompanyUpdateForm;
 import com.hackanet.json.mappers.CompanyMapper;
 import com.hackanet.models.Company;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.services.CompanyService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;

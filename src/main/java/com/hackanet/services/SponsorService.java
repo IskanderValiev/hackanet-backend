@@ -2,7 +2,7 @@ package com.hackanet.services;
 
 import com.hackanet.json.forms.SponsorUpdateForm;
 import com.hackanet.json.forms.SponsorCreateForm;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.models.hackathon.Sponsor;
 
 import java.util.List;

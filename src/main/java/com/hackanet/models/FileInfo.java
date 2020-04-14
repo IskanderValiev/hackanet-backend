@@ -1,6 +1,7 @@
 package com.hackanet.models;
 
 import com.hackanet.models.hackathon.Hackathon;
+import com.hackanet.models.user.User;
 import lombok.*;
 
 import javax.persistence.*;

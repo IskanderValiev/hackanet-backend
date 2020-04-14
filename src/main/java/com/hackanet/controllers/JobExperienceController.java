@@ -5,7 +5,7 @@ import com.hackanet.json.forms.JobExperienceCreateForm;
 import com.hackanet.json.forms.JobExperienceUpdateForm;
 import com.hackanet.json.mappers.JobExperienceMapper;
 import com.hackanet.models.JobExperience;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.services.JobExperienceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;

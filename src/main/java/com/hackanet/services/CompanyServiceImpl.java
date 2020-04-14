@@ -10,11 +10,16 @@ import com.hackanet.json.forms.CompanySearchForm;
 import com.hackanet.json.forms.CompanyUpdateForm;
 import com.hackanet.json.forms.UserLoginForm;
 import com.hackanet.models.Company;
-import com.hackanet.models.Skill;
-import com.hackanet.models.User;
 import com.hackanet.models.enums.CompanyType;
 import com.hackanet.models.hackathon.Hackathon;
+import com.hackanet.models.skill.Skill;
+import com.hackanet.models.user.User;
 import com.hackanet.repositories.CompanyRepository;
+import com.hackanet.security.utils.SecurityUtils;
+import com.hackanet.services.skill.SkillService;
+import com.hackanet.services.user.UserService;
+import com.hackanet.services.user.UserTokenService;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,8 +32,6 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hackanet.security.utils.SecurityUtils.checkCompanyAccess;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.lowerCase;
 
@@ -65,9 +68,9 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Transactional
     public CompanyOwnerTokenDto registerCompany(CompanyCreateForm form) {
-        Company company = getFromForm(form);
+        Company company = buildCompany(form);
         List<Long> technologies = form.getTechnologies();
-        if (isNotEmpty(technologies)) {
+        if (CollectionUtils.isNotEmpty(technologies)) {
             company.setTechnologies(skillService.getByIds(technologies));
         }
         Long imageId = form.getLogoId();
@@ -81,7 +84,7 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public Company update(Long id, User user, CompanyUpdateForm form) {
         Company company = get(id);
-        checkCompanyAccess(company, user);
+        SecurityUtils.checkCompanyAccess(company, user);
 
         String name = form.getName();
         company.setName(name.trim());
@@ -92,11 +95,8 @@ public class CompanyServiceImpl implements CompanyService {
         company.setCountry(StringUtils.capitalize(country.trim()));
         CompanyType companyType = form.getType();
         company.setType(companyType);
-
         List<Long> technologies = form.getTechnologies();
-        if (isNotEmpty(technologies)) {
-            company.setTechnologies(skillService.getByIds(technologies));
-        }
+        company.setTechnologies(skillService.getByIds(technologies));
         return companyRepository.save(company);
     }
 
@@ -109,8 +109,9 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public List<Company> getCompaniesList(CompanySearchForm form) {
-        if (form.getLimit() == null)
+        if (form.getLimit() == null) {
             form.setLimit(AppConstants.DEFAULT_LIMIT);
+        }
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Company> companiesListQuery = getCompaniesListQuery(criteriaBuilder, form);
         TypedQuery<Company> query = entityManager.createQuery(companiesListQuery);
@@ -182,7 +183,7 @@ public class CompanyServiceImpl implements CompanyService {
         return userTokenService.convert(token, companyId);
     }
 
-    private Company getFromForm(CompanyCreateForm form) {
+    private Company buildCompany(CompanyCreateForm form) {
         User user = userService.createForCompany(form);
         Company company = Company.builder()
                 .admin(user)

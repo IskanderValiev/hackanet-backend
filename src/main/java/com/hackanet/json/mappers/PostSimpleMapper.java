@@ -1,11 +1,11 @@
 package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.PostSimpleDto;
-import com.hackanet.models.Post;
+import com.hackanet.models.post.Post;
 import com.hackanet.models.enums.LikeType;
 import com.hackanet.models.enums.PostImportance;
-import com.hackanet.services.PostLikeService;
-import com.hackanet.services.PostViewService;
+import com.hackanet.services.post.PostLikeService;
+import com.hackanet.services.post.PostViewService;
 import com.hackanet.utils.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

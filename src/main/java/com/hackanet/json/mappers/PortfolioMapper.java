@@ -3,7 +3,7 @@ package com.hackanet.json.mappers;
 import com.hackanet.json.dto.HackathonJobDescriptionDto;
 import com.hackanet.json.dto.PortfolioDto;
 import com.hackanet.models.JobExperience;
-import com.hackanet.models.Portfolio;
+import com.hackanet.models.user.Portfolio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

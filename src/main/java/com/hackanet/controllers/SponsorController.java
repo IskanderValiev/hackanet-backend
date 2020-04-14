@@ -4,7 +4,7 @@ import com.hackanet.json.dto.SponsorDto;
 import com.hackanet.json.forms.SponsorCreateForm;
 import com.hackanet.json.forms.SponsorUpdateForm;
 import com.hackanet.json.mappers.SponsorMapper;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.models.hackathon.Sponsor;
 import com.hackanet.services.SponsorService;
 import io.swagger.annotations.Api;

@@ -4,7 +4,7 @@ import com.hackanet.json.forms.TeamCreateForm;
 import com.hackanet.json.forms.TeamSearchForm;
 import com.hackanet.json.forms.TeamUpdateForm;
 import com.hackanet.models.team.Team;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.services.RetrieveService;
 
 import java.time.LocalDate;

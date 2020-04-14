@@ -1,7 +1,7 @@
 package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.SkillDto;
-import com.hackanet.models.Skill;
+import com.hackanet.models.skill.Skill;
 import org.springframework.stereotype.Component;
 
 /**

@@ -1,7 +1,7 @@
 package com.hackanet.services;
 
 import com.hackanet.models.FileInfo;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface UploadService {

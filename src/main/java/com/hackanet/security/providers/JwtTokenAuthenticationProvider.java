@@ -2,11 +2,10 @@ package com.hackanet.security.providers;
 
 import com.hackanet.config.JwtConfig;
 import com.hackanet.exceptions.NotFoundException;
-import com.hackanet.models.UserToken;
+import com.hackanet.models.user.UserToken;
 import com.hackanet.security.authentication.JwtTokenAuthentication;
 import com.hackanet.security.details.UserDetailsImpl;
-import com.hackanet.services.UserService;
-import com.hackanet.services.UserTokenService;
+import com.hackanet.services.user.UserTokenService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -19,8 +18,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
 
 
 @Component

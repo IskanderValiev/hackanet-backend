@@ -1,7 +1,8 @@
 package com.hackanet.services;
 
-import com.hackanet.models.User;
-import com.hackanet.repositories.UserRepository;
+import com.hackanet.models.user.User;
+import com.hackanet.repositories.user.UserRepository;
+import com.hackanet.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;

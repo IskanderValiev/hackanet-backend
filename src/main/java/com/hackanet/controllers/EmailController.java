@@ -1,7 +1,7 @@
 package com.hackanet.controllers;
 
 import com.hackanet.services.EmailService;
-import com.hackanet.services.UserService;
+import com.hackanet.services.user.UserService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -1,7 +1,7 @@
 package com.hackanet.controllers;
 
-import com.hackanet.models.User;
-import com.hackanet.services.HackathonLikeService;
+import com.hackanet.models.user.User;
+import com.hackanet.services.hackathon.HackathonLikeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

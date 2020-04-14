@@ -5,6 +5,8 @@ import com.google.common.collect.Sets;
 import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.Currency;
+import com.hackanet.models.skill.Skill;
+import com.hackanet.models.user.User;
 import lombok.*;
 
 import javax.persistence.*;

@@ -2,8 +2,9 @@ package com.hackanet.services;
 
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.models.hackathon.Subscription;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.repositories.SubscriptionRepository;
+import com.hackanet.services.hackathon.HackathonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;

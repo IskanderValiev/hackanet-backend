@@ -2,10 +2,11 @@ package com.hackanet.services;
 
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.models.ConnectionInvitation;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.models.enums.ConnectionInvitationStatus;
 import com.hackanet.repositories.ConnectionInvitationRepository;
 import com.hackanet.services.scheduler.JobRunner;
+import com.hackanet.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

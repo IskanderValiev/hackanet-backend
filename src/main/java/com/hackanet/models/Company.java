@@ -1,6 +1,8 @@
 package com.hackanet.models;
 
 import com.hackanet.models.enums.CompanyType;
+import com.hackanet.models.skill.Skill;
+import com.hackanet.models.user.User;
 import lombok.*;
 
 import javax.persistence.*;

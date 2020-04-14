@@ -1,6 +1,7 @@
 package com.hackanet.models;
 
 import com.hackanet.models.enums.ConnectionInvitationStatus;
+import com.hackanet.models.user.User;
 import lombok.*;
 
 import javax.persistence.*;

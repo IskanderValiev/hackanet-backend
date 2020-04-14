@@ -3,7 +3,7 @@ package com.hackanet.controllers;
 import com.hackanet.json.dto.ConnectionInvitationDto;
 import com.hackanet.json.mappers.ConnectionInvitationMapper;
 import com.hackanet.models.ConnectionInvitation;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.models.enums.ConnectionInvitationStatus;
 import com.hackanet.services.ConnectionInvitationService;
 import io.swagger.annotations.Api;

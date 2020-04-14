@@ -1,10 +1,9 @@
 package com.hackanet.controllers;
 
 import com.hackanet.json.dto.FileInfoDto;
-import com.hackanet.json.mappers.FileInfoMapper;
 import com.hackanet.json.mappers.Mapper;
 import com.hackanet.models.FileInfo;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.services.UploadService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
