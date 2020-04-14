@@ -32,7 +32,6 @@ public class HackathonProfileViewServiceImpl implements HackathonProfileViewServ
                 .user(user)
                 .timestamp(new Timestamp(System.currentTimeMillis()))
                 .build();
-
         hackathonProfileView = hackathonProfileViewRepository.save(hackathonProfileView);
         return hackathonProfileView;
     }

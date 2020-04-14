@@ -36,20 +36,17 @@ public class HackathonJobDescriptionServiceImpl implements HackathonJobDescripti
     public HackathonJobDescription createForPortfolio(HackathonJobDescriptionCreateForm form) {
         Hackathon hackathon = hackathonService.get(form.getHackathonId());
         Team team = teamService.get(form.getTeamId());
-
         Long userId = form.getUserId();
         boolean contains = teamService.teamContainsUser(team, userId);
         if (!contains) {
             throw new BadRequestException("The user is not in the team");
         }
-
         HackathonJobDescription hackathonJobDescription = HackathonJobDescription.builder()
                 .description(form.getDescription())
                 .portfolio(portfolioService.getByUserId(userId))
                 .hackathon(hackathon)
                 .team(team)
                 .build();
-
         return hackathonJobDescriptionRepository.save(hackathonJobDescription);
     }
 
@@ -59,7 +56,6 @@ public class HackathonJobDescriptionServiceImpl implements HackathonJobDescripti
                 .hackathon(hackathon)
                 .portfolio(portfolio)
                 .build();
-
         return hackathonJobDescriptionRepository.save(jobDescription);
     }
 }

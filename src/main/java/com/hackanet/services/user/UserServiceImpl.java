@@ -9,7 +9,6 @@ import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.dto.TokenDto;
 import com.hackanet.json.forms.*;
-import com.hackanet.models.*;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.skill.Skill;
 import com.hackanet.models.user.User;
@@ -22,17 +21,15 @@ import com.hackanet.repositories.user.UserTokenRepository;
 import com.hackanet.security.enums.Role;
 import com.hackanet.security.utils.PasswordUtil;
 import com.hackanet.security.utils.SecurityUtils;
-import com.hackanet.services.*;
+import com.hackanet.services.EmailService;
+import com.hackanet.services.FileInfoService;
+import com.hackanet.services.PortfolioService;
 import com.hackanet.services.skill.SkillService;
 import com.hackanet.utils.RandomString;
 import com.hackanet.utils.validators.UserUpdateFormValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,11 +40,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import static com.hackanet.security.utils.ProviderUtils.*;
-import static com.hackanet.utils.StringUtils.generateRandomString;
 import static com.hackanet.utils.StringUtils.getJsonOfTokenDtoFromPrincipalName;
 
 /**
@@ -57,7 +51,7 @@ import static com.hackanet.utils.StringUtils.getJsonOfTokenDtoFromPrincipalName;
  */
 @Service
 @Slf4j
-public class UserServiceImpl implements UserService, SocialNetworkAuthService {
+public class UserServiceImpl implements UserService {
 
     // FIXME: 10/21/19 change the value
     private static final Integer DEFAULT_LIMIT = 10;
@@ -172,8 +166,9 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
 
     @Override
     public List<User> userList(UserSearchForm form) {
-        if (form.getLimit() == null)
+        if (form.getLimit() == null) {
             form.setLimit(DEFAULT_LIMIT);
+        }
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<User> usersListQuery = getUsersListQuery(criteriaBuilder, form);
         TypedQuery<User> query = entityManager.createQuery(usersListQuery);
@@ -188,141 +183,15 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
 
     @Override
     public void updateUsersHackathonList(User user, Hackathon hackathon, boolean add) {
-        if (Boolean.TRUE.equals(add))
+        if (Boolean.TRUE.equals(add)) {
             user.getAttendedHackathons().add(hackathon);
-        else user.getAttendedHackathons().remove(hackathon);
-
+        } else {
+            user.getAttendedHackathons().remove(hackathon);
+        }
         userRepository.save(user);
     }
 
-    @Transactional
-    protected TokenDto saveFromGoogle(Map<String, Object> userDetails) {
-        String email = (String) userDetails.get("email");
-        boolean exists = exists(email.toLowerCase());
-        User user;
-        if (exists) {
-            user = get(email.toLowerCase());
-            UserToken userToken = userTokenService.getOrCreateTokenIfNotExists(user);
-            return userTokenService.buildTokenDtoByUser(user, userToken);
-        }
-//            map.get("email_verified"); in case we need to change user status
-        FileInfo fileInfo = FileInfo.builder()
-                .name(generateRandomString())
-                .previewLink((String) userDetails.get("picture"))
-                .build();
-        fileInfoService.save(fileInfo);
 
-        user = User.builder()
-                .email(email.toLowerCase())
-                .name((String) userDetails.get("given_name"))
-                .lastname((String) userDetails.get("family_name"))
-                .picture(fileInfo)
-                .role(Role.USER)
-                .lookingForTeam(Boolean.FALSE)
-                .refreshTokenParam(new RandomString().nextString())
-                .accessTokenParam(new RandomString().nextString())
-                .build();
-        user = userRepository.save(user);
-        UserToken userToken = userTokenService.getOrCreateTokenIfNotExists(user);
-        emailService.sendWelcomeEmail(user);
-        return userTokenService.buildTokenDtoByUser(user, userToken);
-    }
-
-    @Override
-    public TokenDto saveFromGoogle(Authentication authentication) {
-        DefaultOidcUser oidcUser = (DefaultOidcUser) authentication.getPrincipal();
-        return saveFromGoogle(oidcUser.getAttributes());
-    }
-
-    @Transactional
-    protected TokenDto saveFromGithub(Map<String, Object> userDetails) {
-        User.UserBuilder userBuilder = User.builder();
-        String email = (String) userDetails.get("email");
-        String login = (String) userDetails.get("login");
-        if (!StringUtils.isBlank(email)) {
-            boolean exists = exists(email.toLowerCase());
-            if (exists) {
-                User user = get(email.toLowerCase());
-                return userTokenService.getTokenByUser(user);
-            }
-            userBuilder.email(email);
-        } else if (!StringUtils.isBlank(login)) {
-            boolean exists = exists(login.toLowerCase());
-            if (exists) {
-                User user = get(login.toLowerCase());
-                return userTokenService.getTokenByUser(user);
-            }
-            userBuilder.email(login);
-        } else throw new BadRequestException("Email and login are null or empty.");
-
-        String name = (String) userDetails.get("name");
-        if (!StringUtils.isBlank(name))
-            userBuilder.name(name);
-        else
-            userBuilder.name(login);
-        userBuilder.role(Role.USER)
-                .accessTokenParam(new RandomString().nextString())
-                .refreshTokenParam(new RandomString().nextString())
-                .country((String) userDetails.get("location"));
-
-        User user = userRepository.save(userBuilder.build());
-        UserToken token = userTokenService.getOrCreateTokenIfNotExists(user);
-
-        String avatarUrl = (String) userDetails.get("avatar_url");
-        fileInfoService.createAndSave(user, avatarUrl);
-        return userTokenService.buildTokenDtoByUser(user, token);
-
-    }
-
-    @Override
-    public TokenDto saveFromGithub(Authentication authentication) {
-        DefaultOAuth2User oidcUser = (DefaultOAuth2User) authentication.getPrincipal();
-        return saveFromGithub(oidcUser.getAttributes());
-    }
-
-    @Override
-    public TokenDto saveFromSocialNetwork(OAuth2AuthenticationToken principal) {
-        if (isGoogle(principal)) return saveFromGoogle(principal);
-        if (isGithub(principal)) return saveFromGithub(principal);
-        if (isFacebook(principal)) return saveFromFacebook(principal);
-        if (isLinkedIn(principal)) return saveFromLinkedIn(principal);
-        throw new BadRequestException("Provider has not been found");
-    }
-
-    @Override
-    public TokenDto saveFromFacebook(Authentication authentication) {
-        DefaultOAuth2User oidcUser = (DefaultOAuth2User) authentication.getPrincipal();
-        return saveFromFacebook(oidcUser.getAttributes());
-    }
-
-    @Override
-    public TokenDto saveFromLinkedIn(Authentication authentication) {
-        DefaultOAuth2User oidcUser = (DefaultOAuth2User) authentication.getPrincipal();
-        return saveFromLinkedIn(oidcUser.getAttributes());
-    }
-
-    @Transactional
-    protected TokenDto saveFromLinkedIn(Map<String, Object> userDetails) {
-        String name = (String) userDetails.get("localizedFirstName");
-        String lastName = (String) userDetails.get("localizedLastName");
-        String email = (String) userDetails.get("email");
-        // TODO: 11/20/19 get email and save user if he does not exist with received email
-        User user = User.builder()
-                .name(name)
-                .lastname(lastName)
-                .email(email)
-                .role(Role.USER)
-                .refreshTokenParam(new RandomString().nextString())
-                .accessTokenParam(new RandomString().nextString())
-                .build();
-        user = userRepository.save(user);
-        return userTokenService.getTokenByUser(user);
-    }
-
-    @Transactional
-    protected TokenDto saveFromFacebook(Map<String, Object> userDetails) {
-        return new TokenDto();
-    }
 
     @Override
     public User update(Long id, User currentUser, UserUpdateForm form) {
@@ -335,24 +204,16 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
         } else {
             user.setNickname(form.getNickname());
         }
-        user.setName(StringUtils.capitalize(form.getName().toLowerCase()));
-        user.setLastname(StringUtils.capitalize(form.getLastname().toLowerCase()));
+        user.setName(com.hackanet.utils.StringUtils.formatProper(form.getName(), false, "Name"));
+        user.setLastname(com.hackanet.utils.StringUtils.formatProper(form.getLastname(), false, "Lastname"));
         user.setAbout(form.getAbout());
         user.setSkills(skillService.getByIds(form.getSkills()));
         user.setLookingForTeam(form.getLookingForTeam());
         user.setPosition(positionService.get(form.getPositionId()));
         user.setUniversity(form.getUniversity());
         user.setPicture(fileInfoService.get(form.getPicture()));
-        if (form.getCity() != null) {
-            user.setCity(StringUtils.capitalize(form.getCity().toLowerCase()));
-        } else {
-            user.setCity(form.getCity());
-        }
-        if (form.getCountry() != null) {
-            user.setCountry(StringUtils.capitalize(form.getCountry().toLowerCase()));
-        } else {
-            user.setCountry(form.getCountry());
-        }
+        user.setCity(com.hackanet.utils.StringUtils.formatProper(form.getCity(), true, "City"));
+        user.setCountry(com.hackanet.utils.StringUtils.formatProper(form.getCountry(), true, "Country"));
         return userRepository.save(user);
     }
 
@@ -454,11 +315,11 @@ public class UserServiceImpl implements UserService, SocialNetworkAuthService {
         }
         if (!StringUtils.isBlank(form.getCity())) {
             String city = form.getCity().trim().toLowerCase();
-            predicates.add(criteriaBuilder.like(root.get("city"), "%" + StringUtils.capitalize(city) + "%"));
+            predicates.add(criteriaBuilder.like(root.get("city"), "%" + StringUtils.capitalize(city.toLowerCase()) + "%"));
         }
         if (!StringUtils.isBlank(form.getCountry())) {
             String country = form.getCountry().trim().toLowerCase();
-            predicates.add(criteriaBuilder.like(root.get("country"), "%" + StringUtils.capitalize(country) + "%"));
+            predicates.add(criteriaBuilder.like(root.get("country"), "%" + StringUtils.capitalize(country.toLowerCase()) + "%"));
         }
         if (form.getSkills() != null && !form.getSkills().isEmpty()) {
             Join<User, Skill> join = root.join("skills", JoinType.INNER);

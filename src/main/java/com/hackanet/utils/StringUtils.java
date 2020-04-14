@@ -7,7 +7,6 @@ import com.hackanet.security.enums.Role;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 /**
  * @author Iskander Valiev
@@ -16,9 +15,21 @@ import java.util.stream.Stream;
  */
 public class StringUtils {
 
-    public static String formatTitle(String s) {
+    public static String formatProper(String s) {
         s = org.apache.commons.lang.StringUtils.trimToEmpty(s);
-        return org.apache.commons.lang.StringUtils.capitalize(s);
+        return org.apache.commons.lang.StringUtils.capitalize(s.toLowerCase());
+    }
+
+    public static String formatProper(String s, boolean nullable, String fieldName) {
+        if (s == null) {
+            if (nullable) {
+                return null;
+            } else {
+                throw new BadRequestException(fieldName + " is null");
+            }
+        } else {
+            return formatProper(s);
+        }
     }
 
     public static String generateRandomString() {
@@ -31,13 +42,13 @@ public class StringUtils {
     }
 
     public static void checkBadWords(String input, String fieldName) {
-        if (SwearWordsFilter.containsBadWords(input))
+        if (SwearWordsFilter.containsBadWords(input)) {
             throw new BadRequestException(fieldName + " contains bad words");
+        }
     }
 
     public static String getJsonOfTokenDtoFromPrincipalName(String principalName) {
         Class<TokenDto> aClass = TokenDto.class;
-
         principalName = principalName.substring(9, principalName.length() - 1);
         principalName = "{" + principalName;
         Field[] fields = aClass.getDeclaredFields();

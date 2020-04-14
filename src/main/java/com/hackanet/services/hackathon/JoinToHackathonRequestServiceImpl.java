@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.JoinToHackathonRequestCreateForm;
-import com.hackanet.models.*;
+import com.hackanet.models.JoinToHackathonRequest;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.JoinType;
 import com.hackanet.models.enums.RequestStatus;
@@ -16,9 +16,9 @@ import com.hackanet.models.user.User;
 import com.hackanet.repositories.hackathon.JoinToHackathonRequestRepository;
 import com.hackanet.services.EmailService;
 import com.hackanet.services.PortfolioService;
-import com.hackanet.services.user.UserService;
 import com.hackanet.services.chat.ChatService;
 import com.hackanet.services.team.TeamService;
+import com.hackanet.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,15 +71,17 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
         registrationIsAvailable(hackathon);
 
         if (JoinType.ALONE.equals(form.getJoinType())) {
-            if (hackathon.getParticipants().contains(user))
+            if (hackathon.getParticipants().contains(user)) {
                 throw new BadRequestException("You are already a participant of this hackathon");
-            throwExceptionIfRequestExistsByUserId(user.getId(), hackathon.getId());
+            }
+            checkIfRequestExists(user.getId(), hackathon.getId());
             form.setEntityId(user.getId());
         } else if (JoinType.TEAM.equals(form.getJoinType())) {
-            if (form.getEntityId() == null)
+            if (form.getEntityId() == null) {
                 throw new BadRequestException("entity_id must not be null if " + JoinType.class.getName() + " is " + JoinType.TEAM.toString());
+            }
             Team team = teamService.get(form.getEntityId());
-            throwExceptionIfRequestExistsByTeam(team);
+            checkIfRequestExists(team);
             checkTeamAccessAsTeamLeader(team, user);
             return createForHackathonTeam(team, form.getMainTrackId(), form.getSubTrackId());
         }
@@ -91,7 +93,8 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
 
     @Override
     public JoinToHackathonRequest get(Long id) {
-        return requestRepository.findById(id).orElseThrow(() -> new NotFoundException("Request with id=" + id + " not found"));
+        return requestRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Request with id=" + id + " not found"));
     }
 
     @Override
@@ -136,15 +139,16 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
                             .forEach(tp -> {
                                 userService.updateUsersHackathonList(tp, hackathon, true);
                                 emailService.sendHackathonWelcomeEmail(tp, hackathon);
-                    });
+                            });
                 }
                 break;
 
             case ATTENDED:
                 Date startDate = hackathon.getStartDate();
                 Date date = now();
-                if (date.before(startDate))
-                    throw new BadRequestException("Registration for hackathons has not been started yet");
+                if (date.before(startDate)) {
+                    throw new BadRequestException("The hackathon has not been started yet");
+                }
                 if (alone) {
                     final User participant = userService.get(request.getEntityId());
                     portfolioService.addHackathonJob(participant.getId(), hackathon);
@@ -196,13 +200,13 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
         return requestRepository.findByHackathonAndEntityIdAndJoinTypeAndStatus(hackathon, entityId, joinType, status);
     }
 
-    private void throwExceptionIfRequestExistsByTeam(Team team) {
+    private void checkIfRequestExists(Team team) {
         boolean exists = requestRepository.existsByEntityIdAndJoinTypeAndHackathonId(team.getId(), JoinType.TEAM, team.getHackathon().getId());
         if (exists)
             throw new BadRequestException("Request already exists");
     }
 
-    private void throwExceptionIfRequestExistsByUserId(Long userId, Long hackathonId) {
+    private void checkIfRequestExists(Long userId, Long hackathonId) {
         boolean exists = requestRepository.existsByEntityIdAndJoinTypeAndHackathonId(userId, JoinType.ALONE, hackathonId);
         if (exists)
             throw new BadRequestException("Request already exists");
@@ -223,9 +227,10 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
     }
 
     private void validate(Team team) {
-        throwExceptionIfRequestExistsByTeam(team);
-        if (!TeamType.HACKATHON.equals(team.getTeamType()))
+        checkIfRequestExists(team);
+        if (!TeamType.HACKATHON.equals(team.getTeamType())) {
             throw new RuntimeException("TeamType is not " + TeamType.HACKATHON.toString());
+        }
     }
 
 }

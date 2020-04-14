@@ -1,7 +1,7 @@
 package com.hackanet.services;
 
-import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.PasswordChangeRequest;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.team.Team;
 import com.hackanet.models.user.User;
 import com.hackanet.services.user.UserService;

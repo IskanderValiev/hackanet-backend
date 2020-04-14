@@ -40,7 +40,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public Comment create(User user, CommentCreateForm form) {
-        // TODO: 3/9/20 check if user is confirmed
+        SecurityUtils.confirmed(user);
         Comment comment = Comment.builder()
                 .text(form.getText())
                 .post(postService.get(form.getPostId()))

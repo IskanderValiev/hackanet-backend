@@ -7,14 +7,14 @@ import com.hackanet.json.forms.HackathonCreateForm;
 import com.hackanet.json.forms.HackathonSearchForm;
 import com.hackanet.json.forms.HackathonUpdateForm;
 import com.hackanet.models.FileInfo;
+import com.hackanet.models.chat.Chat;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.skill.Skill;
 import com.hackanet.models.user.User;
-import com.hackanet.models.chat.Chat;
 import com.hackanet.repositories.hackathon.HackathonRepository;
 import com.hackanet.services.FileInfoService;
-import com.hackanet.services.skill.SkillService;
 import com.hackanet.services.chat.ChatService;
+import com.hackanet.services.skill.SkillService;
 import com.hackanet.utils.validators.HackathonCreateCreateFormValidator;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -78,7 +78,7 @@ public class HackathonServiceImpl implements HackathonService {
     @Transactional
     public Hackathon save(User user, HackathonCreateForm form) {
         createFormValidator.validateCreateForm(form);
-        Hackathon hackathon = buildHackathonFromCreateForm(form, user);
+        Hackathon hackathon = build(form, user);
         if (form.getLogoId() != null) {
             FileInfo logo = fileInfoService.get(form.getLogoId());
             hackathon.setLogo(logo);
@@ -143,10 +143,11 @@ public class HackathonServiceImpl implements HackathonService {
     @Override
     public void updateUsersHackathonList(List<User> users, Hackathon hackathon, boolean add) {
         Set<User> participants = hackathon.getParticipants();
-        if (Boolean.TRUE.equals(add))
+        if (Boolean.TRUE.equals(add)) {
             participants.addAll(new HashSet<>(users));
-        else
+        } else {
             participants.removeAll(new HashSet<>(users));
+        }
         hackathon.setParticipants(participants);
         hackathonRepository.save(hackathon);
     }
@@ -225,10 +226,11 @@ public class HackathonServiceImpl implements HackathonService {
         return query;
     }
 
-    private Hackathon buildHackathonFromCreateForm(HackathonCreateForm form, User user) {
+    private Hackathon build(HackathonCreateForm form, User user) {
         List<Long> requiredSkills = form.getRequiredSkills();
-        if (requiredSkills == null)
+        if (requiredSkills == null) {
             requiredSkills = Collections.emptyList();
+        }
 
         LocalDateTime registrationStart = getRegistrationLocalDateTimeFromForm(form, true);
         LocalDateTime registrationEnd = getRegistrationLocalDateTimeFromForm(form, false);

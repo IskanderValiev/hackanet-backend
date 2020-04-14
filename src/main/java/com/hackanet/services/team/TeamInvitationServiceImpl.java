@@ -51,7 +51,7 @@ public class TeamInvitationServiceImpl implements TeamInvitationService {
     public TeamInvitation createIfNotExists(User currentUser, Long userId, Long teamId) {
         Team team = teamService.get(teamId);
         checkTeamAccessAsTeamLeader(team, currentUser);
-        teamService.throwExceptionIfTeamIsNotActual(team);
+        teamService.checkRelevance(team);
         User user = userService.get(userId);
         TeamInvitation invitation = repository.getByUserIdAndTeamId(userId, teamId);
         if (invitation != null) {
@@ -80,7 +80,7 @@ public class TeamInvitationServiceImpl implements TeamInvitationService {
     public TeamInvitation changeStatus(User user, Long invitationId, TeamInvitationStatus status) {
         TeamInvitation invitation = get(invitationId);
         checkTeamInvitationAccess(invitation, user, false);
-        teamService.throwExceptionIfTeamIsNotActual(invitation.getTeam());
+        teamService.checkRelevance(invitation.getTeam());
         user = userService.get(user.getId());
         if (status.equals(TeamInvitationStatus.ACCEPTED)) {
             acceptInvitation(user, invitation);

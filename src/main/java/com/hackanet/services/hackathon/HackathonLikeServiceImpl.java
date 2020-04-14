@@ -25,7 +25,6 @@ public class HackathonLikeServiceImpl implements HackathonLikeService {
     @Override
     public HackathonLike like(User user, Long hackathonId) {
         checkIfExists(user.getId(), hackathonId);
-
         HackathonLike like = HackathonLike.builder()
                 .hackathon(hackathonService.get(hackathonId))
                 .user(user)
@@ -36,7 +35,6 @@ public class HackathonLikeServiceImpl implements HackathonLikeService {
     @Override
     public void unlike(User user, Long hackathonId) {
         HackathonLike like = getByUserIdAndHackathonId(user.getId(), hackathonId);
-
         hackathonLikeRepository.delete(like);
     }
 

@@ -52,16 +52,21 @@ public class Team extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     private TeamType teamType;
 
-    private Boolean actual;
+    @OneToMany(mappedBy = "team", orphanRemoval = true)
+    private List<TeamMember> members;
 
+    @Column(name = "relevant", nullable = false)
+    private Boolean relevant;
+
+    @Column(name = "looking_for_hackers")
     private Boolean lookingForHackers;
 
     public List<User> getParticipants() {
         return participants == null ? new ArrayList<>() : participants;
     }
 
-    public Boolean getActual() {
-        return Boolean.TRUE.equals(this.actual);
+    public Boolean getRelevant() {
+        return Boolean.TRUE.equals(this.relevant);
     }
 
     public Boolean getLookingForHackers() {

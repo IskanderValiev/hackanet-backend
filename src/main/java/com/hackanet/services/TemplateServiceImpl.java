@@ -2,8 +2,8 @@ package com.hackanet.services;
 
 import com.hackanet.config.AppConfig;
 import com.hackanet.exceptions.TemplateException;
-import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.PasswordChangeRequest;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.team.Team;
 import com.hackanet.models.user.User;
 import freemarker.template.Configuration;

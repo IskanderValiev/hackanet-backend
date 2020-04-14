@@ -40,7 +40,7 @@ public class TrackServiceImpl implements TrackService {
     @Override
     public Track update(User user, Long id, TrackUpdateForm form) {
         Track track = get(id);
-        SecurityUtils.checkHackathonAccess(track.getHackathon(), user);
+        SecurityUtils.checkTrackAccess(track, user);
         track = Track.builder()
                 .name(form.getName())
                 .description(form.getDescription())
@@ -51,7 +51,7 @@ public class TrackServiceImpl implements TrackService {
     @Override
     public void delete(User user, Long id) {
         Track track = get(id);
-        SecurityUtils.checkHackathonAccess(track.getHackathon(), user);
+        SecurityUtils.checkTrackAccess(track, user);
         trackRepository.delete(track);
     }
 

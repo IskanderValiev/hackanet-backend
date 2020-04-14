@@ -55,7 +55,7 @@ public class ConnectionServiceImpl implements ConnectionService {
 
     @Override
     @Transactional
-    @Caching (evict = {
+    @Caching(evict = {
             @CacheEvict(key = "#user.id", value = "connections-suggestions"),
             @CacheEvict(key = "#userToDelete.id", value = "connections-suggestions")
     }

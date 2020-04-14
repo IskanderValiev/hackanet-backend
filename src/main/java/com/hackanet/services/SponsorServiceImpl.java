@@ -4,9 +4,9 @@ import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.SponsorCreateForm;
 import com.hackanet.json.forms.SponsorUpdateForm;
 import com.hackanet.models.FileInfo;
-import com.hackanet.models.user.User;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.hackathon.Sponsor;
+import com.hackanet.models.user.User;
 import com.hackanet.repositories.hackathon.SponsorRepository;
 import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.hackathon.HackathonService;
@@ -49,12 +49,9 @@ public class SponsorServiceImpl implements SponsorService {
     @Override
     public Sponsor update(User user, Long id, SponsorUpdateForm form) {
         Sponsor sponsor = checkAccess(user, id);
-
-        sponsor = Sponsor.builder()
-                .name(form.getName())
-                .logo(fileInfoService.get(form.getLogoId()))
-                .link(form.getLink())
-                .build();
+        sponsor.setName(form.getName());
+        sponsor.setLogo(fileInfoService.get(form.getLogoId()));
+        sponsor.setLink(form.getLink());
         return sponsorRepository.save(sponsor);
     }
 

@@ -3,18 +3,18 @@ package com.hackanet.services.team;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.JoinToTeamRequestCreateForm;
+import com.hackanet.models.enums.JoinToTeamRequestStatus;
 import com.hackanet.models.team.JoinToTeamRequest;
 import com.hackanet.models.team.Team;
-import com.hackanet.models.user.User;
-import com.hackanet.models.enums.JoinToTeamRequestStatus;
 import com.hackanet.models.team.TeamMember;
+import com.hackanet.models.user.User;
 import com.hackanet.repositories.JoinToTeamRequestRepository;
 import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.EmailService;
-import com.hackanet.services.skill.SkillCombinationService;
-import com.hackanet.services.user.UserNotificationSettingsService;
 import com.hackanet.services.chat.ChatService;
 import com.hackanet.services.push.RabbitMQPushNotificationService;
+import com.hackanet.services.skill.SkillCombinationService;
+import com.hackanet.services.user.UserNotificationSettingsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,23 +57,21 @@ public class JoinToTeamRequestServiceImpl implements JoinToTeamRequestService {
     @Override
     public JoinToTeamRequest create(User user, JoinToTeamRequestCreateForm form) {
         JoinToTeamRequest joinToTeamRequest = joinToTeamRequestRepository.findByUserIdAndTeamId(user.getId(), form.getTeamId());
-        if (joinToTeamRequest != null)
+        if (joinToTeamRequest != null) {
             return joinToTeamRequest;
-
+        }
         Team team = teamService.get(form.getTeamId());
-        teamService.throwExceptionIfTeamIsNotActual(team);
-        if (team.getParticipants().contains(user))
+        teamService.checkRelevance(team);
+        if (team.getParticipants().contains(user)) {
             throw new BadRequestException("You are already in the team");
-
+        }
         JoinToTeamRequest request = JoinToTeamRequest.builder()
                 .requestStatus(JoinToTeamRequestStatus.WAITING)
                 .message(form.getMessage())
                 .user(user)
                 .team(team)
                 .build();
-
-        request = joinToTeamRequestRepository.save(request);
-        return request;
+        return joinToTeamRequestRepository.save(request);
     }
 
     @Override
@@ -92,26 +90,24 @@ public class JoinToTeamRequestServiceImpl implements JoinToTeamRequestService {
     public JoinToTeamRequest updateStatus(User user, Long id, JoinToTeamRequestStatus status) {
         JoinToTeamRequest request = get(id);
         Team team = request.getTeam();
-        teamService.throwExceptionIfTeamIsNotActual(team);
+        teamService.checkRelevance(team);
         SecurityUtils.checkTeamAccessAsTeamLeader(team, user);
         User userFromRequest = request.getUser();
 
         if (JoinToTeamRequestStatus.APPROVED.equals(status)) {
             // TODO: 2/18/20 change this to team members service
             List<TeamMember> members = teamMemberService.getMembers(team.getId());
-
             List<User> participants = team.getParticipants();
             if (!participants.contains(userFromRequest)) {
                 participants.add(userFromRequest);
                 team.setParticipants(participants);
                 teamService.save(team);
             }
-
             chatService.addOrRemoveUser(team.getChat().getId(), userFromRequest.getId(), null, true);
             skillCombinationService.updateIfUserJoinedToTeam(userFromRequest, team);
-
-            if (userNotificationSettingsService.emailEnabled(userFromRequest))
+            if (userNotificationSettingsService.emailEnabled(userFromRequest)) {
                 emailService.sendTeamWelcomeEmail(userFromRequest, team);
+            }
         } else if (JoinToTeamRequestStatus.REJECTED.equals(status)) {
             //send email about reject
             List<User> participants = team.getParticipants();
@@ -122,8 +118,9 @@ public class JoinToTeamRequestServiceImpl implements JoinToTeamRequestService {
             emailService.sendTeamRejectEmail(request.getUser(), team);
         }
 
-        if (userNotificationSettingsService.pushEnabled(userFromRequest))
+        if (userNotificationSettingsService.pushEnabled(userFromRequest)) {
             pushNotificationService.sendJoinToTeamRequestUpdatedStatusNotification(userFromRequest, request);
+        }
         request.setRequestStatus(status);
         request = joinToTeamRequestRepository.save(request);
         return request;

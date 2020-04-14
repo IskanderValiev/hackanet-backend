@@ -2,10 +2,9 @@ package com.hackanet.services.post;
 
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
-import com.hackanet.models.post.Post;
+import com.hackanet.models.enums.LikeType;
 import com.hackanet.models.post.PostLike;
 import com.hackanet.models.user.User;
-import com.hackanet.models.enums.LikeType;
 import com.hackanet.repositories.post.PostLikeRepository;
 import com.hackanet.security.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,16 +32,15 @@ public class PostLikeServiceImpl implements PostLikeService {
     public PostLike like(Long postId, User user, LikeType type) {
         Boolean exists = postLikeRepository.existsByPostIdAndUserId(postId, user.getId());
         if (!exists) {
-            Post post = postService.get(postId);
-
             PostLike postLike = PostLike.builder()
-                    .post(post)
+                    .post(postService.get(postId))
                     .user(user)
                     .likeType(type)
                     .build();
-
             return postLikeRepository.save(postLike);
-        } else throw new BadRequestException("You have already liked this post");
+        } else {
+            throw new BadRequestException("You have already liked this post");
+        }
     }
 
     @Override

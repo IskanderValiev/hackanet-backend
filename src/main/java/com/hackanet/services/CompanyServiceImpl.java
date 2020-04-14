@@ -85,18 +85,12 @@ public class CompanyServiceImpl implements CompanyService {
     public Company update(Long id, User user, CompanyUpdateForm form) {
         Company company = get(id);
         SecurityUtils.checkCompanyAccess(company, user);
-
-        String name = form.getName();
-        company.setName(name.trim());
-        String city = form.getCity();
-        city = city.trim();
-        company.setCity(StringUtils.capitalize(city));
-        String country = form.getCountry();
-        company.setCountry(StringUtils.capitalize(country.trim()));
-        CompanyType companyType = form.getType();
-        company.setType(companyType);
-        List<Long> technologies = form.getTechnologies();
-        company.setTechnologies(skillService.getByIds(technologies));
+        company.setName(form.getName().trim());
+        company.setCity(StringUtils.capitalize(form.getCity().trim().toLowerCase()));
+        company.setCountry(StringUtils.capitalize(form.getCountry().trim().toLowerCase()));
+        company.setType(form.getType());
+        company.setTechnologies(skillService.getByIds(form.getTechnologies()));
+        company.setDescription(form.getDescription());
         return companyRepository.save(company);
     }
 

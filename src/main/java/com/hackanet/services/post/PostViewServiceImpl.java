@@ -27,9 +27,7 @@ public class PostViewServiceImpl implements PostViewService {
                 .user(user)
                 .timestamp(new Timestamp(System.currentTimeMillis()))
                 .build();
-
-        postView = postViewRepository.save(postView);
-        return postView;
+        return postViewRepository.save(postView);
     }
 
     @Override

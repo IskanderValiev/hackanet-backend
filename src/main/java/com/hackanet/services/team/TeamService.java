@@ -25,7 +25,7 @@ public interface TeamService extends RetrieveService<Team> {
     Team getByHackathonIdAndUserId(Long hackathonId, Long userId);
     Team addUser(Team team, User user);
     List<Team> getByHackathonStartTime(LocalDate startTime);
-    void throwExceptionIfTeamIsNotActual(Team team);
+    void checkRelevance(Team team);
     List<Team> getTeamsSuggestion(User user);
     List<Team> getTeamsSuggestion(User user, Long hackathonId);
     boolean teamContainsUser(Team team, Long userId);

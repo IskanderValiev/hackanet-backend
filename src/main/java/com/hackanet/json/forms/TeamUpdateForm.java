@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.hackanet.models.enums.TeamType;
 import lombok.Data;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -15,10 +17,22 @@ import java.util.List;
 @Data
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class TeamUpdateForm {
+
+    @NotEmpty
     private String name;
+
+    @NotNull
     private List<Long> participants;
+
+    @NotNull
     private List<Long> skillsLookingFor;
+
+    @NotNull
     private Long teamLeader;
+
+    @NotNull
     private TeamType teamType;
+
+    @NotNull
     private Boolean lookingForHackers;
 }

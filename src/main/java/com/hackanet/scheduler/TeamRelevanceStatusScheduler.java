@@ -15,7 +15,7 @@ import java.util.List;
  * on 11/25/19
  */
 @Component
-public class TeamActualStatusScheduler {
+public class TeamRelevanceStatusScheduler {
 
     @Autowired
     private TeamService teamService;
@@ -23,9 +23,7 @@ public class TeamActualStatusScheduler {
     @Scheduled(cron = "0 0 0 * * *", zone = "Europe/Moscow")
     public void setTeamActualStatusToFalse() {
         List<Team> teams = teamService.getByHackathonStartTime(LocalDate.now());
-        teams.forEach(team -> {
-            team.setActual(false);
-        });
+        teams.forEach(team -> team.setRelevant(false));
         teamService.save(teams);
     }
 }

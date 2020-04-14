@@ -41,14 +41,19 @@ public class ChatMessageServiceElasticsearchImpl {
 
     @Autowired
     private MessageRepository messageRepository;
+
     @Autowired
     private ChatService chatService;
+
     @Autowired
     private UserService userService;
+
     @Autowired
     private ElasticsearchTemplate elasticsearchTemplate;
+
     @Autowired
     private FileInfoService fileInfoService;
+
     @Autowired
     private JobRunner jobRunner;
 
@@ -57,7 +62,7 @@ public class ChatMessageServiceElasticsearchImpl {
         List<Long> attachments = null;
         if (form.getAttachments() != null) {
             if (form.getAttachments().size() > 10) {
-                throw new BadRequestException("The maximum number of attachments can't be more than 10");
+                throw new BadRequestException("The number of attachments can't be more than 10");
             }
             attachments = fileInfoService.getByIdsIn(form.getAttachments())
                     .stream()
@@ -102,7 +107,7 @@ public class ChatMessageServiceElasticsearchImpl {
         } else {
             textCriteria = Criteria.where("text").expression(query);
         }
-        Criteria chatCriteria = null;
+        Criteria chatCriteria;
         User user = userService.get(form.getUserId());
         // TODO: 10/30/19 optimize
         if (form.getChatId() != null) {
@@ -122,7 +127,7 @@ public class ChatMessageServiceElasticsearchImpl {
                 .collect(Collectors.toList());
     }
 
-    Message createAcceptJobInvitationMessage(Chat chat) {
+    void createAcceptJobInvitationMessage(Chat chat) {
         Message message = Message.builder()
                 .chatId(chat.getId())
                 .timestamp(LocalDateTime.now())
@@ -130,7 +135,6 @@ public class ChatMessageServiceElasticsearchImpl {
                 .build();
         message = messageRepository.save(message);
         jobRunner.addNewMessageNotification(null, message);
-        return message;
     }
 
     public Message getById(String id) {

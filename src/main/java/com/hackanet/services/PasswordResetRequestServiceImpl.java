@@ -51,8 +51,9 @@ public class PasswordResetRequestServiceImpl implements PasswordResetRequestServ
 
     @Override
     public void passwordResetRequest(String email) {
-        if (StringUtils.isBlank(email)) throw new BadRequestException("Email is empty or null");
-
+        if (StringUtils.isBlank(email)) {
+            throw new BadRequestException("Email is empty or null");
+        }
         RandomString randomString = new RandomString(21);
         String code = randomString.nextString();
         Optional<PasswordChangeRequest> optional = passwordChangeRequestRepository.findByCode(code);

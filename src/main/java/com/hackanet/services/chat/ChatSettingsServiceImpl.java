@@ -1,9 +1,9 @@
 package com.hackanet.services.chat;
 
 import com.hackanet.json.forms.ChatSettingUpdateForm;
-import com.hackanet.models.user.User;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.chat.ChatSettings;
+import com.hackanet.models.user.User;
 import com.hackanet.repositories.chat.ChatSettingsRepository;
 import com.hackanet.security.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +19,7 @@ public class ChatSettingsServiceImpl implements ChatSettingsService {
 
     @Autowired
     private ChatSettingsRepository chatSettingsRepository;
+
     @Autowired
     private ChatService chatService;
 
@@ -34,11 +35,11 @@ public class ChatSettingsServiceImpl implements ChatSettingsService {
     public ChatSettings getOrCreateForUser(User user, Long chatId) {
         Chat chat = chatService.get(chatId);
         SecurityUtils.checkChatAccess(chat, user);
-
-        ChatSettings chatSettings = chatSettingsRepository.findByUserAndChat(user, chat).orElse(ChatSettings.builder()
-                .chat(chat)
-                .muted(false)
-                .build());
+        ChatSettings chatSettings = chatSettingsRepository.findByUserAndChat(user, chat)
+                .orElse(ChatSettings.builder()
+                        .chat(chat)
+                        .muted(false)
+                        .build());
         return chatSettings.getId() == null
                 ? chatSettingsRepository.save(chatSettings) : chatSettings;
     }

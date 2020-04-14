@@ -30,9 +30,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public Subscription subscribe(User user, Long hackathonId) {
         Subscription subscription = subscriptionRepository.findByUserIdAndHackathonId(user.getId(), hackathonId);
-        if (subscription != null)
+        if (subscription != null) {
             return subscription;
-
+        }
         subscription = Subscription.builder()
                 .user(user)
                 .hackathon(hackathonService.get(hackathonId))
@@ -56,6 +56,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public List<User> getAllSubscribersByHackathonId(Long hackathonId) {
         List<Subscription> subscriptions = subscriptionRepository.findByHackathonId(hackathonId);
-        return subscriptions.stream().map(Subscription::getUser).collect(Collectors.toList());
+        return subscriptions.stream()
+                .map(Subscription::getUser)
+                .collect(Collectors.toList());
     }
 }

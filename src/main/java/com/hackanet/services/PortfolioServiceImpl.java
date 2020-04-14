@@ -39,19 +39,18 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     /**
      * The method provides functionality of getting portfolio by user id.
-     *
+     * <p>
      * If portfolio with user id passed to the method does not exists,
      * a new portfolio for the user is created.
      *
      * @param userId - id of user
-     * */
+     */
     @Override
     public Portfolio getByUserId(Long userId) {
         Optional<Portfolio> byUserId = portfolioRepository.findByUserId(userId);
         if (byUserId.isPresent()) {
             return byUserId.get();
         }
-
         Portfolio portfolio = Portfolio.builder()
                 .user(userService.get(userId))
                 .build();
@@ -81,6 +80,7 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     @Override
     public Portfolio get(Long id) {
-        return portfolioRepository.findById(id).orElseThrow(() -> new NotFoundException("Portfolio with id = " + id + " not found"));
+        return portfolioRepository.findById(id)
+                .orElseThrow(() -> NotFoundException.throwNFE(Portfolio.class, "id", id));
     }
 }

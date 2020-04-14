@@ -2,8 +2,8 @@ package com.hackanet.services;
 
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.models.ConnectionInvitation;
-import com.hackanet.models.user.User;
 import com.hackanet.models.enums.ConnectionInvitationStatus;
+import com.hackanet.models.user.User;
 import com.hackanet.repositories.ConnectionInvitationRepository;
 import com.hackanet.services.scheduler.JobRunner;
 import com.hackanet.services.user.UserService;

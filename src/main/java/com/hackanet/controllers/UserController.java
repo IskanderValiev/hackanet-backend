@@ -2,13 +2,17 @@ package com.hackanet.controllers;
 
 import com.hackanet.json.dto.TokenDto;
 import com.hackanet.json.dto.UserDto;
+import com.hackanet.json.dto.UserSimpleDto;
 import com.hackanet.json.forms.UserLoginForm;
 import com.hackanet.json.forms.UserRegistrationForm;
 import com.hackanet.json.forms.UserSearchForm;
 import com.hackanet.json.forms.UserUpdateForm;
 import com.hackanet.json.mappers.Mapper;
+import com.hackanet.json.mappers.UserSimpleMapper;
 import com.hackanet.models.user.User;
-import com.hackanet.services.*;
+import com.hackanet.services.ConnectionService;
+import com.hackanet.services.PasswordResetRequestService;
+import com.hackanet.services.SocialNetworkAuthService;
 import com.hackanet.services.user.UserService;
 import com.hackanet.services.user.UserTokenService;
 import io.swagger.annotations.Api;
@@ -77,6 +81,9 @@ public class UserController {
     @Autowired
     private SocialNetworkAuthService socialNetworkAuthService;
 
+    @Autowired
+    private UserSimpleMapper userSimpleMapper;
+
     @PostMapping(REGISTER)
     @ApiOperation("Register a new user")
     public ResponseEntity<TokenDto> register(@RequestBody @Valid UserRegistrationForm form) {
@@ -116,9 +123,9 @@ public class UserController {
 
     @PostMapping(LIST)
     @ApiOperation("Search users")
-    public ResponseEntity<List<UserDto>> search(@RequestBody UserSearchForm form) {
+    public ResponseEntity<List<UserSimpleDto>> search(@RequestBody UserSearchForm form) {
         List<User> users = userService.userList(form);
-        return ResponseEntity.ok(userMapper.map(users));
+        return ResponseEntity.ok(userSimpleMapper.map(users));
     }
 
     @PutMapping(USER_PROFILE)

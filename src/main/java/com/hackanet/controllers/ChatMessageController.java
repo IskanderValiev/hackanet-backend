@@ -44,8 +44,6 @@ public class ChatMessageController {
     public MessageDto sendMessage(@Payload ChatMessageSaveForm form,
                                   @DestinationVariable Long id) {
         form.setChatId(id);
-//        ChatMessage chatMessage = chatMessageService.saveMessage(form);
-//        return chatMessageMapper.map(chatMessage);
         Message message = messageService.saveMessage(form);
         return messageMapper.map(message);
     }

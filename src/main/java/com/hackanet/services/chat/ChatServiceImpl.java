@@ -3,11 +3,11 @@ package com.hackanet.services.chat;
 import com.google.common.collect.Lists;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.ChatCreateForm;
-import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.JobOffer;
-import com.hackanet.models.user.User;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.ChatType;
+import com.hackanet.models.hackathon.Hackathon;
+import com.hackanet.models.user.User;
 import com.hackanet.repositories.chat.ChatRepository;
 import com.hackanet.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +28,10 @@ public class ChatServiceImpl implements ChatService {
 
     @Autowired
     private ChatRepository chatRepository;
+
     @Autowired
     private UserService userService;
+
     @Autowired
     private ChatMessageServiceElasticsearchImpl chatMessageServiceElasticsearch;
 
@@ -38,17 +40,16 @@ public class ChatServiceImpl implements ChatService {
         if (form.getParticipantsIds() == null) {
             form.setParticipantsIds(Lists.newArrayList());
             form.getParticipantsIds().add(currentUser.getId());
-        } else if (form.getParticipantsIds().isEmpty())
+        } else if (form.getParticipantsIds().isEmpty()) {
             form.getParticipantsIds().add(currentUser.getId());
-
+        }
         Set<User> participants = userService.getByIds(form.getParticipantsIds());
         Chat chat = Chat.builder()
                 .participants(participants)
                 .admins(Collections.singleton(currentUser))
                 .type(form.getChatType())
                 .build();
-        chat = chatRepository.save(chat);
-        return chat;
+        return chatRepository.save(chat);
     }
 
     @Override
@@ -65,11 +66,11 @@ public class ChatServiceImpl implements ChatService {
     public Chat addOrRemoveUser(Long chatId, Long userId, User currentUser, Boolean add) {
         Chat chat = get(chatId);
         // any participant can add and remove user from chat
-        if (currentUser != null) checkChatAccessForOperation(chat, currentUser);
+        if (currentUser != null) {
+            checkChatAccessForOperation(chat, currentUser);
+        }
         User user = userService.get(userId);
-
         Set<User> participants = chat.getParticipants();
-
         if (Boolean.TRUE.equals(add)) {
             participants.add(user);
         } else {
@@ -114,18 +115,17 @@ public class ChatServiceImpl implements ChatService {
     public List<Chat> createForHackathon(Hackathon hackathon) {
         Set<User> participants = hackathon.getParticipants();
         participants.add(hackathon.getOwner());
-        HashSet<User> members = new HashSet<>(participants);
 
         Chat newsChat = Chat.builder()
                 .admins(Collections.singleton(hackathon.getOwner()))
                 .type(ChatType.NEWS)
-                .participants(members)
+                .participants(participants)
                 .hackathon(hackathon)
                 .build();
 
         Chat participantsChat = Chat.builder()
                 .type(ChatType.PARTICIPANTS_CONFERENCE)
-                .participants(members)
+                .participants(participants)
                 .hackathon(hackathon)
                 .build();
 
@@ -139,12 +139,10 @@ public class ChatServiceImpl implements ChatService {
         Set<User> participants = new HashSet<>();
         participants.add(jobOffer.getUser());
         participants.add(jobOffer.getCompany().getAdmin());
-
         Chat chat = Chat.builder()
                 .participants(participants)
                 .type(ChatType.PRIVATE)
                 .build();
-
         chat = chatRepository.save(chat);
         chatMessageServiceElasticsearch.createAcceptJobInvitationMessage(chat);
         return chat;

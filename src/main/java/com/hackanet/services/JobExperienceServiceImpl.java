@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Date;
 import java.util.List;
 
-import static com.hackanet.security.utils.SecurityUtils.*;
+import static com.hackanet.security.utils.SecurityUtils.checkPortfolioAccess;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 /**
@@ -29,10 +29,13 @@ public class JobExperienceServiceImpl implements JobExperienceService {
 
     @Autowired
     private JobExperienceRepository jobExperienceRepository;
+
     @Autowired
     private CompanyService companyService;
+
     @Autowired
     private SkillService skillService;
+
     @Autowired
     private PortfolioService portfolioService;
 
@@ -58,7 +61,6 @@ public class JobExperienceServiceImpl implements JobExperienceService {
         if (isNotEmpty(technologies)) {
             jobExperience.setTechnologiesUsed(skillService.getByIds(technologies));
         }
-
         return jobExperienceRepository.save(jobExperience);
     }
 
