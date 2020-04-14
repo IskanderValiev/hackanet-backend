@@ -4,11 +4,12 @@ import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.SponsorCreateForm;
 import com.hackanet.json.forms.SponsorUpdateForm;
 import com.hackanet.models.FileInfo;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.hackathon.Sponsor;
-import com.hackanet.repositories.SponsorRepository;
+import com.hackanet.repositories.hackathon.SponsorRepository;
 import com.hackanet.security.utils.SecurityUtils;
+import com.hackanet.services.hackathon.HackathonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -3,7 +3,7 @@ package com.hackanet.services;
 import com.hackanet.json.forms.JobExperienceCreateForm;
 import com.hackanet.json.forms.JobExperienceUpdateForm;
 import com.hackanet.models.JobExperience;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 
 import java.util.List;
 

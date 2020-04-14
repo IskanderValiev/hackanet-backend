@@ -9,16 +9,19 @@ import com.hackanet.json.mappers.MessageMapper;
 import com.hackanet.models.*;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.chat.ChatSettings;
+import com.hackanet.models.post.Post;
 import com.hackanet.models.team.JoinToTeamRequest;
 import com.hackanet.models.team.Team;
 import com.hackanet.models.team.TeamInvitation;
 import com.hackanet.models.hackathon.Hackathon;
+import com.hackanet.models.user.User;
+import com.hackanet.models.user.UserPhoneToken;
 import com.hackanet.push.ResolvedPush;
 import com.hackanet.push.enums.ClientType;
 import com.hackanet.push.enums.PushType;
 import com.hackanet.push.payload.PostPushPayload;
 import com.hackanet.services.ConnectionInvitationService;
-import com.hackanet.services.UserService;
+import com.hackanet.services.user.UserService;
 import com.hackanet.services.chat.ChatService;
 import com.hackanet.services.chat.ChatSettingsService;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +51,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class RabbitMQPushNotificationService implements MessageListener {
-    
+
     public static final int MAX_PUSH_TEXT_LENGTH = 50;
     public static final int MAX_RETRIES_FOR_PUSH = 3;
 

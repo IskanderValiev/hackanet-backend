@@ -2,9 +2,12 @@ package com.hackanet.services.scheduler;
 
 import com.hackanet.models.*;
 import com.hackanet.models.chat.Message;
+import com.hackanet.models.post.Post;
 import com.hackanet.models.team.Team;
 import com.hackanet.models.team.TeamInvitation;
 import com.hackanet.models.hackathon.Hackathon;
+import com.hackanet.models.user.User;
+import com.hackanet.models.user.UserNotificationSettings;
 import com.hackanet.services.SubscriptionService;
 import com.hackanet.services.scheduler.phone.PhonePushJob;
 import com.hackanet.utils.DateTimeUtil;

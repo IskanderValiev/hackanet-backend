@@ -1,13 +1,12 @@
 package com.hackanet.controllers;
 
-import com.hackanet.json.dto.HackathonDto;
 import com.hackanet.json.dto.JoinToHackathonRequestDto;
 import com.hackanet.json.forms.JoinToHackathonRequestCreateForm;
 import com.hackanet.json.mappers.Mapper;
 import com.hackanet.models.JoinToHackathonRequest;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.models.enums.RequestStatus;
-import com.hackanet.services.JoinToHackathonRequestService;
+import com.hackanet.services.hackathon.JoinToHackathonRequestService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

@@ -1,7 +1,7 @@
 package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.PostLikeDto;
-import com.hackanet.models.PostLike;
+import com.hackanet.models.post.PostLike;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

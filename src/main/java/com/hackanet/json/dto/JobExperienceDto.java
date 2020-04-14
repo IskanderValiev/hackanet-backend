@@ -2,11 +2,9 @@ package com.hackanet.json.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.hackanet.models.Skill;
 import lombok.Builder;
 import lombok.Data;
 
-import java.sql.Date;
 import java.util.List;
 
 /**

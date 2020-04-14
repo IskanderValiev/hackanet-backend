@@ -1,5 +1,7 @@
 package com.hackanet.models;
 
+import com.hackanet.models.skill.Skill;
+import com.hackanet.models.user.Portfolio;
 import lombok.*;
 
 import javax.persistence.*;

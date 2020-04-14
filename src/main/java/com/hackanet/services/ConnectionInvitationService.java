@@ -1,7 +1,7 @@
 package com.hackanet.services;
 
 import com.hackanet.models.ConnectionInvitation;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.models.enums.ConnectionInvitationStatus;
 
 import java.util.Set;

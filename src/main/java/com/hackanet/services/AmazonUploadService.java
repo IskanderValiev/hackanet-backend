@@ -12,7 +12,7 @@ import com.hackanet.config.AmazonStorageConfig;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.ForbiddenException;
 import com.hackanet.models.FileInfo;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.utils.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

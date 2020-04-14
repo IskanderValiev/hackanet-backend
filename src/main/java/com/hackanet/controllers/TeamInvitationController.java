@@ -3,7 +3,7 @@ package com.hackanet.controllers;
 import com.hackanet.json.dto.TeamInvitationDto;
 import com.hackanet.json.mappers.TeamInvitationMapper;
 import com.hackanet.models.team.TeamInvitation;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.models.enums.TeamInvitationStatus;
 import com.hackanet.services.team.TeamInvitationService;
 import io.swagger.annotations.Api;

@@ -3,7 +3,7 @@ package com.hackanet.services.chat;
 import com.hackanet.json.forms.ChatCreateForm;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.JobOffer;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.models.chat.Chat;
 
 import java.util.List;

@@ -1,8 +1,8 @@
 package com.hackanet.models.team;
 
 import com.hackanet.models.AbstractEntity;
-import com.hackanet.models.Skill;
-import com.hackanet.models.User;
+import com.hackanet.models.skill.Skill;
+import com.hackanet.models.user.User;
 import lombok.*;
 
 import javax.persistence.*;

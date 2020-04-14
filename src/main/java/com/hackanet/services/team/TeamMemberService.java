@@ -1,7 +1,7 @@
 package com.hackanet.services.team;
 
-import com.hackanet.models.Skill;
-import com.hackanet.models.User;
+import com.hackanet.models.skill.Skill;
+import com.hackanet.models.user.User;
 import com.hackanet.models.team.Team;
 import com.hackanet.models.team.TeamMember;
 

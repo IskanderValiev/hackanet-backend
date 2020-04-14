@@ -2,8 +2,8 @@ package com.hackanet.controllers;
 
 import com.hackanet.json.dto.SkillDto;
 import com.hackanet.json.mappers.Mapper;
-import com.hackanet.models.Skill;
-import com.hackanet.services.SkillService;
+import com.hackanet.models.skill.Skill;
+import com.hackanet.services.skill.SkillService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

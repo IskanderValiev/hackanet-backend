@@ -1,7 +1,7 @@
 package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.UserReviewDto;
-import com.hackanet.models.UserReview;
+import com.hackanet.models.user.UserReview;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

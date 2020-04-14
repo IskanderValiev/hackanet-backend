@@ -2,9 +2,9 @@ package com.hackanet.json.mappers;
 
 import com.hackanet.json.dto.TeamParticipantDto;
 import com.hackanet.models.FileInfo;
-import com.hackanet.models.Skill;
+import com.hackanet.models.skill.Skill;
 import com.hackanet.models.team.Team;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

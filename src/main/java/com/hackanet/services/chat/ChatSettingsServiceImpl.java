@@ -1,7 +1,7 @@
 package com.hackanet.services.chat;
 
 import com.hackanet.json.forms.ChatSettingUpdateForm;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.chat.ChatSettings;
 import com.hackanet.repositories.chat.ChatSettingsRepository;

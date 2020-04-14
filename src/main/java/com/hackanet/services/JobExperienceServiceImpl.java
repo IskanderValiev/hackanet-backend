@@ -6,10 +6,10 @@ import com.hackanet.json.forms.JobExperienceCreateForm;
 import com.hackanet.json.forms.JobExperienceUpdateForm;
 import com.hackanet.models.Company;
 import com.hackanet.models.JobExperience;
-import com.hackanet.models.Portfolio;
-import com.hackanet.models.User;
+import com.hackanet.models.user.Portfolio;
+import com.hackanet.models.user.User;
 import com.hackanet.repositories.JobExperienceRepository;
-import org.apache.commons.collections.CollectionUtils;
+import com.hackanet.services.skill.SkillService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

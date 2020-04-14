@@ -3,7 +3,7 @@ package com.hackanet.services;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.PasswordChangeRequest;
 import com.hackanet.models.team.Team;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 
 public interface EmailService {
     void buildMessage(String text, String subject, String email);

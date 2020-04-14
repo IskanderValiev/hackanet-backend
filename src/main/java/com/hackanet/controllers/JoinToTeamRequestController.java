@@ -4,7 +4,7 @@ import com.hackanet.json.dto.JoinToTeamRequestDto;
 import com.hackanet.json.forms.JoinToTeamRequestCreateForm;
 import com.hackanet.json.mappers.JoinToTeamRequestMapper;
 import com.hackanet.models.team.JoinToTeamRequest;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.models.enums.JoinToTeamRequestStatus;
 import com.hackanet.services.team.JoinToTeamRequestService;
 import io.swagger.annotations.Api;

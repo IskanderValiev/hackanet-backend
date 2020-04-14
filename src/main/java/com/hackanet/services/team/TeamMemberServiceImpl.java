@@ -3,13 +3,13 @@ package com.hackanet.services.team;
 import com.hackanet.exceptions.ForbiddenException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.exceptions.SkillNumberViolationException;
-import com.hackanet.models.Skill;
-import com.hackanet.models.User;
+import com.hackanet.models.skill.Skill;
+import com.hackanet.models.user.User;
 import com.hackanet.models.team.Team;
 import com.hackanet.models.team.TeamMember;
 import com.hackanet.repositories.TeamMemberRepository;
 import com.hackanet.security.utils.SecurityUtils;
-import com.hackanet.services.SkillService;
+import com.hackanet.services.skill.SkillService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

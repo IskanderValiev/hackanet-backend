@@ -3,7 +3,7 @@ package com.hackanet.utils;
 import com.hackanet.application.AppConstants;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.json.forms.HackathonCreateForm;
-import com.hackanet.models.UserNotificationSettings;
+import com.hackanet.models.user.UserNotificationSettings;
 
 import java.sql.Date;
 import java.sql.Time;

@@ -3,7 +3,7 @@ package com.hackanet.controllers;
 import com.hackanet.json.dto.TeamDto;
 import com.hackanet.json.mappers.TeamMapper;
 import com.hackanet.models.team.Team;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.services.team.TeamService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;

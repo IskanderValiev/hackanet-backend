@@ -1,7 +1,7 @@
 package com.hackanet.json.mappers.activity.log;
 
 import com.hackanet.json.dto.activity.log.ActivityUser;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import org.springframework.stereotype.Component;
 
 /**

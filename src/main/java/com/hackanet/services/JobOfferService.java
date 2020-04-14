@@ -1,7 +1,7 @@
 package com.hackanet.services;
 
 import com.hackanet.models.JobOffer;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 
 import java.util.List;
 

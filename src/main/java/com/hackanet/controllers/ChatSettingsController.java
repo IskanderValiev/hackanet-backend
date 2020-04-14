@@ -3,7 +3,7 @@ package com.hackanet.controllers;
 import com.hackanet.json.dto.ChatSettingsDto;
 import com.hackanet.json.forms.ChatSettingUpdateForm;
 import com.hackanet.json.mappers.ChatSettingsMapper;
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 import com.hackanet.models.chat.ChatSettings;
 import com.hackanet.services.chat.ChatSettingsService;
 import io.swagger.annotations.Api;

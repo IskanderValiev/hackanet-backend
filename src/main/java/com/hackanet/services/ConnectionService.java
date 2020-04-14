@@ -1,6 +1,6 @@
 package com.hackanet.services;
 
-import com.hackanet.models.User;
+import com.hackanet.models.user.User;
 
 import java.util.Set;
 

@@ -1,6 +1,6 @@
 package com.hackanet.repositories;
 
-import com.hackanet.models.Portfolio;
+import com.hackanet.models.user.Portfolio;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

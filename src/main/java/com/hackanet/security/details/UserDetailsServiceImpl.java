@@ -1,8 +1,8 @@
 package com.hackanet.security.details;
 
 import com.hackanet.exceptions.NotFoundException;
-import com.hackanet.models.User;
-import com.hackanet.repositories.UserRepository;
+import com.hackanet.models.user.User;
+import com.hackanet.repositories.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

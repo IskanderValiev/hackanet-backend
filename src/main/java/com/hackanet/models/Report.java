@@ -2,6 +2,7 @@ package com.hackanet.models;
 
 import com.hackanet.models.enums.ReportEntityType;
 import com.hackanet.models.enums.ReportStatus;
+import com.hackanet.models.user.User;
 import lombok.*;
 
 import javax.persistence.*;
