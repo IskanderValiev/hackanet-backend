@@ -24,8 +24,8 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
             " inner join team_participants tp on t.id = tp.team_id" +
             " inner join users u on tp.user_id = u.id" +
             " inner join user_skill_table ust on u.id = ust.user_id" +
-            " where ust.skills_id in :skills and t.looking_for_hackers is true and t.actual is true")
+            " where ust.skills_id in :skills and t.looking_for_hackers is true and t.relavant is true")
     List<Team> findBySkills(@Param("skills") List<Long> skills);
 
-    List<Team> findAllByLookingForHackersAndActual(Boolean lookingForHackers, Boolean actual);
+    List<Team> findAllByLookingForHackersAndRelevant(Boolean lookingForHackers, Boolean relevant);
 }

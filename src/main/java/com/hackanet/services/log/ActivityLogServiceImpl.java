@@ -5,13 +5,14 @@ import com.hackanet.json.dto.activity.log.UserLocationInfo;
 import com.hackanet.json.mappers.activity.log.ActivityUserMapper;
 import com.hackanet.json.mappers.activity.log.RequestMapper;
 import com.hackanet.json.mappers.activity.log.UserLocationInfoMapper;
-import com.hackanet.models.user.User;
 import com.hackanet.models.log.ActivityLog;
+import com.hackanet.models.user.User;
 import com.hackanet.repositories.log.ActivityLogRepository;
 import com.hackanet.services.user.UserService;
 import com.hackanet.utils.StringUtils;
 import com.maxmind.geoip2.model.CityResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
  * on 3/18/20
  */
 @Service
+@Profile(value = "local")
 public class ActivityLogServiceImpl implements ActivityLogService {
 
     @Autowired
@@ -62,7 +64,6 @@ public class ActivityLogServiceImpl implements ActivityLogService {
             if (arg instanceof HttpServletRequest) {
                 HttpServletRequest request = (HttpServletRequest) arg;
                 activityLogBuilder.request(requestMapper.map(request));
-
                 CityResponse cityResponse = userLocationService.getCountry(request.getRemoteAddr());
                 UserLocationInfo userLocationInfo = userLocationInfoMapper.map(cityResponse);
                 activityLogBuilder.userLocationInfo(userLocationInfo);

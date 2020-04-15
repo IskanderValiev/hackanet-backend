@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
  */
 @Aspect
 @Component
-@Profile("local")
+@Profile(value = "local")
 public class ActivityLoggerAspect {
 
     @Autowired
