@@ -209,7 +209,7 @@ public class TeamServiceImpl implements TeamService {
         user = userService.get(user.getEmail());
         List<Skill> skills = skillCombinationService.mostRelevantSkills(user);
         if (skills.isEmpty()) {
-            return teamRepository.findAllByLookingForHackersAndActual(true, true);
+            return teamRepository.findAllByLookingForHackersAndRelevant(true, true);
         }
         List<Long> skillsIds = skills.stream().map(Skill::getId).collect(Collectors.toList());
         return teamRepository.findBySkills(skillsIds);
@@ -229,7 +229,7 @@ public class TeamServiceImpl implements TeamService {
         user = userService.get(user.getId());
         List<Skill> skills = skillCombinationService.mostRelevantSkills(user);
         if (skills.isEmpty()) {
-            return teamRepository.findAllByLookingForHackersAndActual(true, true);
+            return teamRepository.findAllByLookingForHackersAndRelevant(true, true);
         }
         List<Long> skillsIds = skills.stream().map(Skill::getId).collect(Collectors.toList());
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
