@@ -278,10 +278,10 @@ public class TeamServiceImpl implements TeamService {
             join.on(criteriaBuilder.equal(join.get("id"), form.getHackathonId()));
             predicates.add(join.getOn());
         }
-        String name = form.getName().trim();
+        String name = form.getName();
         if (!StringUtils.isBlank(name)) {
             Expression<String> nameInLc = criteriaBuilder.lower(root.get("name"));
-            predicates.add(criteriaBuilder.like(nameInLc, "%" + name + "%"));
+            predicates.add(criteriaBuilder.like(nameInLc, "%" + name.trim().toLowerCase() + "%"));
         }
         List<Long> requiredSkills = form.getRequiredSkills();
         if (requiredSkills != null && !requiredSkills.isEmpty()) {
@@ -298,16 +298,12 @@ public class TeamServiceImpl implements TeamService {
         teamFormValidator.validateCreateForm(form);
         Chat chat = chatService.createForTeam(user);
         List<Long> skillsLookingForIds = form.getSkillsLookingFor();
-        List<Skill> skillsLookingFor = new ArrayList<>();
-        if (skillsLookingForIds != null && !skillsLookingForIds.isEmpty()) {
-            skillsLookingFor = skillService.getByIds(skillsLookingForIds);
-        }
         Team team = Team.builder()
                 .name(form.getName().trim())
                 .chat(chat)
                 .participants(Collections.singletonList(user))
                 .teamLeader(user)
-                .skillsLookingFor(skillsLookingFor)
+                .skillsLookingFor(skillService.getByIds(skillsLookingForIds))
                 .teamType(form.getTeamType())
                 .relevant(true)
                 .build();

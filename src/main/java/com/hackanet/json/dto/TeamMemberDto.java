@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 @Builder
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class TeamParticipantDto {
+public class TeamMemberDto {
     private Long id;
     private List<SkillDto> skills;
     private Boolean isTeamLeader;

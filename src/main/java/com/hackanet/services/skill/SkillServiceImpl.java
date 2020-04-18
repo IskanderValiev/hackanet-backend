@@ -1,5 +1,6 @@
 package com.hackanet.services.skill;
 
+import com.google.common.collect.Lists;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.models.skill.Skill;
@@ -67,6 +68,9 @@ public class SkillServiceImpl implements SkillService {
 
     @Override
     public List<Skill> getByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Lists.newArrayList();
+        }
         return skillRepository.findAllByIdIn(ids);
     }
 }

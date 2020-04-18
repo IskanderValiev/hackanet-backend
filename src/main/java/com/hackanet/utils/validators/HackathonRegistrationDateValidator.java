@@ -14,8 +14,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class HackathonRegistrationDateValidator {
 
     public static void registrationIsAvailable(Hackathon hackathon) {
-        checkArgument(hackathon.getRegistrationEndDate().isBefore(LocalDateTime.now()), "Registration for the hackathon has already finished");
-        checkArgument(hackathon.getRegistrationStartDate().isAfter(LocalDateTime.now()), "Registration for the hackathon has not started yet");
+        checkArgument(hackathon.getRegistrationEndDate().isAfter(LocalDateTime.now()), "Registration for the hackathon has already finished");
+        checkArgument(hackathon.getRegistrationStartDate().isBefore(LocalDateTime.now()), "Registration for the hackathon has not started yet");
 
         Date now = new Date(System.currentTimeMillis());
         checkArgument(now.after(hackathon.getStartDate()), "Hackathon has already started or passed");

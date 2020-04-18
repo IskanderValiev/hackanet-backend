@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class TeamMapper implements Mapper<Team, TeamDto> {
 
     @Autowired
-    private TeamParticipantMapper teamParticipantMapper;
+    private TeamMemberMapper teamMemberMapper;
     @Autowired
     private SkillMapper skillMapper;
 
@@ -26,7 +26,7 @@ public class TeamMapper implements Mapper<Team, TeamDto> {
         return TeamDto.builder()
                 .id(from.getId())
                 .name(from.getName())
-                .participants(teamParticipantMapper.map(from.getParticipants(), from))
+                .members(teamMemberMapper.map(from.getParticipants(), from))
                 .skillsLookingFor(skillMapper.map(from.getSkillsLookingFor()))
                 .teamType(from.getTeamType())
                 .lookingForHackers(Boolean.TRUE.equals(from.getLookingForHackers()))

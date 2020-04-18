@@ -89,11 +89,6 @@ public class HackathonServiceImpl implements HackathonService {
     }
 
     @Override
-    public Hackathon save(Hackathon hackathon) {
-        return hackathonRepository.save(hackathon);
-    }
-
-    @Override
     public Hackathon get(Long id) {
         return hackathonRepository.findById(id).orElseThrow(() -> NotFoundException.forHackathon(id));
     }
@@ -171,7 +166,7 @@ public class HackathonServiceImpl implements HackathonService {
 
     public void setChats(List<Chat> chats, Hackathon hackathon) {
         hackathon.setChats(chats);
-        save(hackathon);
+        hackathonRepository.save(hackathon);
     }
 
     @Override
@@ -227,11 +222,6 @@ public class HackathonServiceImpl implements HackathonService {
     }
 
     private Hackathon build(HackathonCreateForm form, User user) {
-        List<Long> requiredSkills = form.getRequiredSkills();
-        if (requiredSkills == null) {
-            requiredSkills = Collections.emptyList();
-        }
-
         LocalDateTime registrationStart = getRegistrationLocalDateTimeFromForm(form, true);
         LocalDateTime registrationEnd = getRegistrationLocalDateTimeFromForm(form, false);
 
@@ -248,7 +238,7 @@ public class HackathonServiceImpl implements HackathonService {
                 .city(StringUtils.capitalize(form.getCity()))
                 .currency(form.getCurrency())
                 .prizeFund(form.getPrizeFund())
-                .requiredSkills(skillService.getByIds(requiredSkills))
+                .requiredSkills(skillService.getByIds(form.getRequiredSkills()))
                 .deleted(false)
                 .longitude(form.getLongitude())
                 .latitude(form.getLatitude())
@@ -263,28 +253,23 @@ public class HackathonServiceImpl implements HackathonService {
         Date end = new Date(form.getEndDate());
         hackathon.setStartDate(start);
         hackathon.setEndDate(end);
-
         if (form.getLogo() != null) {
             FileInfo file = fileInfoService.get(form.getLogo());
             hackathon.setLogo(file);
         }
-
         String name = form.getName();
         hackathon.setName(name.trim());
         hackathon.setDescription(form.getDescription().trim());
-
-        String country = StringUtils.capitalize(form.getCountry());
+        String country = StringUtils.capitalize(form.getCountry().toLowerCase());
         hackathon.setCountry(country);
-        String city = StringUtils.capitalize(form.getCity());
+        String city = StringUtils.capitalize(form.getCity().toLowerCase());
         hackathon.setCity(city);
         hackathon.setLatitude(form.getLatitude());
         hackathon.setLongitude(form.getLongitude());
-
         Long regStartDate = form.getRegistrationStartDate();
         Long regEndDate = form.getRegistrationEndDate();
         hackathon.setRegistrationEndDate(epochToLocalDateTime(regEndDate));
         hackathon.setRegistrationStartDate(epochToLocalDateTime(regStartDate));
-
         List<Long> requiredSkills = form.getRequiredSkills();
         if (requiredSkills != null && !requiredSkills.isEmpty()) {
             hackathon.setRequiredSkills(skillService.getByIds(requiredSkills));

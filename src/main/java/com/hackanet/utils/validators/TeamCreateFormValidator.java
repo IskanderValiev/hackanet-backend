@@ -17,11 +17,11 @@ public class TeamCreateFormValidator implements CreateFormValidator<TeamCreateFo
 
     @Override
     public void validateCreateForm(TeamCreateForm createForm) {
-        checkArgument(SwearWordsFilter.containsBadWords(createForm.getName().trim()), "Team name contains bad words");
+        checkArgument(!SwearWordsFilter.containsBadWords(createForm.getName().trim()), "Team name contains bad words");
     }
 
     @Override
     public void validateUpdateForm(TeamUpdateForm updateForm) {
-        checkArgument(SwearWordsFilter.containsBadWords(updateForm.getName().trim()), "Team name contains bad words");
+        checkArgument(!SwearWordsFilter.containsBadWords(updateForm.getName().trim()), "Team name contains bad words");
     }
 }

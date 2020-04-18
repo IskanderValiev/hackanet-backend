@@ -17,9 +17,9 @@ public class FileInfoMapper implements Mapper<FileInfo, FileInfoDto> {
 
     @Override
     public FileInfoDto map(FileInfo from) {
-        if (from == null)
+        if (from == null) {
             return null;
-
+        }
         return FileInfoDto.builder()
                 .id(from.getId())
                 .name(from.getName())

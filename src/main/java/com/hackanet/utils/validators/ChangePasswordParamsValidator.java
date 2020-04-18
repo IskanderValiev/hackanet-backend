@@ -21,8 +21,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class ChangePasswordParamsValidator {
 
     public void validate(String code, String newPassword, String email) {
-        checkArgument(StringUtils.isBlank(code), "Code is empty or null");
-        checkArgument(StringUtils.isBlank(email), "Email is empty");
+        checkArgument(StringUtils.isNotBlank(code), "Code is empty or null");
+        checkArgument(StringUtils.isNotBlank(email), "Email is empty");
 
         boolean matches = Pattern.matches(Patterns.VALID_PASSWORD_REGEX, newPassword.trim());
         checkArgument(matches, "Password is invalid");
@@ -32,6 +32,6 @@ public class ChangePasswordParamsValidator {
         checkArgument(Boolean.TRUE.equals(passwordRequest.getUsed()), "The password change request has been already used");
 
         long minutes = DateTimeUtil.getDifferenceBetweenLocalDateTimes(passwordRequest.getCreatedDate(), LocalDateTime.now());
-        checkArgument(minutes > PasswordResetRequestServiceImpl.PASSWORD_REQUEST_EXPIRED_TIME, "Password reset request has expired");
+        checkArgument(minutes < PasswordResetRequestServiceImpl.PASSWORD_REQUEST_EXPIRED_TIME, "Password reset request has expired");
     }
 }

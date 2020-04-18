@@ -11,6 +11,7 @@ public class HackathonJobDescriptionMapper implements Mapper<HackathonJobDescrip
 
     @Autowired
     private TeamMapper teamMapper;
+
     @Autowired
     private HackathonMapper hackathonMapper;
 
@@ -25,7 +26,6 @@ public class HackathonJobDescriptionMapper implements Mapper<HackathonJobDescrip
                 .description(from.getDescription())
                 .hackathon(hackathonMapper.map(from.getHackathon()))
                 .build();
-
         if (team != null) {
             dto.setTeam(teamMapper.map(team));
         }

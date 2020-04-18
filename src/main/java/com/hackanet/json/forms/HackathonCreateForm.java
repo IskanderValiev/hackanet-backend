@@ -2,6 +2,7 @@ package com.hackanet.json.forms;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.google.common.collect.Lists;
 import com.hackanet.models.enums.Currency;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,6 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class HackathonCreateForm extends CreateForm {
+
     @NotNull
     @NotEmpty
     private String name;
@@ -59,4 +61,8 @@ public class HackathonCreateForm extends CreateForm {
 
     private Long registrationStartDate;
     private Long registrationEndDate;
+
+    public List<Long> getRequiredSkills() {
+        return requiredSkills == null ? Lists.newArrayList() : requiredSkills;
+    }
 }

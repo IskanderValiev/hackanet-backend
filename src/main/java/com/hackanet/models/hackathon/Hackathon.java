@@ -50,6 +50,7 @@ public class Hackathon extends AbstractEntity {
     private Currency currency;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "logo_id", columnDefinition = "BIGINT DEFAULT 2")
     private FileInfo logo;
 
     @ManyToOne(fetch = FetchType.LAZY)

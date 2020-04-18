@@ -12,7 +12,6 @@ import java.util.List;
 
 public interface HackathonService extends RetrieveService<Hackathon> {
     Hackathon save(User user, HackathonCreateForm form);
-    Hackathon save(Hackathon hackathon);
     Hackathon update(Long id, User user, HackathonUpdateForm form);
     void delete(Long id, User user);
     List<Hackathon> hackathonList(HackathonSearchForm form);
