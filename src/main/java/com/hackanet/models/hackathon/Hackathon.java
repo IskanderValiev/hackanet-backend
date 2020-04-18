@@ -49,7 +49,7 @@ public class Hackathon extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     private Currency currency;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "logo_id", columnDefinition = "BIGINT DEFAULT 2")
     private FileInfo logo;
 

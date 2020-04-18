@@ -5,6 +5,7 @@ import com.hackanet.models.user.User;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * @author Iskander Valiev
@@ -28,8 +29,8 @@ public class FileInfo extends AbstractEntity {
     @Column(name = "preview_link", unique = true, nullable = false)
     private String previewLink;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "logo")
-    private Hackathon hackathonImage;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "logo")
+    private List<Hackathon> hackathonImage;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")

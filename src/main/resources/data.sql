@@ -2,9 +2,8 @@
 -- SET image_id = 16
 -- WHERE users.image_id IS NULL;
 
-CREATE TABLE IF NOT EXISTS qrtz_locks
-(
-    sched_name VARCHAR(120) NOT NULL,
-    lock_name  VARCHAR(40)  NOT NULL,
-    CONSTRAINT qrtz_locks_pkey PRIMARY KEY (sched_name, lock_name)
-);
+-- INSERT INTO hackanet_db.public.files_info (name, preview_link, type)
+-- VALUES ('no_picture_avatar.png', 'https://hackanet-bucket.s3.amazonaws.com/no_picture_avatar.png', 'image/png');
+--
+-- INSERT INTO hackanet_db.public.files_info (name, preview_link, type)
+-- VALUES ('pngtree-h-company-logo-vector-template-design-illustration-png-image_771701.jpg', 'https://hackanet-bucket.s3.amazonaws.com/pngtree-h-company-logo-vector-template-design-illustration-png-image_771701.jpg', 'image/jpeg');

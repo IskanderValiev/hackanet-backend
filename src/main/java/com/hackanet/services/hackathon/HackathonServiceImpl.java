@@ -108,6 +108,7 @@ public class HackathonServiceImpl implements HackathonService {
         return hackathon;
     }
 
+    @CacheEvict(value = "hackathons", allEntries = true)
     @Override
     public void delete(Long id, User user) {
         Hackathon hackathon = get(id);
@@ -118,8 +119,9 @@ public class HackathonServiceImpl implements HackathonService {
 
     @Override
     public List<Hackathon> hackathonList(HackathonSearchForm form) {
-        if (form.getLimit() == null)
+        if (form.getLimit() == null) {
             form.setLimit(AppConstants.DEFAULT_LIMIT);
+        }
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Hackathon> hackathonListQuery = getHackathonsListQuery(criteriaBuilder, form);
         TypedQuery<Hackathon> query = entityManager.createQuery(hackathonListQuery);
@@ -173,6 +175,7 @@ public class HackathonServiceImpl implements HackathonService {
                 .orElseThrow(() -> new NotFoundException("Hackathon with admin id = " + userId + " not found"));
     }
 
+    @CacheEvict(value = "hackathons", allEntries = true)
     @Override
     public Hackathon approve(Long id) {
         Hackathon hackathon = get(id);
