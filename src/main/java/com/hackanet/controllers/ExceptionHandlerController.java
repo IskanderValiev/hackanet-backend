@@ -4,6 +4,7 @@ import com.hackanet.exceptions.*;
 import com.hackanet.json.dto.ExceptionDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @ControllerAdvice
 public class ExceptionHandlerController {
     @ResponseBody
-    @ExceptionHandler({BadRequestException.class, IllegalArgumentException.class, BadFormTypeException.class, AlreadyExistException.class})
+    @ExceptionHandler({BadRequestException.class, IllegalArgumentException.class, BadFormTypeException.class, AlreadyExistException.class, AuthenticationServiceException.class})
     public ResponseEntity<ExceptionDto> handleBadRequest(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionDto.of(ex.getMessage()));
     }
