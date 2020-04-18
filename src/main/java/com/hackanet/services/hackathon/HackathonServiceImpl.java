@@ -79,10 +79,8 @@ public class HackathonServiceImpl implements HackathonService {
     public Hackathon save(User user, HackathonCreateForm form) {
         createFormValidator.validateCreateForm(form);
         Hackathon hackathon = build(form, user);
-        if (form.getLogoId() != null) {
-            FileInfo logo = fileInfoService.get(form.getLogoId());
-            hackathon.setLogo(logo);
-        }
+        FileInfo logo = fileInfoService.get(form.getLogoId());
+        hackathon.setLogo(logo);
         hackathon = hackathonRepository.save(hackathon);
         chatService.createForHackathon(hackathon);
         return hackathon;

@@ -3,6 +3,7 @@ package com.hackanet.json.forms;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.google.common.collect.Lists;
+import com.hackanet.application.AppConstants;
 import com.hackanet.models.enums.Currency;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -64,5 +65,9 @@ public class HackathonCreateForm extends CreateForm {
 
     public List<Long> getRequiredSkills() {
         return requiredSkills == null ? Lists.newArrayList() : requiredSkills;
+    }
+
+    public Long getLogoId() {
+        return logoId == null ? AppConstants.DEFAULT_HACKATHON_IMAGE_ID : logoId;
     }
 }

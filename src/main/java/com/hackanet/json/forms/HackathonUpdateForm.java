@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.hackanet.annotations.End;
 import com.hackanet.annotations.NotFormatted;
 import com.hackanet.annotations.Start;
+import com.hackanet.application.AppConstants;
 import com.hackanet.exceptions.BadRequestException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,7 +45,7 @@ public class HackathonUpdateForm {
     @NotNull
     private String description;
 
-    private Long logo;
+    private Long logoId;
 
     @NotNull
     private String country;
@@ -75,4 +76,8 @@ public class HackathonUpdateForm {
 
     @NotNull
     private Long registrationEndDate;
+
+    public Long getLogo() {
+        return logoId == null ? AppConstants.DEFAULT_HACKATHON_IMAGE_ID : logoId;
+    }
 }
