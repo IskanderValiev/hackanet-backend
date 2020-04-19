@@ -1,5 +1,6 @@
 package com.hackanet.models.team;
 
+import com.google.common.collect.Lists;
 import com.hackanet.models.AbstractEntity;
 import com.hackanet.models.skill.Skill;
 import com.hackanet.models.user.User;
@@ -34,4 +35,8 @@ public class TeamMember extends AbstractEntity {
 
     @Column(columnDefinition = "bool DEFAULT false")
     private Boolean skillsUpdated;
+
+    public List<Skill> getSkills() {
+        return skills == null ? Lists.newArrayList() : skills;
+    }
 }

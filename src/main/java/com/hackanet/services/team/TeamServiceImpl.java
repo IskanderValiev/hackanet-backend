@@ -99,9 +99,11 @@ public class TeamServiceImpl implements TeamService {
     public Team createTeam(User user, TeamCreateForm form) {
         Team team = build(form, user);
         final Team savedTeam = teamRepository.save(team);
-        UserNotificationSettings settings = userNotificationSettingsService.getOrCreateDefaultsSettingsForUser(user);
-        if (Boolean.TRUE.equals(settings.getPushEnabled())) {
-            jobRunner.addHackathonJobReviewRequestJobToTeamLeader(settings, user, team);
+        if (TeamType.HACKATHON.equals(team.getTeamType())) {
+            UserNotificationSettings settings = userNotificationSettingsService.getOrCreateDefaultsSettingsForUser(user);
+            if (Boolean.TRUE.equals(settings.getPushEnabled())) {
+                jobRunner.addHackathonJobReviewRequestJobToTeamLeader(settings, user, team);
+            }
         }
         Set<User> participants = userService.getByIds(form.getParticipantsIds());
         teamInvitationService.sendInvitations(participants, user, savedTeam);
