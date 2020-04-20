@@ -5,6 +5,7 @@ import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.UserReviewCreateForm;
 import com.hackanet.models.ReviewStatistic;
 import com.hackanet.models.team.Team;
+import com.hackanet.models.team.TeamMember;
 import com.hackanet.models.user.User;
 import com.hackanet.models.user.UserReview;
 import com.hackanet.repositories.user.UserReviewRepository;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.hackanet.security.utils.SecurityUtils.checkUserReviewAccess;
 
@@ -42,20 +44,19 @@ public class UserReviewServiceImpl implements UserReviewService {
     @Transactional
     public UserReview createReview(User user, UserReviewCreateForm form) {
         boolean reviewExists = userReviewRepository.existsByUserIdAndReviewedUserIdAndTeamId(user.getId(), form.getReviewedUserId(), form.getTeamId());
-        if (reviewExists)
+        if (reviewExists) {
             throw new BadRequestException("You have left a review about this user");
-
+        }
         Team team = teamService.get(form.getTeamId());
         User reviewedUser = userService.get(form.getReviewedUserId());
-
-        List<User> participants = team.getParticipants();
-        if (!(participants.contains(user) && participants.contains(reviewedUser)))
+        List<User> members = team.getMembers().stream().map(TeamMember::getUser).collect(Collectors.toList());
+        if (!(members.contains(user) && members.contains(reviewedUser))) {
             throw new BadRequestException("You have not been team mates");
-
+        }
         boolean hackathonAttended = requestService.isHackathonAttended(team.getHackathon(), user);
-        if (!hackathonAttended)
+        if (!hackathonAttended) {
             throw new BadRequestException("User has not attended the hackathon");
-
+        }
         UserReview userReview = UserReview.builder()
                 .user(user)
                 .team(team)

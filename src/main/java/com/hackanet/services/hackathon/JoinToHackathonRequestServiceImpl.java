@@ -12,6 +12,7 @@ import com.hackanet.models.enums.TeamType;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.hackathon.Track;
 import com.hackanet.models.team.Team;
+import com.hackanet.models.team.TeamMember;
 import com.hackanet.models.user.User;
 import com.hackanet.repositories.hackathon.JoinToHackathonRequestRepository;
 import com.hackanet.services.EmailService;
@@ -27,6 +28,7 @@ import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.hackanet.security.utils.SecurityUtils.checkHackathonAccess;
 import static com.hackanet.security.utils.SecurityUtils.checkTeamAccessAsTeamLeader;
@@ -131,15 +133,15 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
                     userService.updateUsersHackathonList(participant, hackathon, true);
                 } else {
                     Team team = teamService.get(request.getEntityId());
-                    chats.forEach(chat -> {
-                        chatService.addOrRemoveListOfUsers(chat.getId(), team.getParticipants(), null, true);
-                    });
-                    team.getParticipants().stream()
+                    final List<User> members = team.getMembers().stream()
+                            .map(TeamMember::getUser)
                             .filter(tp -> !hackathon.getParticipants().contains(tp))
-                            .forEach(tp -> {
+                            .peek(tp -> {
                                 userService.updateUsersHackathonList(tp, hackathon, true);
                                 emailService.sendHackathonWelcomeEmail(tp, hackathon);
-                            });
+                            })
+                            .collect(Collectors.toList());
+                    chats.forEach(chat -> chatService.addOrRemoveListOfUsers(chat.getId(), members, null, true));
                 }
                 break;
 
@@ -154,7 +156,7 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
                     portfolioService.addHackathonJob(participant.getId(), hackathon);
                 } else {
                     Team team = teamService.get(request.getEntityId());
-                    team.getParticipants().forEach(tp -> portfolioService.addHackathonJob(tp.getId(), hackathon));
+                    team.getMembers().forEach(tp -> portfolioService.addHackathonJob(tp.getId(), hackathon));
                 }
                 break;
 

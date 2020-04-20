@@ -1,5 +1,6 @@
 package com.hackanet.services.team;
 
+import com.hackanet.exceptions.AlreadyExistException;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.JoinToTeamRequestCreateForm;
@@ -62,8 +63,8 @@ public class JoinToTeamRequestServiceImpl implements JoinToTeamRequestService {
         }
         Team team = teamService.get(form.getTeamId());
         teamService.checkRelevance(team);
-        if (team.getParticipants().contains(user)) {
-            throw new BadRequestException("You are already in the team");
+        if (teamService.teamContainsUser(team, user.getId())) {
+            throw new BadRequestException("The user is already in the team");
         }
         JoinToTeamRequest request = JoinToTeamRequest.builder()
                 .requestStatus(JoinToTeamRequestStatus.WAITING)
@@ -95,25 +96,22 @@ public class JoinToTeamRequestServiceImpl implements JoinToTeamRequestService {
         User userFromRequest = request.getUser();
 
         if (JoinToTeamRequestStatus.APPROVED.equals(status)) {
-            // TODO: 2/18/20 change this to team members service
-            List<TeamMember> members = teamMemberService.getMembers(team.getId());
-            List<User> participants = team.getParticipants();
-            if (!participants.contains(userFromRequest)) {
-                participants.add(userFromRequest);
-                team.setParticipants(participants);
-                teamService.save(team);
+            final boolean containsUser = teamService.teamContainsUser(team, userFromRequest.getId());
+            if (containsUser) {
+                throw new AlreadyExistException("The user is already in team");
             }
+            teamMemberService.addTeamMember(userFromRequest, team);
             chatService.addOrRemoveUser(team.getChat().getId(), userFromRequest.getId(), null, true);
             skillCombinationService.updateIfUserJoinedToTeam(userFromRequest, team);
             if (userNotificationSettingsService.emailEnabled(userFromRequest)) {
                 emailService.sendTeamWelcomeEmail(userFromRequest, team);
             }
         } else if (JoinToTeamRequestStatus.REJECTED.equals(status)) {
-            //send email about reject
-            List<User> participants = team.getParticipants();
-            if (participants.contains(userFromRequest)) {
-                participants.remove(userFromRequest);
+            final TeamMember teamMember = teamMemberService.getMemberByUserIdAndTeamId(userFromRequest.getId(), team.getId());
+            if (teamMember != null) {
                 chatService.addOrRemoveUser(team.getChat().getId(), userFromRequest.getId(), null, false);
+                skillCombinationService.recalculate(teamMember, true);
+                teamMemberService.deleteTeamMember(teamMember);
             }
             emailService.sendTeamRejectEmail(request.getUser(), team);
         }
@@ -122,8 +120,7 @@ public class JoinToTeamRequestServiceImpl implements JoinToTeamRequestService {
             pushNotificationService.sendJoinToTeamRequestUpdatedStatusNotification(userFromRequest, request);
         }
         request.setRequestStatus(status);
-        request = joinToTeamRequestRepository.save(request);
-        return request;
+        return joinToTeamRequestRepository.save(request);
     }
 
     @Override

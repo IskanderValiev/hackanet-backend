@@ -6,7 +6,6 @@ import com.hackanet.models.chat.Chat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +20,7 @@ public class ChatMapper implements Mapper<Chat, ChatDto> {
 
     @Autowired
     private UserSimpleMapper userSimpleMapper;
+
     @Autowired
     private ChatMessageMapper messageMapper;
 
@@ -29,10 +29,9 @@ public class ChatMapper implements Mapper<Chat, ChatDto> {
         if (from == null) {
             return null;
         }
-        if (from.getMessages()==null) {
+        if (from.getMessages() == null) {
             from.setMessages(Collections.emptyList());
         }
-
         List<UserSimpleDto> userSimpleDtos = userSimpleMapper.map(from.getParticipants());
         List<UserSimpleDto> adminDtos = userSimpleMapper.map(from.getAdmins());
         return ChatDto.builder()

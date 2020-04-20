@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Iskander Valiev
@@ -25,13 +26,15 @@ public class SkillServiceImpl implements SkillService {
     @Override
     public Skill add(String name) {
         if (!StringUtils.isBlank(name)) {
+            final Optional<Skill> optional = get(name);
+            if (optional.isPresent()) {
+                return optional.get();
+            }
             Skill skill = Skill.builder()
                     .name(name.trim())
                     .nameLc(name.trim().toLowerCase())
                     .build();
-
-            skill = skillRepository.save(skill);
-            return skill;
+            return skillRepository.save(skill);
         } else {
             throw new BadRequestException("Name is empty or null");
         }
@@ -72,5 +75,9 @@ public class SkillServiceImpl implements SkillService {
             return Lists.newArrayList();
         }
         return skillRepository.findAllByIdIn(ids);
+    }
+
+    private Optional<Skill> get(String name) {
+        return skillRepository.findByNameIgnoreCase(name);
     }
 }

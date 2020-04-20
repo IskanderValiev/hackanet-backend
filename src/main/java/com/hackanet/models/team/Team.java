@@ -1,5 +1,6 @@
 package com.hackanet.models.team;
 
+import com.google.common.collect.Lists;
 import com.hackanet.models.AbstractEntity;
 import com.hackanet.models.skill.Skill;
 import com.hackanet.models.user.User;
@@ -29,12 +30,6 @@ public class Team extends AbstractEntity {
 
     private String name;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "team_participants",
-            joinColumns = @JoinColumn(name = "team_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private List<User> participants;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hackathon_id")
     private Hackathon hackathon;
@@ -61,8 +56,8 @@ public class Team extends AbstractEntity {
     @Column(name = "looking_for_hackers")
     private Boolean lookingForHackers;
 
-    public List<User> getParticipants() {
-        return participants == null ? new ArrayList<>() : participants;
+    public List<TeamMember> getMembers() {
+        return members == null ? Lists.newArrayList() : members;
     }
 
     public Boolean getRelevant() {

@@ -20,12 +20,19 @@ import java.sql.Timestamp;
 @Setter
 @Entity
 public class JoinToTeamRequest extends AbstractEntity {
+
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
+
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Team team;
+
     @Enumerated(EnumType.STRING)
     private JoinToTeamRequestStatus requestStatus;
+
+    @Column(name = "timestamp", nullable = false, columnDefinition = "default CURRENT_TIMESTAMP()")
     private Timestamp timestamp;
+
+    @Column(name = "message", nullable = true, length = 500)
     private String message;
 }

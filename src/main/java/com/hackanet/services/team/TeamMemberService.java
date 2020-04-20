@@ -8,8 +8,10 @@ import com.hackanet.models.team.TeamMember;
 import java.util.List;
 
 public interface TeamMemberService {
-    TeamMember addTeamMember(User user, Team team, List<Skill> skills);
-    TeamMember addTeamMember(User user, Team team);
+    void addTeamMember(User user, Team team, List<Skill> skills);
+    void addTeamMember(User user, Team team);
+    void deleteTeamMember(TeamMember teamMember);
+    void deleteTeamMember(Long teamId, Long userId);
     TeamMember updateSkills(Long id, List<Long> skillsIds, User user);
     TeamMember get(Long id);
     List<Team> getTeams(Long userId);

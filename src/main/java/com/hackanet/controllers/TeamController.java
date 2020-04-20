@@ -18,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -36,9 +37,11 @@ public class TeamController {
     private static final String CREATE = "/create";
     private static final String TEAM = "/{id}";
     private static final String SEARCH = "/search";
+    private static final String DELETE_MEMBER = TEAM + "/members/delete";
 
     @Autowired
     private TeamMapper teamMapper;
+
     @Autowired
     private TeamService teamService;
 
@@ -77,6 +80,20 @@ public class TeamController {
     public ResponseEntity<List<TeamDto>> search(@RequestBody TeamSearchForm form) {
         List<Team> teams = teamService.teamList(form);
         return ResponseEntity.ok(teamMapper.map(teams));
+    }
+
+    @DeleteMapping(DELETE_MEMBER)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<TeamDto> kickOutMember(@PathVariable Long id,
+                                                 @RequestParam Long userId,
+                                                 @AuthenticationPrincipal User user,
+                                                 HttpServletRequest request) {
+        Team team = teamService.deleteMember(id, userId, user);
+        return ResponseEntity.ok(teamMapper.map(team));
     }
 }
 

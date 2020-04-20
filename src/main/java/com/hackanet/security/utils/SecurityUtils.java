@@ -103,7 +103,8 @@ public class SecurityUtils {
     }
 
     public static void checkTeamAccess(Team team, User user) {
-        if (!team.getParticipants().contains(user)) {
+        final boolean contains = team.getMembers().stream().anyMatch(tm -> tm.getUser().equals(user));
+        if (!contains) {
             throw new ForbiddenException("You have no access to this team");
         }
     }

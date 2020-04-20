@@ -22,6 +22,7 @@ import com.hackanet.services.skill.SkillCombinationService;
 import com.hackanet.services.skill.SkillService;
 import com.hackanet.services.user.UserNotificationSettingsService;
 import com.hackanet.services.user.UserService;
+import com.hackanet.utils.DateTimeUtil;
 import com.hackanet.utils.validators.TeamCreateFormValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -34,7 +35,9 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -107,7 +110,7 @@ public class TeamServiceImpl implements TeamService {
         }
         Set<User> participants = userService.getByIds(form.getParticipantsIds());
         teamInvitationService.sendInvitations(participants, user, savedTeam);
-        teamMemberService.addTeamMember(user, savedTeam);
+        teamMemberService.addTeamMember(user, savedTeam, skillService.getByIds(form.getTeamLeaderUsedSkills()));
         skillCombinationService.createByTeam(team);
         return team;
     }
@@ -119,32 +122,6 @@ public class TeamServiceImpl implements TeamService {
         SecurityUtils.checkTeamAccess(team, user);
         team.setName(form.getName().trim());
         team.setLookingForHackers(Boolean.TRUE.equals(form.getLookingForHackers()));
-        /*
-         * if user is contained in participants but is not contained in members =>
-         * the user will be added in chat and team
-         *
-         * if user is contained in members but is not contained in participants =>
-         * the user will be removed from the chat and the team
-         * */
-        // TODO: 11/24/19 delete
-        List<Long> participants = form.getParticipants();
-        if (participants != null && !participants.isEmpty()) {
-            List<Long> members = team.getParticipants().stream()
-                    .map(User::getId)
-                    .collect(Collectors.toList());
-            participants.forEach(p -> {
-                if (!members.contains(p)) {
-                    chatService.addOrRemoveUser(team.getChat().getId(), p, null, true);
-                }
-            });
-            members.forEach(m -> {
-                if (!participants.contains(m)) {
-                    chatService.addOrRemoveUser(team.getChat().getId(), m, null, false);
-                    log.info("Removing member with id = {}", m);
-                }
-            });
-            team.setParticipants(new ArrayList<>(userService.getByIds(participants)));
-        }
         List<Long> skillsLookingFor = form.getSkillsLookingFor();
         team.setSkillsLookingFor(skillService.getByIds(skillsLookingFor));
         team.setTeamLeader(userService.get(form.getTeamLeader()));
@@ -182,15 +159,6 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public Team getByHackathonIdAndUserId(Long userId, Long hackathonId) {
         return teamRepository.findByHackathonIdAndUserId(userId, hackathonId);
-    }
-
-    @Override
-    public Team addUser(Team team, User user) {
-        List<User> participants = team.getParticipants();
-        if (!participants.contains(user))
-            participants.add(user);
-        team.setParticipants(participants);
-        return teamRepository.save(team);
     }
 
     @Override
@@ -242,12 +210,17 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public boolean teamContainsUser(Team team, Long userId) {
-        List<Long> collect = team.getParticipants()
-                .stream()
-                .map(User::getId)
-                .filter(id -> Objects.equals(id, userId))
-                .collect(Collectors.toList());
-        return !collect.isEmpty();
+        return teamMemberService.exists(userId, team.getId());
+    }
+
+    @Override
+    public Team deleteMember(Long teamId, Long userId, User currentUser) {
+        final Team team = get(teamId);
+        SecurityUtils.checkTeamAccessAsTeamLeader(team, currentUser);
+        checkChangeTeamAvailability(team);
+        teamMemberService.deleteTeamMember(teamId, userId);
+        chatService.addOrRemoveUser(team.getChat().getId(), userId, currentUser, false);
+        return team;
     }
 
     private CriteriaQuery<Team> getTeamSuggestionsListQuery(CriteriaBuilder criteriaBuilder, List<Long> skillsIds, Long hackathonId) {
@@ -303,7 +276,6 @@ public class TeamServiceImpl implements TeamService {
         Team team = Team.builder()
                 .name(form.getName().trim())
                 .chat(chat)
-                .participants(Collections.singletonList(user))
                 .teamLeader(user)
                 .skillsLookingFor(skillService.getByIds(skillsLookingForIds))
                 .teamType(form.getTeamType())
@@ -320,5 +292,18 @@ public class TeamServiceImpl implements TeamService {
             team.setHackathon(hackathon);
         }
         return team;
+    }
+
+    private void checkChangeTeamAvailability(Team team) {
+        if (!TeamType.HACKATHON.equals(team.getTeamType())) {
+            return;
+        }
+        final java.sql.Date startDate = team.getHackathon().getStartDate();
+        final LocalDateTime startLocalDateTime = DateTimeUtil.longToLocalDateTime(startDate.getTime());
+        final LocalDateTime now = LocalDateTime.now();
+        final Long differenceInHours = DateTimeUtil.getDifferenceBetweenLocalDateTimes(startLocalDateTime, now, TimeUnit.HOURS);
+        if (differenceInHours < 24) {
+            throw new BadRequestException("Team updating is not allowed less than 24 hours before a hackathon starts");
+        }
     }
 }

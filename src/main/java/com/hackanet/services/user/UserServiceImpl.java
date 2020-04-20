@@ -191,8 +191,6 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-
-
     @Override
     public User update(Long id, User currentUser, UserUpdateForm form) {
         userUpdateFormValidator.validateUpdateForm(form);

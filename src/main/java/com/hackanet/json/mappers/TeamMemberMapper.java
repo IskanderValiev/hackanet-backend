@@ -4,12 +4,13 @@ import com.hackanet.json.dto.TeamMemberDto;
 import com.hackanet.models.FileInfo;
 import com.hackanet.models.skill.Skill;
 import com.hackanet.models.team.Team;
+import com.hackanet.models.team.TeamMember;
 import com.hackanet.models.user.User;
+import com.hackanet.services.team.TeamMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,18 +28,20 @@ public class TeamMemberMapper {
     @Autowired
     private FileInfoMapper fileInfoMapper;
 
+    @Autowired
+    private TeamMemberService teamMemberService;
+
     public TeamMemberDto map(User from, Team team) {
         FileInfo image = from.getPicture();
-        List<Skill> skills = from.getSkills();
-        TeamMemberDto build = TeamMemberDto.builder()
+        final TeamMember teamMember = teamMemberService.getMemberByUserIdAndTeamId(from.getId(), team.getId());
+        return TeamMemberDto.builder()
                 .id(from.getId())
                 .name(from.getName())
                 .lastName(from.getLastname())
                 .isTeamLeader(team.getTeamLeader().getId().equals(from.getId()))
-                .skills(skillMapper.map(skills))
+                .skills(skillMapper.map(teamMember.getSkills()))
                 .image(fileInfoMapper.map(image))
                 .build();
-        return build;
     }
 
     public List<TeamMemberDto> map(Collection<User> participants, Team team) {

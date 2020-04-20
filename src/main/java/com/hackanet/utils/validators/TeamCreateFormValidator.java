@@ -18,6 +18,7 @@ public class TeamCreateFormValidator implements CreateFormValidator<TeamCreateFo
     @Override
     public void validateCreateForm(TeamCreateForm createForm) {
         checkArgument(!SwearWordsFilter.containsBadWords(createForm.getName().trim()), "Team name contains bad words");
+        checkArgument(createForm.getTeamLeaderUsedSkills().size() < 3, "Maximum skills count can be used by team members is 3");
     }
 
     @Override

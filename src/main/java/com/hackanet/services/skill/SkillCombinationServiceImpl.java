@@ -11,7 +11,8 @@ import com.hackanet.services.team.TeamMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
@@ -37,14 +38,13 @@ public class SkillCombinationServiceImpl implements SkillCombinationService {
     public void createByTeam(Team team) {
         List<TeamMember> members = teamMemberService.getMembers(team.getId());
         for (TeamMember m : members) {
-            combineSkills(m.getUser(), team, members);
+            combineSkills(m.getUser(), team);
         }
     }
 
     @Override
     public void updateIfUserJoinedToTeam(User user, Team team) {
-        List<TeamMember> members = teamMemberService.getMembers(team.getId());
-        combineSkills(user, team, members);
+        combineSkills(user, team);
     }
 
     @Override
@@ -74,40 +74,48 @@ public class SkillCombinationServiceImpl implements SkillCombinationService {
     }
 
     @Override
-    public void recalculate(Team team, TeamMember teamMember) {
-        List<TeamMember> members = teamMemberService.getMembers(team.getId());
-        members.remove(teamMember);
+    public void recalculate(TeamMember teamMember, boolean userDeleted) {
+        final Team team = teamMember.getTeam();
+        reset(teamMember);
+        if (!userDeleted) {
+            combineSkills(teamMember.getUser(), team);
+        }
+    }
 
-        members.forEach(member ->
-                member.getSkills().forEach(skill ->
-                        teamMember.getSkills().forEach(skill1 -> {
-                            decreaseCount(skill.getId(), skill1.getId());
-                            decreaseCount(skill1.getId(), skill.getId());
-                        })
-                )
-        );
-        combineSkills(teamMember.getUser(), team, members);
+    @Override
+    public void reset(TeamMember teamMember) {
+        final Team team = teamMember.getTeam();
+        team.getMembers()
+                .stream()
+                .filter(m -> !m.equals(teamMember))
+                .forEach(member ->
+                        member.getSkills().forEach(skill ->
+                                teamMember.getSkills().forEach(skill1 -> {
+                                    decreaseCount(skill.getId(), skill1.getId());
+                                    decreaseCount(skill1.getId(), skill.getId());
+                                })
+                        )
+                );
     }
 
     /**
      * combines skills which are used by members in team
      *
-     * @param user    - user whose skills to combine
-     * @param members - team members to combine skills with
+     * @param user - user whose skills to combine
      */
-    private void combineSkills(User user, Team team, List<TeamMember> members) {
+    private void combineSkills(User user, Team team) {
         TeamMember member = teamMemberService.getMemberByUserIdAndTeamId(user.getId(), team.getId());
-        members.remove(member);
-
         member.getSkills().forEach(skill ->
-                members.forEach(m ->
-                        m.getSkills().forEach(ops -> {
-                            if (!skill.equals(ops)) {
-                                createIfNotExistsAndIncreaseCount(skill.getId(), ops.getId());
-                                createIfNotExistsAndIncreaseCount(ops.getId(), skill.getId());
-                            }
-                        })
-                )
+                team.getMembers().stream()
+                        .filter(m -> !m.equals(member))
+                        .forEach(m ->
+                                m.getSkills().forEach(ops -> {
+                                    if (!skill.equals(ops)) {
+                                        createIfNotExistsAndIncreaseCount(skill.getId(), ops.getId());
+                                        createIfNotExistsAndIncreaseCount(ops.getId(), skill.getId());
+                                    }
+                                })
+                        )
         );
     }
 

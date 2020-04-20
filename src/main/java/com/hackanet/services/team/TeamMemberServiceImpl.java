@@ -1,5 +1,6 @@
 package com.hackanet.services.team;
 
+import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.ForbiddenException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.exceptions.SkillNumberViolationException;
@@ -9,9 +10,11 @@ import com.hackanet.models.team.Team;
 import com.hackanet.models.team.TeamMember;
 import com.hackanet.repositories.TeamMemberRepository;
 import com.hackanet.security.utils.SecurityUtils;
+import com.hackanet.services.skill.SkillCombinationHelperService;
 import com.hackanet.services.skill.SkillService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,31 +33,48 @@ public class TeamMemberServiceImpl implements TeamMemberService {
     @Autowired
     private SkillService skillService;
 
+    @Autowired
+    private SkillCombinationHelperService skillCombinationHelperService;
+
     @Override
-    public TeamMember addTeamMember(User user, Team team, List<Skill> skills) {
-        if (skills != null && skills.size() > 3) {
-            throw new SkillNumberViolationException();
-        }
+    public void addTeamMember(User user, Team team, List<Skill> skills) {
+        checkSkillsCount(skills);
         TeamMember teamMember = build(user, team, skills);
-        return teamMemberRepository.save(teamMember);
+        teamMemberRepository.save(teamMember);
     }
 
     @Override
-    public TeamMember addTeamMember(User user, Team team) {
-        return addTeamMember(user, team, null);
+    public void addTeamMember(User user, Team team) {
+        addTeamMember(user, team, null);
     }
 
     @Override
-    public TeamMember updateSkills(Long id, List<Long> skillsIds, User user) {
-        if (skillsIds != null && skillsIds.size() > 3) {
-            throw new SkillNumberViolationException();
+    public void deleteTeamMember(TeamMember teamMember) {
+        teamMemberRepository.delete(teamMember);
+    }
+
+    @Override
+    public void deleteTeamMember(Long teamId, Long userId) {
+        final TeamMember teamMember = getMemberByUserIdAndTeamId(userId, teamId);
+        teamMemberRepository.delete(teamMember);
+        skillCombinationHelperService.reset(teamMember);
+    }
+
+    @Override
+    @Transactional
+    public TeamMember updateSkills(Long teamId, List<Long> skillsIds, User user) {
+        checkSkillsCount(skillsIds);
+        TeamMember teamMember = getMemberByUserIdAndTeamId(user.getId(), teamId);
+        if (!teamMember.getTeam().getRelevant()) {
+            throw new BadRequestException("The team is not relevant");
         }
-        TeamMember teamMember = get(id);
         if (Boolean.TRUE.equals(teamMember.getSkillsUpdated())) {
             throw new ForbiddenException("Skills have been updated");
         }
         SecurityUtils.checkTeamMemberAccess(teamMember, user);
+        skillCombinationHelperService.reset(teamMember);
         teamMember.setSkills(skillService.getByIds(skillsIds));
+        skillCombinationHelperService.update(teamMember);
         teamMember.setSkillsUpdated(true);
         return teamMemberRepository.save(teamMember);
     }
@@ -91,5 +111,11 @@ public class TeamMemberServiceImpl implements TeamMemberService {
                 .team(team)
                 .skills(skills)
                 .build();
+    }
+
+    private void checkSkillsCount(List skills) {
+        if (skills != null && skills.size() > 3) {
+            throw new SkillNumberViolationException();
+        }
     }
 }

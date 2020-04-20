@@ -1,7 +1,6 @@
 package com.hackanet.utils;
 
 import com.hackanet.application.AppConstants;
-import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.json.forms.HackathonCreateForm;
 import com.hackanet.models.user.UserNotificationSettings;
 
@@ -9,11 +8,9 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.TimeZone;
-
-import static java.lang.System.currentTimeMillis;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Iskander Valiev
@@ -23,8 +20,12 @@ import static java.lang.System.currentTimeMillis;
 public class DateTimeUtil {
 
     public static LocalTime longToLocalTime(Long mills) {
-        LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(mills), ZoneId.systemDefault());
+        final LocalDateTime time = longToLocalDateTime(mills);
         return time.toLocalTime();
+    }
+
+    public static LocalDateTime longToLocalDateTime(Long mills) {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(mills), ZoneId.systemDefault());
     }
 
     public static long localTimeToLong(LocalTime localTime) {
@@ -34,16 +35,6 @@ public class DateTimeUtil {
 
     public static long localDateTimeToLong(LocalDateTime localDateTime) {
         return localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-    }
-
-    public static LocalDateTime timestampToLocalDateTime(Timestamp timestamp) {
-        return timestamp.toLocalDateTime();
-    }
-
-    public static Timestamp addDaysAndHoursToTimestamp(Timestamp timestamp, Integer days, Integer hours) {
-        LocalDateTime localDateTime = timestamp.toLocalDateTime().plusDays(days).plusHours(hours);
-        timestamp = new Timestamp(localDateTime.toInstant(ZoneOffset.UTC).toEpochMilli());
-        return timestamp;
     }
 
     public static Timestamp getAvailableTime(UserNotificationSettings settings, Timestamp timestamp) {
@@ -124,50 +115,23 @@ public class DateTimeUtil {
         }
     }
 
-    public static String nowString() {
-        return getString(LocalDateTime.now(), "yyyy-MM-dd HH:mm:ss");
+    public static Long getDifferenceBetweenLocalDateTimes(LocalDateTime from, LocalDateTime to, TimeUnit unit) {
+        final long difference = getDifferenceBetweenLocalDateTimes(from, to);
+        return getUnit(difference, unit);
     }
 
-    public static String getString(LocalDateTime dateTime, String format) {
-        DateTimeFormatter formatter = format(format);
-        return dateTime.format(formatter);
-    }
-
-    private static DateTimeFormatter format(String format) {
-        return DateTimeFormatter.ofPattern(format);
-    }
-
-    public static LocalDateTime getRegistrationDate(Long date, boolean start, Date end) {
-        LocalDateTime retVal;
-        if (start) {
-            retVal = date == null
-                    ? LocalDateTime.now()
-                    : epochToLocalDateTime(date);
-            return retVal;
-        }
-        retVal = date == null
-                ? end.toLocalDate().minusDays(1).atTime(23, 59)
-                : epochToLocalDateTime(date);
-        return retVal;
-    }
-
-    public static void validateRegistrationDates(Long regStartDate, Long regEndDate, Date start, Date end) {
-        if (regStartDate > regEndDate)
-            throw new BadRequestException("Registration Start Date is after End Date");
-        if (regEndDate < System.currentTimeMillis())
-            throw new BadRequestException("Registration End Date is in the past");
-        if (new Timestamp(regStartDate).after(start))
-            throw new BadRequestException("Registration Start Date must be before hackathon start date");
-        if (new Timestamp(regEndDate).after(end))
-            throw new BadRequestException("Registration End Date must be before hackathon end date");
-    }
-
-    public static void validateHackathonDates(Date start, Date end) {
-        if (start.after(end)) {
-            throw new BadRequestException("Start date is after end date");
-        }
-        if (start.before(new Date(currentTimeMillis()))) {
-            throw new BadRequestException("Start date is in the past");
+    public static Long getUnit(Long mills, TimeUnit timeUnit) {
+        switch (timeUnit) {
+            case DAYS:
+                return TimeUnit.MILLISECONDS.toDays(mills);
+            case HOURS:
+                return TimeUnit.MILLISECONDS.toHours(mills);
+            case MINUTES:
+                return TimeUnit.MILLISECONDS.toMinutes(mills);
+            case SECONDS:
+                return TimeUnit.MILLISECONDS.toSeconds(mills);
+            default:
+                return mills;
         }
     }
 }

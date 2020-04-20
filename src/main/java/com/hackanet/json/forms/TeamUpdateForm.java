@@ -22,9 +22,6 @@ public class TeamUpdateForm {
     private String name;
 
     @NotNull
-    private List<Long> participants;
-
-    @NotNull
     private List<Long> skillsLookingFor;
 
     @NotNull

@@ -107,7 +107,7 @@ public class TemplateServiceImpl implements TemplateService {
     public String prepareTeamWelcomeEmail(User user, Team team) {
         Map<String, Object> dataModel = new HashMap<>();
         dataModel.put("teamName", team.getName());
-        dataModel.put("members", team.getParticipants());
+        dataModel.put("members", team.getMembers());
         log.info("Preparing team welcome email");
         return resolveTemplate(dataModel, TEAM_WELCOME_TEMPLATE, null);
     }

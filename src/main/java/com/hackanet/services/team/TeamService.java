@@ -23,10 +23,10 @@ public interface TeamService extends RetrieveService<Team> {
     List<Team> getByHackathon(Long hackathonId);
     List<Team> teamList(TeamSearchForm form);
     Team getByHackathonIdAndUserId(Long hackathonId, Long userId);
-    Team addUser(Team team, User user);
     List<Team> getByHackathonStartTime(LocalDate startTime);
     void checkRelevance(Team team);
     List<Team> getTeamsSuggestion(User user);
     List<Team> getTeamsSuggestion(User user, Long hackathonId);
     boolean teamContainsUser(Team team, Long userId);
+    Team deleteMember(Long id, Long userId, User currentUser);
 }

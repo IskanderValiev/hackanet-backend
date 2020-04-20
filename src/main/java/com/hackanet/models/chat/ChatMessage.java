@@ -20,13 +20,17 @@ import java.sql.Timestamp;
 @Entity
 @Table(name = "chat_messages")
 public class ChatMessage extends AbstractEntity {
+
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "sender_id")
     private User sender;
+
     @Column(nullable = false)
     private Timestamp messageTime;
+
     @Column(nullable = false, length = 1000)
     private String text;
+
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "chat_id")
     private Chat chat;

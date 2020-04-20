@@ -84,12 +84,13 @@ public class TeamInvitationController {
             @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
                     required = true, dataType = "string", paramType = "header")
     })
-    @ApiOperation(value = "Change status")
+    @ApiOperation(value = "Change status. Skills ids are required only if the status is ACCEPTED")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<TeamInvitationDto> changeStatus(@PathVariable("id") Long id,
                                                           @RequestParam TeamInvitationStatus status,
+                                                          @RequestParam(required = false) List<Long> skillsIds,
                                                           @AuthenticationPrincipal User user) {
-        TeamInvitation invitation = teamInvitationService.changeStatus(user, id, status);
+        TeamInvitation invitation = teamInvitationService.changeStatus(user, id, status, skillsIds);
         return ResponseEntity.ok(teamInvitationMapper.map(invitation));
     }
 }
