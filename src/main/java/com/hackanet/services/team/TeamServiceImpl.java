@@ -228,7 +228,7 @@ public class TeamServiceImpl implements TeamService {
         Root<Team> root = query.from(Team.class);
         query.select(root);
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(criteriaBuilder.isTrue(root.get("actual")));
+        predicates.add(criteriaBuilder.isTrue(root.get("relevant")));
         predicates.add(criteriaBuilder.isTrue(root.get("lookingForHackers")));
         if (hackathonId != null) {
             Join<Team, Hackathon> join = root.join("hackathon", JoinType.INNER);
