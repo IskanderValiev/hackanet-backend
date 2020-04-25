@@ -1,5 +1,6 @@
 package com.hackanet.services.team;
 
+import com.hackanet.components.Profiling;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.TeamCreateForm;
@@ -8,6 +9,7 @@ import com.hackanet.json.forms.TeamUpdateForm;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.enums.TeamType;
 import com.hackanet.models.hackathon.Hackathon;
+import com.hackanet.models.mappers.TeamRowMapper;
 import com.hackanet.models.skill.Skill;
 import com.hackanet.models.team.Team;
 import com.hackanet.models.team.TeamMember;
@@ -27,12 +29,18 @@ import com.hackanet.utils.validators.TeamCreateFormValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
+import javax.sql.DataSource;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -45,6 +53,7 @@ import java.util.stream.Collectors;
  * created by isko
  * on 10/31/19
  */
+@Profiling(enabled = true)
 @Service
 @Slf4j
 public class TeamServiceImpl implements TeamService {
@@ -79,6 +88,7 @@ public class TeamServiceImpl implements TeamService {
     private SkillCombinationService skillCombinationService;
 
     @Autowired
+    @Lazy
     private TeamInvitationService teamInvitationService;
 
     @Autowired
@@ -86,6 +96,20 @@ public class TeamServiceImpl implements TeamService {
 
     @Autowired
     private TeamCreateFormValidator teamFormValidator;
+
+    @Autowired
+    private NamedParameterJdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private DataSource dataSource;
+
+    @Autowired
+    private TeamRowMapper teamRowMapper;
+
+    @PostConstruct
+    public void init() {
+        this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+    }
 
     @Override
     public Team save(Team team) {
@@ -209,6 +233,17 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    public List<Team> getTeamsSuggestionUsingJDBC(User user, Long hackathonId) {
+        user = userService.get(user.getId());
+        List<Skill> skills = skillCombinationService.mostRelevantSkills(user);
+        if (skills.isEmpty()) {
+            return teamRepository.findAllByLookingForHackersAndRelevant(true, true);
+        }
+        List<Long> skillsIds = skills.stream().map(Skill::getId).collect(Collectors.toList());
+        return getTeamsSuggestionsUsingJDBC(hackathonId, skillsIds);
+    }
+
+    @Override
     public boolean teamContainsUser(Team team, Long userId) {
         return teamMemberService.exists(userId, team.getId());
     }
@@ -236,11 +271,31 @@ public class TeamServiceImpl implements TeamService {
             predicates.add(join.getOn());
         }
         Join<Team, TeamMember> teamParticipantsJoin = root.join("members", JoinType.INNER);
-        // FIXME: 4/14/20 join.get("id") fix join parameter
-        teamParticipantsJoin.on(teamParticipantsJoin.get("id").in(skillsIds));
+        Join<TeamMember, Skill> teamMemberSkillJoin = teamParticipantsJoin.join("skills", JoinType.INNER);
+        predicates.add(teamMemberSkillJoin.get("id").in(skillsIds));
         query.distinct(true);
         query.where(criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()])));
         return query;
+    }
+
+    private List<Team> getTeamsSuggestionsUsingJDBC(Long hackathonId, List<Long> skillsIds) {
+        //language=SQL
+        StringBuffer query = new StringBuffer(
+                "select distinct " +
+                        "team0_.* " +
+                        "from team team0_ " +
+                        "inner join team_members members1_ on team0_.id = members1_.team_id " +
+                        "inner join team_members_skills tms on members1_.id = tms.user_id " +
+                        "where tms.skill_id in (:skills) and team0_.relevant = true " +
+                        "and team0_.looking_for_hackers = true");
+        Map<String, Object> params = new HashMap<>();
+        params.put("skills", skillsIds);
+        if (hackathonId != null) {
+            query.append(" and hackathon_id = :hackathonId");
+            params.put("hackathonId", hackathonId);
+        }
+        SqlParameterSource parameterSource = new MapSqlParameterSource(params);
+        return jdbcTemplate.query(query.toString(), parameterSource, teamRowMapper);
     }
 
     private CriteriaQuery<Team> getTeamListQuery(CriteriaBuilder criteriaBuilder, TeamSearchForm form) {

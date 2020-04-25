@@ -23,5 +23,5 @@ public class TeamDto {
     private String name;
     private TeamType teamType;
     private Boolean lookingForHackers;
-    private Boolean actual;
+    private Boolean relevant;
 }

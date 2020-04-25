@@ -13,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -28,6 +31,7 @@ import java.util.List;
 public class TeamSuggestionController {
 
     private static final String BY_HACKATHON = "/hackathons";
+    private static final String BY_HACKATHON_JDBC = BY_HACKATHON + "/jdbc";
 
     @Autowired
     private TeamService teamService;
@@ -61,4 +65,16 @@ public class TeamSuggestionController {
         return ResponseEntity.ok(teamMapper.map(teams));
     }
 
+    @GetMapping(BY_HACKATHON_JDBC)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    @ApiOperation(value = "Get teams suggestions by hackathonId (can be null)", nickname = "GET SUGGESTIONS BY HACKATHON")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<TeamDto>> getSuggestionsByHackathonsUsingJDBC(@RequestParam(required = false) Long id,
+                                                                             @AuthenticationPrincipal User user) {
+        List<Team> teams = teamService.getTeamsSuggestionUsingJDBC(user, id);
+        return ResponseEntity.ok(teamMapper.map(teams));
+    }
 }

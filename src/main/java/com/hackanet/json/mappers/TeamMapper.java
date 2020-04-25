@@ -43,7 +43,7 @@ public class TeamMapper implements Mapper<Team, TeamDto> {
                 .skillsLookingFor(skillMapper.map(from.getSkillsLookingFor()))
                 .teamType(from.getTeamType())
                 .lookingForHackers(Boolean.TRUE.equals(from.getLookingForHackers()))
-                .actual(Boolean.TRUE.equals(from.getRelevant()))
+                .relevant(Boolean.TRUE.equals(from.getRelevant()))
                 .build();
     }
 }
