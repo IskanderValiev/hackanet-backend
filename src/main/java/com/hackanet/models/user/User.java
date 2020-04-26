@@ -6,6 +6,7 @@ import com.hackanet.models.FileInfo;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.skill.Skill;
+import com.hackanet.models.team.TeamMember;
 import com.hackanet.security.enums.Role;
 import lombok.*;
 
@@ -119,6 +120,9 @@ public class User extends AbstractEntity {
 
     @OneToOne(mappedBy = "user")
     private BlockedUser blockedUser;
+
+    @OneToMany(mappedBy = "user")
+    private List<TeamMember> members;
 
     public List<FileInfo> getFiles() {
         return files == null ? new ArrayList<>() : files;
