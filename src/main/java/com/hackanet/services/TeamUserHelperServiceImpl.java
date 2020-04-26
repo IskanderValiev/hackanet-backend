@@ -1,5 +1,6 @@
 package com.hackanet.services;
 
+import com.google.common.collect.Lists;
 import com.hackanet.models.BlockedUser;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.skill.Skill;
@@ -40,6 +41,9 @@ public class TeamUserHelperServiceImpl implements TeamUserHelperService {
         final Team team = teamService.get(teamId);
         SecurityUtils.checkTeamAccess(team, user);
         final List<Skill> skills = skillCombinationService.mostRelevantSkills(team);
+        if (skills == null || skills.isEmpty()) {
+            return Lists.newArrayList();
+        }
         final List<Long> skillsIds = skills.stream().mapToLong(Skill::getId).boxed().collect(Collectors.toList());
         final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         final CriteriaQuery<User> query = getUsersQuery(criteriaBuilder, skillsIds, hackathonId);
