@@ -70,7 +70,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
             }
         }
         ActivityLog build = activityLogBuilder.build();
-//        activityLogRepository.save(build);
+        activityLogRepository.save(build);
     }
 
     @Override
