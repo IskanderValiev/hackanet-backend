@@ -24,8 +24,20 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
             " inner join team_participants tp on t.id = tp.team_id" +
             " inner join users u on tp.user_id = u.id" +
             " inner join user_skill_table ust on u.id = ust.user_id" +
-            " where ust.skills_id in :skills and t.looking_for_hackers is true and t.relavant is true")
+            " where ust.skills_id in :skills and t.looking_for_hackers is true and t.relevant is true")
     List<Team> findBySkills(@Param("skills") List<Long> skills);
 
     List<Team> findAllByLookingForHackersAndRelevant(Boolean lookingForHackers, Boolean relevant);
+
+    @Query(nativeQuery = true, value = "select * from team " +
+                                                "inner join team_members tm on team.id = tm.team_id " +
+                                                "inner join users u on tm.user_id = u.id " +
+                                                                        "where u.id = :userId")
+    List<Team> findAllByUserId(@Param("userId") Long userId);
+
+    @Query(nativeQuery = true, value = "select * from team t " +
+                                                "inner join team_members tm on t.id = tm.team_id " +
+                                                "inner join users u on tm.user_id = u.id " +
+                                                                        "where u.id = :userId and t.relevant = :relevant")
+    List<Team> findAllByUserIdAndRelevant(@Param("userId") Long userId, @Param("relevant") Boolean relevant);
 }

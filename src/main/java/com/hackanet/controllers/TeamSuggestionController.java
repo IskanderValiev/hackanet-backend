@@ -1,9 +1,12 @@
 package com.hackanet.controllers;
 
+import com.hackanet.json.dto.MemberSuggestionDto;
 import com.hackanet.json.dto.TeamDto;
+import com.hackanet.json.mappers.MemberSuggestionMapper;
 import com.hackanet.json.mappers.TeamMapper;
 import com.hackanet.models.team.Team;
 import com.hackanet.models.user.User;
+import com.hackanet.services.TeamUserHelperService;
 import com.hackanet.services.team.TeamService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -32,12 +36,19 @@ public class TeamSuggestionController {
 
     private static final String BY_HACKATHON = "/hackathons";
     private static final String BY_HACKATHON_JDBC = BY_HACKATHON + "/jdbc";
+    private static final String MEMBERS = "/members";
 
     @Autowired
     private TeamService teamService;
 
     @Autowired
+    private TeamUserHelperService teamUserHelperService;
+
+    @Autowired
     private TeamMapper teamMapper;
+
+    @Autowired
+    private MemberSuggestionMapper memberSuggestionMapper;
 
     @GetMapping
     @ApiImplicitParams({
@@ -76,5 +87,20 @@ public class TeamSuggestionController {
                                                                              @AuthenticationPrincipal User user) {
         List<Team> teams = teamService.getTeamsSuggestionUsingJDBC(user, id);
         return ResponseEntity.ok(teamMapper.map(teams));
+    }
+
+    @GetMapping(MEMBERS)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    @ApiOperation(value = "Get members suggestions for teams by hackathonId (can be null)", nickname = "GET SUGGESTIONS BY HACKATHON")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<MemberSuggestionDto>> getMembersSuggestions(@RequestParam Long teamId,
+                                                                           @RequestParam(required = false) Long hackathonId,
+                                                                           @AuthenticationPrincipal User user,
+                                                                           HttpServletRequest request) {
+        final List<User> suggestions = teamUserHelperService.getMembersSuggestions(user, teamId, hackathonId);
+        return ResponseEntity.ok(memberSuggestionMapper.map(suggestions));
     }
 }
