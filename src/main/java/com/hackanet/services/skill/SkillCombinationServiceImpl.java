@@ -49,28 +49,18 @@ public class SkillCombinationServiceImpl implements SkillCombinationService {
 
     @Override
     public List<Skill> mostRelevantSkills(User user) {
-        List<AuxiliarySkillCombination> list = new ArrayList<>();
-        user.getSkills().forEach(skill -> {
-            List<SkillCombination> combinations = skillCombinationRepository.findBySkillId(skill.getId());
-            long combinationCount = combinations.stream()
-                    .mapToLong(SkillCombination::getCountOfCombination)
-                    .sum();
+        return mostRelevantSkillsForSkills(user.getSkills());
+    }
 
-            for (SkillCombination combination : combinations) {
-                double probability = (double) combination.getCountOfCombination() / combinationCount;
-                list.add(AuxiliarySkillCombination.builder()
-                        .probability(probability)
-                        .skillId(skill.getId())
-                        .skillUsedWithId(combination.getSkillUsedWith())
-                        .build());
-            }
+    @Override
+    public List<Skill> mostRelevantSkills(Team team) {
+        List<Skill> skills = new ArrayList<>();
+        final List<TeamMember> members = team.getMembers();
+        members.forEach(teamMember -> {
+            final List<Skill> relevantSkills = mostRelevantSkillsForSkills(teamMember.getSkills());
+            skills.addAll(relevantSkills);
         });
-
-        return list.stream()
-                .sorted(comparing(AuxiliarySkillCombination::getProbability).reversed())
-                .map(AuxiliarySkillCombination::getSkillUsedWithId)
-                .map(id -> skillService.get(id))
-                .collect(Collectors.toList());
+        return skills;
     }
 
     @Override
@@ -96,6 +86,32 @@ public class SkillCombinationServiceImpl implements SkillCombinationService {
                                 })
                         )
                 );
+    }
+
+    private List<Skill> mostRelevantSkillsForSkills(List<Skill> skills) {
+        final ArrayList<AuxiliarySkillCombination> list = new ArrayList<>();
+        skills.forEach(skill -> {
+            List<SkillCombination> combinations = skillCombinationRepository.findBySkillId(skill.getId());
+            long combinationCount = combinations.stream()
+                    .mapToLong(SkillCombination::getCountOfCombination)
+                    .sum();
+
+            for (SkillCombination combination : combinations) {
+                double probability = (double) combination.getCountOfCombination() / combinationCount;
+                list.add(AuxiliarySkillCombination.builder()
+                        .probability(probability)
+                        .skillId(skill.getId())
+                        .skillUsedWithId(combination.getSkillUsedWith())
+                        .build());
+            }
+        });
+
+        return list.stream()
+                .sorted(comparing(AuxiliarySkillCombination::getProbability).reversed())
+                .map(AuxiliarySkillCombination::getSkillUsedWithId)
+                .map(id -> skillService.get(id))
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     /**

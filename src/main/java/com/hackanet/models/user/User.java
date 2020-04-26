@@ -1,6 +1,7 @@
 package com.hackanet.models.user;
 
 import com.hackanet.models.AbstractEntity;
+import com.hackanet.models.BlockedUser;
 import com.hackanet.models.FileInfo;
 import com.hackanet.models.chat.Chat;
 import com.hackanet.models.hackathon.Hackathon;
@@ -115,6 +116,9 @@ public class User extends AbstractEntity {
 
     @Column(name = "university", length = 100)
     private String university;
+
+    @OneToOne(mappedBy = "user")
+    private BlockedUser blockedUser;
 
     public List<FileInfo> getFiles() {
         return files == null ? new ArrayList<>() : files;

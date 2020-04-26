@@ -16,6 +16,7 @@ public interface SkillCombinationService {
     void createByTeam(Team team);
     void updateIfUserJoinedToTeam(User user, Team team);
     List<Skill> mostRelevantSkills(User user);
+    List<Skill> mostRelevantSkills(Team team);
     void recalculate(TeamMember teamMember, boolean userDeleted);
     void reset(TeamMember teamMember);
 }

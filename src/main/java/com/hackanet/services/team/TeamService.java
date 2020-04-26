@@ -30,4 +30,5 @@ public interface TeamService extends RetrieveService<Team> {
     List<Team> getTeamsSuggestionUsingJDBC(User user, Long hackathonId);
     boolean teamContainsUser(Team team, Long userId);
     Team deleteMember(Long id, Long userId, User currentUser);
+    List<Team> getTeamsByUser(long userId, Boolean relevance);
 }

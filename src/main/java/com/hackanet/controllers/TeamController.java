@@ -11,6 +11,7 @@ import com.hackanet.services.team.TeamService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,7 @@ public class TeamController {
     private static final String TEAM = "/{id}";
     private static final String SEARCH = "/search";
     private static final String DELETE_MEMBER = TEAM + "/members/delete";
+    private static final String BY_USER = "/users";
 
     @Autowired
     private TeamMapper teamMapper;
@@ -94,6 +96,23 @@ public class TeamController {
                                                  HttpServletRequest request) {
         Team team = teamService.deleteMember(id, userId, user);
         return ResponseEntity.ok(teamMapper.map(team));
+    }
+
+    @GetMapping(BY_USER)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    @ApiOperation(value = "Get the user's teams.",
+            notes = "Relevant is nullable",
+            response = Team.class,
+            responseContainer = "List")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<TeamDto>> getByUser(@AuthenticationPrincipal User user,
+                                                   @RequestParam(required = false) Boolean relevant,
+                                                   HttpServletRequest request) {
+        final List<Team> teams = teamService.getTeamsByUser(user.getId(), relevant);
+        return ResponseEntity.ok(teamMapper.map(teams));
     }
 }
 

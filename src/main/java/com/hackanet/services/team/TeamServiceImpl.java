@@ -258,6 +258,14 @@ public class TeamServiceImpl implements TeamService {
         return team;
     }
 
+    @Override
+    public List<Team> getTeamsByUser(long userId, Boolean relevance) {
+        if (relevance != null) {
+            return teamRepository.findAllByUserIdAndRelevant(userId, Boolean.TRUE.equals(relevance));
+        }
+        return teamRepository.findAllByUserId(userId);
+    }
+
     private CriteriaQuery<Team> getTeamSuggestionsListQuery(CriteriaBuilder criteriaBuilder, List<Long> skillsIds, Long hackathonId) {
         CriteriaQuery<Team> query = criteriaBuilder.createQuery(Team.class);
         Root<Team> root = query.from(Team.class);
