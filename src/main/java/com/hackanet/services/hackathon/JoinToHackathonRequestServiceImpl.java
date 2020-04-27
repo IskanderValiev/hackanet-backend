@@ -16,6 +16,7 @@ import com.hackanet.models.team.TeamMember;
 import com.hackanet.models.user.User;
 import com.hackanet.repositories.hackathon.JoinToHackathonRequestRepository;
 import com.hackanet.services.EmailService;
+import com.hackanet.services.PortfolioHackathonJobHelperService;
 import com.hackanet.services.PortfolioService;
 import com.hackanet.services.chat.ChatService;
 import com.hackanet.services.team.TeamService;
@@ -66,6 +67,9 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
 
     @Autowired
     private TrackService trackService;
+
+    @Autowired
+    private PortfolioHackathonJobHelperService portfolioHackathonJobHelperService;
 
     @Override
     public JoinToHackathonRequest createRequest(JoinToHackathonRequestCreateForm form, User user) {
@@ -153,10 +157,10 @@ public class JoinToHackathonRequestServiceImpl implements JoinToHackathonRequest
                 }
                 if (alone) {
                     final User participant = userService.get(request.getEntityId());
-                    portfolioService.addHackathonJob(participant.getId(), hackathon);
+                    portfolioHackathonJobHelperService.addHackathonJob(participant.getId(), hackathon);
                 } else {
                     Team team = teamService.get(request.getEntityId());
-                    team.getMembers().forEach(tp -> portfolioService.addHackathonJob(tp.getId(), hackathon));
+                    team.getMembers().forEach(tp -> portfolioHackathonJobHelperService.addHackathonJob(tp.getId(), hackathon));
                 }
                 break;
 

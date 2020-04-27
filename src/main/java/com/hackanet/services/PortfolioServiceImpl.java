@@ -9,6 +9,7 @@ import com.hackanet.repositories.PortfolioRepository;
 import com.hackanet.services.hackathon.HackathonJobDescriptionService;
 import com.hackanet.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,8 @@ public class PortfolioServiceImpl implements PortfolioService {
     private JobExperienceService jobExperienceService;
 
     @Autowired
+    //Spring uses a proxy instead of the real object at the injection point. This proxy delays the initialization of the underlying object until it is first used.
+    @Lazy
     private HackathonJobDescriptionService hackathonJobDescriptionService;
 
     /**
@@ -69,13 +72,6 @@ public class PortfolioServiceImpl implements PortfolioService {
         }
         portfolioRepository.save(portfolio);
         return portfolioRepository.save(portfolio);
-    }
-
-    @Override
-    public Portfolio addHackathonJob(Long userId, Hackathon hackathon) {
-        Portfolio byUserId = getByUserId(userId);
-        hackathonJobDescriptionService.createEmptyDescriptionWithHackathon(byUserId, hackathon);
-        return new Portfolio();
     }
 
     @Override
