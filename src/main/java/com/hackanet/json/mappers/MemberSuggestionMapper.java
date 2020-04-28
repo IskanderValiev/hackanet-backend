@@ -19,6 +19,9 @@ public class MemberSuggestionMapper implements Mapper<User, MemberSuggestionDto>
     @Autowired
     private SkillMapper skillMapper;
 
+    @Autowired
+    private FileInfoMapper fileInfoMapper;
+
     @Override
     public MemberSuggestionDto map(User from) {
         if (from == null) {
@@ -30,6 +33,7 @@ public class MemberSuggestionMapper implements Mapper<User, MemberSuggestionDto>
                 .lastname(from.getLastname())
                 .position(positionMapper.map(from.getPosition()))
                 .skills(skillMapper.map(from.getSkills()))
+                .picture(fileInfoMapper.map(from.getPicture()))
                 .build();
         return dto;
     }
