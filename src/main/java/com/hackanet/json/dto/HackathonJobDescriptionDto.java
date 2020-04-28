@@ -16,6 +16,6 @@ import lombok.Data;
 public class HackathonJobDescriptionDto {
     private Long id;
     private TeamDto team;
-    private HackathonDto hackathon;
+    private HackathonSimpleDto hackathon;
     private String description;
 }

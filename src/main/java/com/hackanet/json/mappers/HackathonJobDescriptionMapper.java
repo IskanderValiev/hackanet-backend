@@ -13,7 +13,7 @@ public class HackathonJobDescriptionMapper implements Mapper<HackathonJobDescrip
     private TeamMapper teamMapper;
 
     @Autowired
-    private HackathonMapper hackathonMapper;
+    private HackathonSimpleMapper hackathonMapper;
 
     @Override
     public HackathonJobDescriptionDto map(HackathonJobDescription from) {

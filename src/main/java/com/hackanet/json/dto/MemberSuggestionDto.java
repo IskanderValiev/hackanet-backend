@@ -26,4 +26,6 @@ public class MemberSuggestionDto {
     private List<SkillDto> skills;
 
     private PositionDto position;
+
+    private FileInfoDto picture;
 }
