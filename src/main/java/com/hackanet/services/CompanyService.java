@@ -16,4 +16,5 @@ public interface CompanyService extends RetrieveService<Company> {
     List<Company> getCompaniesList(CompanySearchForm form);
     Company createCompanyByName(String name, String country, String city);
     Company getByAdmin(User admin);
+    List<Company> getByNameLike(String name);
 }

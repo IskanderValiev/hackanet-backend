@@ -135,6 +135,11 @@ public class CompanyServiceImpl implements CompanyService {
         return companyRepository.findByAdmin(admin).orElseThrow(() -> new BadRequestException("The user is not a company owner."));
     }
 
+    @Override
+    public List<Company> getByNameLike(@NotNull String name) {
+        return companyRepository.findAllByNameLike(name.trim().toLowerCase());
+    }
+
     private CriteriaQuery<Company> getCompaniesListQuery(CriteriaBuilder criteriaBuilder, CompanySearchForm form) {
         CriteriaQuery<Company> query = criteriaBuilder.createQuery(Company.class);
         Root<Company> root = query.from(Company.class);

@@ -119,7 +119,6 @@ public class UserServiceImpl implements UserService {
         String email = form.getEmail().toLowerCase();
         String password = form.getPassword();
         User user = get(email);
-
         if (passwordUtil.matches(password, user.getHashedPassword())) {
             UserToken token = userTokenRepository.findByUserId(user.getId());
             if (token == null) {
@@ -237,6 +236,8 @@ public class UserServiceImpl implements UserService {
                 .country(form.getCountry())
                 .city(form.getCity())
                 .name(form.getName())
+                .accessTokenParam(new RandomString().nextString())
+                .refreshTokenParam(new RandomString().nextString())
                 .build();
 
         return userRepository.save(user);
