@@ -22,8 +22,7 @@ public class PortfolioHackathonJobHelperServiceImpl implements PortfolioHackatho
 
     @Override
     public void addHackathonJob(Long userId, Hackathon hackathon) {
-        Portfolio byUserId = portfolioService.getByUserId(userId);
-        hackathonJobDescriptionService.createEmptyDescriptionWithHackathon(byUserId, hackathon);
-        return new Portfolio();
+        Portfolio portfolio = portfolioService.getByUserId(userId);
+        hackathonJobDescriptionService.createEmptyDescriptionWithHackathon(portfolio, hackathon);
     }
 }
