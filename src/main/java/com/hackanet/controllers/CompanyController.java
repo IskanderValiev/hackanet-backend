@@ -40,6 +40,7 @@ public class CompanyController {
 
     @Autowired
     private CompanyService companyService;
+
     @Autowired
     private CompanyMapper companyMapper;
 
@@ -87,6 +88,10 @@ public class CompanyController {
     }
 
     @GetMapping(ADD_BY_NAME)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
     @ApiOperation("Add by name")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<CompanyDto> addByName(@RequestParam String name, @RequestParam String country, @RequestParam String city) {
