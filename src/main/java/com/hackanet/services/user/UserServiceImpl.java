@@ -236,6 +236,7 @@ public class UserServiceImpl implements UserService {
                 .country(form.getCountry())
                 .city(form.getCity())
                 .name(form.getName())
+                .emailConfirmationCode(new RandomString().nextString())
                 .accessTokenParam(new RandomString().nextString())
                 .refreshTokenParam(new RandomString().nextString())
                 .build();
