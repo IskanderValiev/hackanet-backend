@@ -300,6 +300,7 @@ public class UserServiceImpl implements UserService {
         Root<User> root = query.from(User.class);
         query.select(root);
         List<Predicate> predicates = new ArrayList<>();
+        predicates.add(criteriaBuilder.equal(root.get("role"), Role.USER));
         if (form.getLookingForTeam() != null) {
             if (form.getLookingForTeam()) {
                 predicates.add(criteriaBuilder.isTrue(root.get("lookingForTeam")));

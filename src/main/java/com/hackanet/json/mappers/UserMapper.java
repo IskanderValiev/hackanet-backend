@@ -28,6 +28,9 @@ public class UserMapper implements Mapper<User, UserDto> {
     @Autowired
     private PositionMapper positionMapper;
 
+    @Autowired
+    private HackathonSimpleMapper hackathonSimpleMapper;
+
     @Override
     public UserDto map(User from) {
         if (from == null) {
@@ -51,6 +54,7 @@ public class UserMapper implements Mapper<User, UserDto> {
                 .picture(fileInfoMapper.map(from.getPicture()))
                 .skills(skillMapper.map(from.getSkills()))
                 .role(from.getRole())
+                .attendedHackathons(hackathonSimpleMapper.map(from.getAttendedHackathons()))
                 .build();
     }
 }

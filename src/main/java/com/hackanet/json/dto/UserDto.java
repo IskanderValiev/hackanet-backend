@@ -38,4 +38,5 @@ public class UserDto {
     private Long lastRequestTime;
     private PositionDto position;
     private Role role;
+    private List<HackathonSimpleDto> attendedHackathons;
 }
