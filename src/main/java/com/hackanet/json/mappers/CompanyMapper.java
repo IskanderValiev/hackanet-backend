@@ -32,6 +32,7 @@ public class CompanyMapper implements Mapper<Company, CompanyDto> {
                 .city(from.getCity())
                 .technologies(skillMapper.map(from.getTechnologies()))
                 .logo(fileInfoMapper.map(from.getLogo()))
+                .approved(Boolean.TRUE.equals(from.getApproved()))
                 .build();
     }
 }

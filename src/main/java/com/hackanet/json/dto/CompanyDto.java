@@ -25,4 +25,5 @@ public class CompanyDto {
     private List<SkillDto> technologies;
     private CompanyType companyType;
     private FileInfoDto logo;
+    private Boolean approved;
 }

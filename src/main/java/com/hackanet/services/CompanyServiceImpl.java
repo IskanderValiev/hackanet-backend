@@ -145,7 +145,7 @@ public class CompanyServiceImpl implements CompanyService {
         Root<Company> root = query.from(Company.class);
         query.select(root);
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(criteriaBuilder.isTrue(root.get("approved")));
+        predicates.add(criteriaBuilder.or(criteriaBuilder.isTrue(root.get("approved")), criteriaBuilder.equal(root.get("type"), CompanyType.ADDED_BY_NAME)));
         String name = form.getName();
         if (!isBlank(name)) {
             Expression<String> nameInLc = criteriaBuilder.lower(root.get("name"));

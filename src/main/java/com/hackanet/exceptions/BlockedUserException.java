@@ -5,7 +5,7 @@ package com.hackanet.exceptions;
  * created by isko
  * on 4/29/20
  */
-public class BlockedUserException extends RuntimeException {
+public class BlockedUserException extends ForbiddenException {
 
     public BlockedUserException() {
         super("The user has been blocked");

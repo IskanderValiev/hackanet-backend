@@ -1,6 +1,8 @@
 package com.hackanet.aspects;
 
+import com.hackanet.models.user.User;
 import com.hackanet.services.log.ActivityLogService;
+import com.hackanet.services.user.UserService;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
@@ -23,6 +25,9 @@ public class ActivityLoggerAspect {
     @Autowired
     private ActivityLogService activityLogService;
 
+    @Autowired
+    private UserService userService;
+
     @Pointcut("execution(public * com.hackanet.controllers.*Controller.*(..))")
     public void addActivityLog() {
 
@@ -35,6 +40,11 @@ public class ActivityLoggerAspect {
 
     @After("addActivityLog()")
     public void afterAddActivityLog(JoinPoint jp) {
-
+        for (Object arg : jp.getArgs()) {
+            if (arg instanceof User) {
+                User user  = (User) arg;
+                userService.updateLastRequestTime(user);
+            }
+        }
     }
 }

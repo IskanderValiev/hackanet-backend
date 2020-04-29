@@ -24,7 +24,7 @@ public class ExceptionHandlerController {
     }
 
     @ResponseBody
-    @ExceptionHandler({ForbiddenException.class, BlackListException.class})
+    @ExceptionHandler({ForbiddenException.class, BlackListException.class, BlockedUserException.class})
     public ResponseEntity<ExceptionDto> handleForbidden(ForbiddenException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ExceptionDto.of(ex.getMessage()));
     }

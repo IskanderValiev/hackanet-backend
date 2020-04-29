@@ -105,7 +105,7 @@ public class User extends AbstractEntity {
     @Column(name = "last_request_time", nullable = false)
     private LocalDateTime lastRequestTime;
 
-    @Column(name = "email_confirmed", nullable = false)
+    @Column(name = "email_confirmed", nullable = false, columnDefinition = "boolean DEFAULT false")
     private Boolean emailConfirmed;
 
     @Column(name = "email_confirmation_code", nullable = false, unique = true)
@@ -150,5 +150,13 @@ public class User extends AbstractEntity {
 
     public List<User> getBlockedUsers() {
         return blockedUsers == null ? new ArrayList<>() : blockedUsers;
+    }
+
+    public LocalDateTime getLastRequestTime() {
+        return lastRequestTime == null ? LocalDateTime.now() : lastRequestTime;
+    }
+
+    public Boolean getEmailConfirmed() {
+        return Boolean.TRUE.equals(emailConfirmed);
     }
 }
