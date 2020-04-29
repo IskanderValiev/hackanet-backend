@@ -52,6 +52,10 @@ public class CompanyController {
     }
 
     @GetMapping(COMPANY)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = false, dataType = "string", paramType = "header")
+    })
     @ApiOperation("Get information about the company")
     public ResponseEntity<CompanyDto> get(@PathVariable Long id) {
         Company company = companyService.get(id);
@@ -59,7 +63,12 @@ public class CompanyController {
     }
 
     @PutMapping(COMPANY)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
     @ApiOperation("Update the information about the company")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<CompanyDto> update(@PathVariable Long id,
                                              @RequestBody CompanyUpdateForm form,
                                              @AuthenticationPrincipal User user) {
@@ -81,6 +90,10 @@ public class CompanyController {
     }
 
     @PostMapping
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = false, dataType = "string", paramType = "header")
+    })
     @ApiOperation("Search companies")
     public ResponseEntity<List<CompanyDto>> search(@RequestBody CompanySearchForm form) {
         List<Company> companies = companyService.getCompaniesList(form);
