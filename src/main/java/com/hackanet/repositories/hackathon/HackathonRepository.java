@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface HackathonRepository extends JpaRepository<Hackathon, Long> {
     List<Hackathon> findByParticipantsContaining(User user);
-    Hackathon findByOwnerId(Long userId);
+    List<Hackathon> findByOwnerId(Long userId);
     List<Hackathon> findAllByDeletedIsFalseAndApprovedIsTrue();
 }

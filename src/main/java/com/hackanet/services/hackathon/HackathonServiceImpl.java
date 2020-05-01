@@ -170,9 +170,8 @@ public class HackathonServiceImpl implements HackathonService {
     }
 
     @Override
-    public Hackathon getByAdmin(Long userId) {
-        return Optional.of(hackathonRepository.findByOwnerId(userId))
-                .orElseThrow(() -> new NotFoundException("Hackathon with admin id = " + userId + " not found"));
+    public List<Hackathon> getByAdmin(Long userId) {
+        return hackathonRepository.findByOwnerId(userId);
     }
 
     @CacheEvict(value = "hackathons", allEntries = true)

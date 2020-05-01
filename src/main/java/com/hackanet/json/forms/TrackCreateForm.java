@@ -26,4 +26,7 @@ public class TrackCreateForm {
     @NotNull
     @Length(max = 1000)
     private String description;
+
+    @NotNull
+    private Long hackathonId;
 }

@@ -7,7 +7,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD=
+      - POSTGRES_PASSWORD=SQ86skuQj6
       - POSTGRES_USER=postgres
       - POSTGRES_DB=hackanet_db
     ports:
@@ -35,10 +35,20 @@ services:
     container_name: elasticsearch
     hostname: elasticsearch
     environment:
-      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-      MAX_LOCKED_MEMORY: unlimited
+      - MAX_LOCKED_MEMORY=unlimited
+      - ES_JAVA_OPTS=-Xmx512m -Xms512m
+      - cluster.name=hackanet
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+      - xpack.monitoring.enabled=false
+      - xpack.ml.enabled=false
+      - xpack.watcher.enabled=false
+      - http.port=9200
+      - transport.tcp.port=9300
     volumes:
-      - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      #      - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - esdata:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
       - 9300:9300
@@ -56,21 +66,38 @@ services:
 #    depends_on:
 #      - elasticsearch
 
-#  logstash:
-#    image: docker.elastic.co/logstash/logstash:5.6.3
-#    container_name: logstash
-#    hostname: logstash
-#    volumes:
-#      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-#      - ./logstash.yml:/usr/share/logstash/config/logstash.yml
-##      - ./systemd-nspawn:/logs
-#    ports:
-#      - 5044:5044
-#    links:
-#      - elasticsearch
-#    depends_on:
-#      - elasticsearch
-#      - kibana
+  #  logstash:
+  #    image: docker.elastic.co/logstash/logstash:5.6.3
+  #    container_name: logstash
+  #    hostname: logstash
+  #    volumes:
+  #      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+  #      - ./logstash.yml:/usr/share/logstash/config/logstash.yml
+  ##      - ./systemd-nspawn:/logs
+  #    ports:
+  #      - 5044:5044
+  #    links:
+  #      - elasticsearch
+  #    depends_on:
+  #      - elasticsearch
+  #      - kibana
+
+  hackanet-statistic:
+    image: hackanet-statistic:latest
+    container_name: hackanet-statistic
+    ports:
+      - 8085:8085
+    expose:
+      - 8085
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+    environment:
+      - SERVER_PORT=8085
+      - SPRING_DATA_ELASTICSEARCH_CLUSTER-NODES=elasticsearch:9300
+      - SPRING_DATA_ELASTICSEARCH_CLUSTER-NAME=hackanet
+
 
 
   hackanet-backend:
@@ -85,21 +112,25 @@ services:
       - mongo
       - rabbitmq
       - elasticsearch
-#      - logstash
-#      - kibana
+    #      - logstash
+    #      - kibana
     links:
       - postgres
       - mongo
       - rabbitmq
       - elasticsearch
-#      - logstash
-#      - kibana
+    #      - logstash
+    #      - kibana
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hackanet_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=
+      - SPRING_DATASOURCE_PASSWORD=SQ86skuQj6
       - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_DATA_ELASTICSEARCH_CLUSTER-NODES=elasticsearch:9300
+      - SPRING_DATA_ELASTICSEARCH_CLUSTER-NAME=hackanet
 
 volumes:
   postgres-data:
+  esdata:
+    driver: local

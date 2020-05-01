@@ -8,6 +8,8 @@ import com.hackanet.models.hackathon.Track;
 import com.hackanet.models.user.User;
 import com.hackanet.services.hackathon.TrackService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,6 +42,10 @@ public class TrackController {
     private TrackService trackService;
 
     @PostMapping
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
     @ApiOperation(value = "Add a new track")
     @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<TrackDto> add(@Valid @RequestBody TrackCreateForm form,
@@ -59,7 +65,12 @@ public class TrackController {
     }
 
     @PutMapping(ONE)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
     @ApiOperation(value = "Update the track information")
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<TrackDto> update(@Valid @RequestBody TrackUpdateForm form,
                                            @PathVariable Long id,
                                            @AuthenticationPrincipal User user,

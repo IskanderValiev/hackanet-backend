@@ -32,7 +32,7 @@ public class TrackServiceImpl implements TrackService {
         Track track = Track.builder()
                 .name(form.getName())
                 .description(form.getDescription())
-                .hackathon(hackathonService.getByAdmin(user.getId()))
+                .hackathon(hackathonService.get(form.getHackathonId()))
                 .build();
         return trackRepository.save(track);
     }

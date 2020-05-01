@@ -19,6 +19,6 @@ public interface HackathonService extends RetrieveService<Hackathon> {
     List<Hackathon> getFriendsHackathons(User user);
     List<Hackathon> getHackathonsListByUser(User user);
     void setChats(List<Chat> chats, Hackathon hackathon);
-    Hackathon getByAdmin(Long userId);
+    List<Hackathon> getByAdmin(Long userId);
     Hackathon approve(Long id);
 }

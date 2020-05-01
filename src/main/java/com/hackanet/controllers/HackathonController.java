@@ -46,6 +46,7 @@ public class HackathonController {
     private static final String FRIENDS = "/friends";
     private static final String CURRENT_USER_HACKATHONS = "/user";
     private static final String APPROVE = HACKATHON + "/approve";
+    private static final String BY_ADMIN = "/admin";
 
     @Autowired
     private HackathonService hackathonService;
@@ -192,5 +193,18 @@ public class HackathonController {
     public ResponseEntity<HackathonDto> approve(@PathVariable Long id) {
         Hackathon hackathon = hackathonService.approve(id);
         return ResponseEntity.ok(mapper.map(hackathon));
+    }
+
+    @GetMapping(BY_ADMIN)
+    @ApiOperation(value = "Set approved status for hackathon")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<HackathonDto>> getByAdmin(@AuthenticationPrincipal User user,
+                                                         HttpServletRequest request) {
+        final List<Hackathon> hackathons = hackathonService.getByAdmin(user.getId());
+        return ResponseEntity.ok(mapper.map(hackathons));
     }
 }
