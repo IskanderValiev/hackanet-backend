@@ -98,8 +98,6 @@ services:
       - SPRING_DATA_ELASTICSEARCH_CLUSTER-NODES=elasticsearch:9300
       - SPRING_DATA_ELASTICSEARCH_CLUSTER-NAME=hackanet
 
-
-
   hackanet-backend:
     image: hackanet:latest
     container_name: hackanet
