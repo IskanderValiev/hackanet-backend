@@ -1,6 +1,7 @@
 package com.hackanet.controllers;
 
 import com.hackanet.json.dto.HackathonDto;
+import com.hackanet.json.dto.HackathonProfileViewFullStatisticDto;
 import com.hackanet.json.dto.HackathonSimpleDto;
 import com.hackanet.json.forms.HackathonCreateForm;
 import com.hackanet.json.forms.HackathonSearchForm;
@@ -26,7 +27,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.sql.Date;
 import java.util.List;
 
 /**
@@ -43,6 +43,10 @@ public class HackathonController {
     static final String HACKATHON = "/{id}";
     private static final String LIST = "/list";
     private static final String VIEWS = HACKATHON + "/views";
+    private static final String VIEWS_HOURLY = VIEWS + "/hourly";
+    private static final String VIEWS_DAILY = VIEWS + "/daily";
+    private static final String UNIQUE_VIEWS = VIEWS + "/unique";
+    private static final String VIEWS_IN_PERIOD = VIEWS + "/period";
     private static final String FRIENDS = "/friends";
     private static final String CURRENT_USER_HACKATHONS = "/user";
     private static final String APPROVE = HACKATHON + "/approve";
@@ -156,18 +160,76 @@ public class HackathonController {
     }
 
     @GetMapping(VIEWS)
+    @ApiOperation(value = "Get information about views in total")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = false, dataType = "string", paramType = "header")
+    })
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN')")
+    public ResponseEntity<Long> getViewsCount(@AuthenticationPrincipal User user,
+                                              @PathVariable Long id,
+                                              HttpServletRequest request) {
+        return ResponseEntity.ok(hackathonProfileViewService.countByHackathonId(id));
+    }
+
+    @GetMapping(VIEWS_IN_PERIOD)
     @ApiOperation(value = "Get information about views in the period")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
                     required = true, dataType = "string", paramType = "header")
     })
     @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN')")
-    public ResponseEntity<Long> getViewsCount(@AuthenticationPrincipal User user,
-                                              @RequestParam Date from,
-                                              @RequestParam Date to,
-                                              @PathVariable Long id,
-                                              HttpServletRequest request) {
+    public ResponseEntity<Long> getViewsCountInPeriod(@AuthenticationPrincipal User user,
+                                                      @PathVariable Long id,
+                                                      @RequestParam Long from,
+                                                      @RequestParam Long to,
+                                                      HttpServletRequest request) {
+        return ResponseEntity.ok(hackathonProfileViewService.countOfViewsInPeriod(id, user, from, to));
+    }
+
+    @GetMapping(UNIQUE_VIEWS)
+    @ApiOperation(value = "Get information about unique views in the period")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN')")
+    public ResponseEntity<Long> getUniqueViewsCount(@AuthenticationPrincipal User user,
+                                                    @RequestParam Long from,
+                                                    @RequestParam Long to,
+                                                    @PathVariable Long id,
+                                                    HttpServletRequest request) {
         return ResponseEntity.ok(hackathonProfileViewService.countOfUniqueViewsInPeriod(user, id, from, to));
+    }
+
+    @GetMapping(VIEWS_HOURLY)
+    @ApiOperation(value = "Get information about views in the period by hours")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN')")
+    public ResponseEntity<HackathonProfileViewFullStatisticDto> getStatisticsByHours(@AuthenticationPrincipal User user,
+                                                                                     @RequestParam Long from,
+                                                                                     @RequestParam Long to,
+                                                                                     @PathVariable Long id,
+                                                                                     HttpServletRequest request) {
+        return ResponseEntity.ok(hackathonProfileViewService.getStatisticHourly(id, user, from, to));
+    }
+
+    @GetMapping(VIEWS_DAILY)
+    @ApiOperation(value = "Get information about views in the period by days")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization header", defaultValue = "Bearer %token%",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN')")
+    public ResponseEntity<HackathonProfileViewFullStatisticDto> getStatisticsByDays(@AuthenticationPrincipal User user,
+                                                                                    @RequestParam Long from,
+                                                                                    @RequestParam Long to,
+                                                                                    @PathVariable Long id,
+                                                                                    HttpServletRequest request) {
+        return ResponseEntity.ok(hackathonProfileViewService.getStatisticDaily(id, user, from, to));
     }
 
     @GetMapping(FRIENDS)

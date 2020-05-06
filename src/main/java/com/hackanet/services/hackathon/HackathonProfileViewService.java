@@ -1,10 +1,9 @@
 package com.hackanet.services.hackathon;
 
+import com.hackanet.json.dto.HackathonProfileViewFullStatisticDto;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.hackathon.HackathonProfileView;
 import com.hackanet.models.user.User;
-
-import java.sql.Date;
 
 /**
  * @author Iskander Valiev
@@ -13,6 +12,9 @@ import java.sql.Date;
  */
 public interface HackathonProfileViewService {
     HackathonProfileView addView(User user, Hackathon hackathon);
-    Long countOfUniqueViewsInPeriod(User user, Long hackathonId, Date from, Date to);
+    Long countOfUniqueViewsInPeriod(User user, Long hackathonId, Long from, Long to);
+    Long countOfViewsInPeriod(Long hackathonId, User user, Long from, Long to);
     Long countByHackathonId(Long hackathonId);
+    HackathonProfileViewFullStatisticDto getStatisticHourly(Long hackathonId, User user, Long from, Long to);
+    HackathonProfileViewFullStatisticDto getStatisticDaily(Long hackathonId, User user, Long from, Long to);
 }

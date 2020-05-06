@@ -9,6 +9,8 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -133,5 +135,59 @@ public class DateTimeUtil {
             default:
                 return mills;
         }
+    }
+
+    public static Date fromMills(Long mills) {
+        return new Date(mills);
+    }
+
+    public static List<LocalDateTime> splitUpByHours(Long start, Long end) {
+        LocalDateTime startLDT = round(start);
+        final LocalDateTime endLDT = round(end);
+
+        List<LocalDateTime> elements = new ArrayList<>();
+        while (startLDT.isBefore(endLDT)) {
+            elements.add(startLDT);
+            startLDT = startLDT.plusHours(1L);
+        }
+        return elements;
+    }
+
+    public static List<LocalDateTime> splitByDays(Long start, Long end) {
+        LocalDateTime startLDT = roundDay(start);
+        final LocalDateTime endLDT = roundDay(end);
+
+        List<LocalDateTime> elements = new ArrayList<>();
+        while (startLDT.isBefore(endLDT)) {
+            elements.add(startLDT);
+            startLDT = startLDT.plusDays(1L);
+        }
+        return elements;
+    }
+
+    public static LocalDateTime roundDay(LocalDateTime time) {
+        return LocalDateTime.of(time.getYear(), time.getMonth(), time.getDayOfMonth(), 0, 0, 0);
+    }
+
+    public static LocalDateTime roundDay(Long mills) {
+        final LocalDateTime time = epochToLocalDateTime(mills);
+        return roundDay(time);
+    }
+
+    public static LocalDateTime round(LocalDateTime time) {
+        return LocalDateTime.of(time.getYear(), time.getMonth(), time.getDayOfMonth(), time.getHour(), 0, 0);
+    }
+
+    public static LocalDateTime round(Long mills) {
+        final LocalDateTime time = epochToLocalDateTime(mills);
+        return round(time);
+    }
+
+    public static boolean isBetween(LocalDateTime value, LocalDateTime from, LocalDateTime to) {
+        return value.isAfter(from) && value.isBefore(to);
+    }
+
+    public static boolean isBetween(Long value, LocalDateTime from, LocalDateTime to) {
+        return isBetween(epochToLocalDateTime(value), from, to);
     }
 }

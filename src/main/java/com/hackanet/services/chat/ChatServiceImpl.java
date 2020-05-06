@@ -59,7 +59,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<Chat> getByUser(User user) {
-        return chatRepository.findAllByParticipantsIn(user);
+        return chatRepository.findAllByParticipantsIn(Collections.singleton(user));
     }
 
     @Override
