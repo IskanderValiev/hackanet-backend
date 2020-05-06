@@ -64,7 +64,6 @@ public class AMPQConfig {
         container.setConnectionFactory(connectionFactory);
         container.setQueueNames(QUEUE_NAME);
         container.setMessageListener(pushNotificationService);
-        container.setMessageConverter(jsonMessageConverter());
         container.setAcknowledgeMode(AcknowledgeMode.AUTO);
         return container;
     }

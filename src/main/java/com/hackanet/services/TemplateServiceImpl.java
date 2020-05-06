@@ -28,14 +28,14 @@ import java.util.Map;
 @Service
 public class TemplateServiceImpl implements TemplateService {
 
-    private static final String WELCOME_EMAIL_TEMPLATE = "welcome_email.ftl";
-    private static final String TEST = "test.ftl";
-    private static final String RESET_PASSWORD_TEMPLATE = "reset_password.ftl";
-    private static final String TEAM_WELCOME_TEMPLATE = "team_welcome.ftl";
-    private static final String TEAM_REJECT_TEMPLATE = "team_reject.ftl";
-    private static final String HACKATHON_WELCOME_TEMPLATE = "hackathon_welcome.ftl";
-    private static final String HACKATHON_JOB_REVIEW_REQUEST_TEMPLATE = "hackathon_job_review_request.ftl";
-    private static final String EMAIL_CONFIRMATION_TEMPLATE = "email_confirmation_email.ftl";
+    private static final String WELCOME_EMAIL_TEMPLATE = "welcome_email.ftlh";
+    private static final String TEST = "test.ftlh";
+    private static final String RESET_PASSWORD_TEMPLATE = "reset_password.ftlh";
+    private static final String TEAM_WELCOME_TEMPLATE = "team_welcome.ftlh";
+    private static final String TEAM_REJECT_TEMPLATE = "team_reject.ftlh";
+    private static final String HACKATHON_WELCOME_TEMPLATE = "hackathon_welcome.ftlh";
+    private static final String HACKATHON_JOB_REVIEW_REQUEST_TEMPLATE = "hackathon_job_review_request.ftlh";
+    private static final String EMAIL_CONFIRMATION_TEMPLATE = "email_confirmation_email.ftlh";
 
     @Autowired
     private AppConfig appConfig;

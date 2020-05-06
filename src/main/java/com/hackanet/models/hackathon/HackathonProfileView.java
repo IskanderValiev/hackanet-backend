@@ -4,10 +4,12 @@ import com.hackanet.models.AbstractEntity;
 import com.hackanet.models.user.User;
 import lombok.*;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 /**
  * @author Iskander Valiev
@@ -28,5 +30,6 @@ public class HackathonProfileView extends AbstractEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Hackathon hackathon;
 
-    private Timestamp timestamp;
+    @Column(name = "timestamp", nullable = false)
+    private LocalDateTime timestamp;
 }
