@@ -22,7 +22,6 @@ import java.util.Set;
 public class ChatDto {
     private Long id;
     private Set<UserSimpleDto> participants;
-    private List<ChatMessageDto> messages;
     private Set<UserSimpleDto> admin;
     private ChatType chatType;
 }

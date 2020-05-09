@@ -36,6 +36,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManagerFactory;
 import java.util.List;
@@ -91,6 +92,7 @@ public class RabbitMQPushNotificationService implements MessageListener {
     @Autowired
     private EntityManagerFactory entityManagerFactory;
 
+    @Transactional
     public void sendNewMessageNotification(@NotNull com.hackanet.models.chat.Message message) {
         Chat chat = chatService.get(message.getChatId());
         List<User> participants = chat.getParticipants().stream()

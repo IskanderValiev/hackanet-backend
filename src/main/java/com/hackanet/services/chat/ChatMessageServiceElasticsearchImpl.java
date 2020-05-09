@@ -21,7 +21,6 @@ import org.springframework.data.elasticsearch.core.query.SimpleField;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -77,7 +76,7 @@ public class ChatMessageServiceElasticsearchImpl {
         Message chatMessage = Message.builder()
                 .id(generateRandomString())
                 .chatId(form.getChatId())
-                .timestamp(LocalDateTime.now())
+                .datetime(System.currentTimeMillis())
                 .text(form.getText().trim())
                 .attachments(attachments)
                 .senderId(form.getSenderId())
@@ -95,7 +94,7 @@ public class ChatMessageServiceElasticsearchImpl {
     }
 
     public List<Message> getByChatId(Long chatId) {
-        return messageRepository.findAllByChatIdOrderByTimestamp(chatId);
+        return messageRepository.findAllByChatId(chatId);
     }
 
     public List<Message> searchMessage(MessageSearchForm form) {
@@ -123,14 +122,14 @@ public class ChatMessageServiceElasticsearchImpl {
         searchCriteria.and(textCriteria, chatCriteria);
         CriteriaQuery criteriaQuery = new CriteriaQuery(searchCriteria);
         return elasticsearchTemplate.queryForList(criteriaQuery, Message.class).stream()
-                .sorted(Comparator.comparing(Message::getTimestamp))
+                .sorted(Comparator.comparing(Message::getDatetime).reversed())
                 .collect(Collectors.toList());
     }
 
     void createAcceptJobInvitationMessage(Chat chat) {
         Message message = Message.builder()
                 .chatId(chat.getId())
-                .timestamp(LocalDateTime.now())
+                .datetime(System.currentTimeMillis())
                 .text(LocalMessageText.EN.getAcceptedJobOffer())
                 .build();
         message = messageRepository.save(message);

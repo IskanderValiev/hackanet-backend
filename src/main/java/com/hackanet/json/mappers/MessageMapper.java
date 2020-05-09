@@ -10,6 +10,7 @@ import com.hackanet.services.user.UserService;
 import com.hackanet.services.chat.ChatMessageServiceElasticsearchImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +51,7 @@ public class MessageMapper {
         return MessageDto.builder()
                 .id(from.getId())
                 .text(from.getText())
-                .date(localDateTimeToLong(from.getTimestamp()))
+                .date(from.getDatetime())
                 .attachments(files)
                 .chatId(from.getChatId())
                 .replies(map(chatMessageService.getReplies(from.getId())))

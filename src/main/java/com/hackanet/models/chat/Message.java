@@ -28,7 +28,7 @@ public class Message {
     private String id;
     private Long senderId;
     private Long chatId;
-    private LocalDateTime timestamp;
+    private Long datetime;
     private String text;
     private List<Long> attachments;
     private String replyTo;

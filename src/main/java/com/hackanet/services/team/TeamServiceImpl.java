@@ -227,7 +227,7 @@ public class TeamServiceImpl implements TeamService {
         }
         List<Long> skillsIds = skills.stream().map(Skill::getId).collect(Collectors.toList());
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Team> suggestions = getTeamSuggestionsListQuery(criteriaBuilder, skillsIds, hackathonId);
+        CriteriaQuery<Team> suggestions = getTeamSuggestionsListQuery(criteriaBuilder, skillsIds, user, hackathonId);
         TypedQuery<Team> query = entityManager.createQuery(suggestions);
         return query.getResultList();
     }
@@ -266,7 +266,7 @@ public class TeamServiceImpl implements TeamService {
         return teamRepository.findAllByUserId(userId);
     }
 
-    private CriteriaQuery<Team> getTeamSuggestionsListQuery(CriteriaBuilder criteriaBuilder, List<Long> skillsIds, Long hackathonId) {
+    private CriteriaQuery<Team> getTeamSuggestionsListQuery(CriteriaBuilder criteriaBuilder, List<Long> skillsIds, User user, Long hackathonId) {
         CriteriaQuery<Team> query = criteriaBuilder.createQuery(Team.class);
         Root<Team> root = query.from(Team.class);
         query.select(root);
@@ -279,6 +279,11 @@ public class TeamServiceImpl implements TeamService {
             predicates.add(join.getOn());
         }
         Join<Team, TeamMember> teamParticipantsJoin = root.join("members", JoinType.INNER);
+        predicates.add(criteriaBuilder.not(teamParticipantsJoin.get("team").in(getTeamsByUser(user.getId(), null)
+                .stream()
+                .mapToLong(Team::getId)
+                .boxed()
+                .collect(Collectors.toList()))));
         Join<TeamMember, Skill> teamMemberSkillJoin = teamParticipantsJoin.join("skills", JoinType.INNER);
         predicates.add(teamMemberSkillJoin.get("id").in(skillsIds));
         query.distinct(true);
