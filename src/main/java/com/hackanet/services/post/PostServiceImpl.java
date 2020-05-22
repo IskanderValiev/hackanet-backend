@@ -1,6 +1,7 @@
 package com.hackanet.services.post;
 
 import com.hackanet.application.AppConstants;
+import com.hackanet.exceptions.CensorViolationException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.json.forms.PostCreateForm;
@@ -16,6 +17,8 @@ import com.hackanet.services.FileInfoService;
 import com.hackanet.services.hackathon.HackathonService;
 import com.hackanet.services.scheduler.JobRunner;
 import com.hackanet.services.user.UserService;
+import com.hackanet.utils.PostKeyWordsFeignClient;
+import com.hackanet.utils.SwearWordsFilter;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,7 @@ import javax.persistence.criteria.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Iskander Valiev
@@ -53,8 +57,15 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private JobRunner jobRunner;
 
+    @Autowired
+    private PostKeyWordsFeignClient postKeyWordsFeignClient;
+
     @Override
     public Post add(PostCreateForm form, User user) {
+        final Boolean containsBadWords = SwearWordsFilter.containsBadWords(form.getContent());
+        if (containsBadWords) {
+            throw new CensorViolationException("The post's content has bad words.");
+        }
         Post post = Post.builder()
                 .title(form.getTitle())
                 .content(form.getContent())
@@ -74,6 +85,10 @@ public class PostServiceImpl implements PostService {
         } else {
             post.setImportance(PostImportance.NOT_IMPORTANT);
         }
+        final String content = form.getContent().replaceAll("\"", "\\\"");
+        System.out.println(content);
+        final Set<String> keyWords = postKeyWordsFeignClient.getKeyWords(content);
+        post.setKeywords(keyWords);
         post = postRepository.save(post);
         jobRunner.addNewPostNotification(null, post);
         return post;

@@ -10,6 +10,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Iskander Valiev
@@ -55,4 +56,9 @@ public class Post extends AbstractEntity {
 
     @OneToMany(mappedBy = "post")
     private List<PostLike> likes;
+
+    @ElementCollection
+    @CollectionTable(name = "post_keywords_table", joinColumns = @JoinColumn(name = "post_id"))
+    @Column(name = "keywords")
+    private Set<String> keywords;
 }

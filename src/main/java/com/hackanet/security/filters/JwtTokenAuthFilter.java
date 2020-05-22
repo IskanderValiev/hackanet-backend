@@ -37,7 +37,6 @@ public class JwtTokenAuthFilter implements Filter {
         String authorizationHeader = request.getHeader("Authorization");
         JwtTokenAuthentication authentication;
 
-
         SecurityContext context = SecurityContextHolder.getContext();
         if (authorizationHeader == null) {
             authentication = new JwtTokenAuthentication(null);
