@@ -34,6 +34,7 @@ public class ChatMessageRestController {
 
     @Autowired
     private ChatMessageServiceElasticsearchImpl messageServiceElasticsearch;
+
     @Autowired
     private MessageMapper messageMapper;
 

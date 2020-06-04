@@ -44,6 +44,6 @@ public class VKUniversityAPIServiceImpl implements UniversityService {
         } catch (IOException e) {
             throw new BadRequestException(e.getMessage());
         }
-        return null;
+        return new VkUniversityResponse();
     }
 }

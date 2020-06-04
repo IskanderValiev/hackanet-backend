@@ -9,4 +9,5 @@ public interface MessageRepository extends ElasticsearchRepository<Message, Stri
     List<Message> findAllByChatIdOrderByDatetime(Long chatId);
     List<Message> findAllByChatId(Long chatId);
     List<Message> findAllByReplyTo(String id);
+    Message findByChatIdOrderByDatetimeDesc();
 }

@@ -18,6 +18,6 @@ public class HackathonRegistrationDateValidator {
         checkArgument(hackathon.getRegistrationStartDate().isBefore(LocalDateTime.now()), "Registration for the hackathon has not started yet");
 
         Date now = new Date(System.currentTimeMillis());
-        checkArgument(now.after(hackathon.getStartDate()), "Hackathon has already started or passed");
+        checkArgument(now.before(hackathon.getStartDate()), "Hackathon has already started or passed");
     }
 }

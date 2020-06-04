@@ -279,11 +279,14 @@ public class TeamServiceImpl implements TeamService {
             predicates.add(join.getOn());
         }
         Join<Team, TeamMember> teamParticipantsJoin = root.join("members", JoinType.INNER);
-        predicates.add(criteriaBuilder.not(teamParticipantsJoin.get("team").in(getTeamsByUser(user.getId(), null)
+        final List<Long> userTeams = getTeamsByUser(user.getId(), null)
                 .stream()
                 .mapToLong(Team::getId)
                 .boxed()
-                .collect(Collectors.toList()))));
+                .collect(Collectors.toList());
+        if (userTeams != null && !userTeams.isEmpty()) {
+            predicates.add(criteriaBuilder.not(teamParticipantsJoin.get("team").in(userTeams)));
+        }
         Join<TeamMember, Skill> teamMemberSkillJoin = teamParticipantsJoin.join("skills", JoinType.INNER);
         predicates.add(teamMemberSkillJoin.get("id").in(skillsIds));
         query.distinct(true);
@@ -348,6 +351,7 @@ public class TeamServiceImpl implements TeamService {
                 .skillsLookingFor(skillService.getByIds(skillsLookingForIds))
                 .teamType(form.getTeamType())
                 .relevant(true)
+                .lookingForHackers(true)
                 .build();
         if (TeamType.HACKATHON.equals(form.getTeamType())) {
             if (form.getHackathonId() == null) {

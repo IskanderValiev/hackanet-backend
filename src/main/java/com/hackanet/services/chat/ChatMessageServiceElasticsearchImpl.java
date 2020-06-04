@@ -10,6 +10,7 @@ import com.hackanet.models.chat.Chat;
 import com.hackanet.models.chat.Message;
 import com.hackanet.models.enums.LocalMessageText;
 import com.hackanet.repositories.chat.MessageRepository;
+import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.FileInfoService;
 import com.hackanet.services.user.UserService;
 import com.hackanet.services.scheduler.JobRunner;
@@ -21,12 +22,12 @@ import org.springframework.data.elasticsearch.core.query.SimpleField;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.hackanet.security.utils.SecurityUtils.checkChatAccess;
 import static com.hackanet.utils.StringUtils.generateRandomString;
 import static com.hackanet.utils.StringUtils.isPhrase;
 
@@ -108,10 +109,9 @@ public class ChatMessageServiceElasticsearchImpl {
         }
         Criteria chatCriteria;
         User user = userService.get(form.getUserId());
-        // TODO: 10/30/19 optimize
         if (form.getChatId() != null) {
             Chat chat = chatService.get(form.getChatId());
-            checkChatAccess(chat, user);
+            SecurityUtils.checkChatAccess(chat, user);
             chatCriteria = Criteria.where(new SimpleField("chatId")).is(form.getChatId());
         } else {
             List<Chat> chats = chatService.getByUser(user);
@@ -142,5 +142,9 @@ public class ChatMessageServiceElasticsearchImpl {
 
     public List<Message> getReplies(String id) {
         return messageRepository.findAllByReplyTo(id);
+    }
+
+    public Message getLastMessageByChatId(Long chatId) {
+        return null;
     }
 }

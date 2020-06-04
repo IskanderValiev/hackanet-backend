@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
@@ -124,37 +125,38 @@ public class SkillCombinationServiceImpl implements SkillCombinationService {
         member.getSkills().forEach(skill ->
                 team.getMembers().stream()
                         .filter(m -> !m.equals(member))
-                        .forEach(m ->
-                                m.getSkills().forEach(ops -> {
-                                    if (!skill.equals(ops)) {
-                                        createIfNotExistsAndIncreaseCount(skill.getId(), ops.getId());
-                                        createIfNotExistsAndIncreaseCount(ops.getId(), skill.getId());
-                                    }
-                                })
+                        .map(TeamMember::getSkills)
+                        .forEach(teamMemberSkill ->
+                                teamMemberSkill.stream()
+                                        .filter(s -> !skill.equals(s))
+                                        .forEach(ops -> {
+                                            createIfNotExistsAndIncreaseCount(skill.getId(), ops.getId());
+                                            createIfNotExistsAndIncreaseCount(ops.getId(), skill.getId());
+                                        })
                         )
         );
     }
 
     private void createIfNotExistsAndIncreaseCount(Long skill, Long skillUsedWith) {
-        SkillCombination combination = skillCombinationRepository.findBySkillIdAndSkillUsedWith(skill, skillUsedWith);
-        if (combination == null) {
-            combination = SkillCombination.builder()
-                    .skillId(skill)
-                    .skillUsedWith(skillUsedWith)
-                    .countOfCombination(1L)
-                    .build();
-        } else {
-            combination.setCountOfCombination(combination.getCountOfCombination() + 1);
-        }
-        skillCombinationRepository.save(combination);
+        final Optional<SkillCombination> optionalCombination =
+                skillCombinationRepository.findBySkillIdAndSkillUsedWith(skill, skillUsedWith);
+        final SkillCombination skillCombination = optionalCombination.orElse(SkillCombination.builder()
+                .skillId(skill)
+                .skillUsedWith(skillUsedWith)
+                .countOfCombination(0L)
+                .build());
+        skillCombination.setCountOfCombination(skillCombination.getCountOfCombination() + 1);
+        skillCombinationRepository.save(skillCombination);
     }
 
     private void decreaseCount(Long skill, Long skillUsedWith) {
-        SkillCombination combination = skillCombinationRepository.findBySkillIdAndSkillUsedWith(skill, skillUsedWith);
-        if (combination == null) {
+        final Optional<SkillCombination> optionalCombination = skillCombinationRepository.findBySkillIdAndSkillUsedWith(skill, skillUsedWith);
+        if (!optionalCombination.isPresent()) {
             return;
         }
-        combination.setCountOfCombination(combination.getCountOfCombination() - 1);
+        final SkillCombination combination = optionalCombination.get();
+        combination.setCountOfCombination(combination.getCountOfCombination() == 0 ?
+                0 : combination.getCountOfCombination() - 1);
         skillCombinationRepository.save(combination);
     }
 }

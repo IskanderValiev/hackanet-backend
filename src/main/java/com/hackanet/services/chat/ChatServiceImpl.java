@@ -9,14 +9,13 @@ import com.hackanet.models.enums.ChatType;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.user.User;
 import com.hackanet.repositories.chat.ChatRepository;
+import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-
-import static com.hackanet.security.utils.SecurityUtils.checkChatAccessForOperation;
 
 /**
  * @author Iskander Valiev
@@ -38,8 +37,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public Chat create(ChatCreateForm form, User currentUser) {
         if (form.getParticipantsIds() == null) {
-            form.setParticipantsIds(Lists.newArrayList());
-            form.getParticipantsIds().add(currentUser.getId());
+            form.setParticipantsIds(Collections.singletonList(currentUser.getId()));
         } else if (form.getParticipantsIds().isEmpty()) {
             form.getParticipantsIds().add(currentUser.getId());
         }
@@ -65,16 +63,14 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public Chat addOrRemoveUser(Long chatId, Long userId, User currentUser, Boolean add) {
         Chat chat = get(chatId);
-        // any participant can add and remove user from chat
         if (currentUser != null) {
-            checkChatAccessForOperation(chat, currentUser);
+            SecurityUtils.checkChatAccessForOperation(chat, currentUser);
         }
         User user = userService.get(userId);
         Set<User> participants = chat.getParticipants();
         if (Boolean.TRUE.equals(add)) {
             participants.add(user);
         } else {
-            // TODO: 10/27/19 pick up a new admin if user who created the chat has leaved
             participants.remove(user);
         }
         chat.setParticipants(participants);
@@ -86,7 +82,7 @@ public class ChatServiceImpl implements ChatService {
     public Chat addOrRemoveListOfUsers(Long chatId, List<User> users, User currentUser, Boolean add) {
         Chat chat = get(chatId);
         if (currentUser != null) {
-            checkChatAccessForOperation(chat, currentUser);
+            SecurityUtils.checkChatAccessForOperation(chat, currentUser);
         }
 
         Set<User> participants = chat.getParticipants();
