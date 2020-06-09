@@ -31,9 +31,6 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private JavaMailSender javaMailSender;
 
-    @Autowired
-    private UserService userService;
-
     private ExecutorService executorService = Executors.newCachedThreadPool();
 
     @Override

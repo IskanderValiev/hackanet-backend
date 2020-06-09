@@ -19,7 +19,6 @@ import java.util.*;
  * created by isko
  * on 10/18/19
  */
-@ToString
 @EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter

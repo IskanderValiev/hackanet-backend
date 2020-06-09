@@ -24,9 +24,7 @@ import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.EmailService;
 import com.hackanet.services.FileInfoService;
 import com.hackanet.services.PortfolioService;
-import com.hackanet.services.skill.SkillCombinationService;
 import com.hackanet.services.skill.SkillService;
-import com.hackanet.services.team.TeamMemberService;
 import com.hackanet.utils.RandomString;
 import com.hackanet.utils.validators.UserUpdateFormValidator;
 import lombok.extern.slf4j.Slf4j;
@@ -272,6 +270,7 @@ public class UserServiceImpl implements UserService {
         user = get(user.getId());
         user.setLastRequestTime(LocalDateTime.now());
         userRepository.save(user);
+        log.info("The last request time has been updated");
     }
 
     @Override

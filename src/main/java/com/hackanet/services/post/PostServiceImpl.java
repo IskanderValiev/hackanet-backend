@@ -3,14 +3,14 @@ package com.hackanet.services.post;
 import com.hackanet.application.AppConstants;
 import com.hackanet.exceptions.CensorViolationException;
 import com.hackanet.exceptions.NotFoundException;
-import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.json.forms.PostCreateForm;
 import com.hackanet.json.forms.PostSearchForm;
 import com.hackanet.json.forms.PostUpdateForm;
+import com.hackanet.models.enums.PostImportance;
+import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.post.Post;
 import com.hackanet.models.post.PostLike;
 import com.hackanet.models.user.User;
-import com.hackanet.models.enums.PostImportance;
 import com.hackanet.repositories.post.PostRepository;
 import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.FileInfoService;
@@ -86,7 +86,6 @@ public class PostServiceImpl implements PostService {
             post.setImportance(PostImportance.NOT_IMPORTANT);
         }
         final String content = form.getContent().replaceAll("\"", "\\\"");
-        System.out.println(content);
         final Set<String> keyWords = postKeyWordsFeignClient.getKeyWords(content);
         post.setKeywords(keyWords);
         post = postRepository.save(post);

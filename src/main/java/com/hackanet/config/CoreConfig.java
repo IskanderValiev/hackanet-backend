@@ -8,12 +8,12 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
+import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -29,11 +29,6 @@ import java.util.Properties;
  */
 @Configuration
 public class CoreConfig {
-
-    @Bean
-    public PasswordEncoder encoder() {
-        return new BCryptPasswordEncoder();
-    }
 
     @Bean(name = "mailFreemarkerConfigurer")
     public FreeMarkerConfigurationFactory freemarkerConfig() throws IOException, TemplateException {
@@ -52,13 +47,12 @@ public class CoreConfig {
     }
 
     /*
-    *
-    * The bean registers custom filter
-    *
-    * */
+     *
+     * The bean registers custom filter
+     *
+     * */
     @Bean
     public FilterRegistrationBean<CORSFilter> someFilterRegistration() {
-
         FilterRegistrationBean<CORSFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new CORSFilter());
         registration.addUrlPatterns("/hackanet/**");
@@ -90,4 +84,11 @@ public class CoreConfig {
                 .setSSLSocketFactory(sslConnectionSocketFactory)
                 .build();
     }
+
+    @Bean
+    @ConditionalOnMissingBean(value = RestTemplate.class)
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
 }

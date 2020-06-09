@@ -15,6 +15,6 @@ import java.util.Set;
 // name - name of the service we want to send a request to
 @FeignClient(name = "hackanet-post-recommendation-system")
 public interface PostKeyWordsFeignClient {
-    @GetMapping(value = "/keywords")
+    @GetMapping(value = "/content/handler/keywords")
     Set<String> getKeyWords(@RequestParam String content);
 }
