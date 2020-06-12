@@ -30,11 +30,6 @@ import java.util.Properties;
 @Configuration
 public class CoreConfig {
 
-    @Bean
-    public PasswordEncoder encoder() {
-        return new BCryptPasswordEncoder();
-    }
-
     @Bean(name = "mailFreemarkerConfigurer")
     public FreeMarkerConfigurationFactory freemarkerConfig() throws IOException, TemplateException {
         FreeMarkerConfigurationFactory configurationFactory = new FreeMarkerConfigurationFactory();

@@ -19,12 +19,11 @@ public abstract class AbstractEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    protected Long id;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        System.out.println(o.getClass().getName() + " -- " + getClass().getName());
         if (o == null || getClass() != o.getClass()) return false;
         AbstractEntity that = (AbstractEntity) o;
         return Objects.equal(id, that.id);

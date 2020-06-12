@@ -1,5 +1,6 @@
 package com.hackanet.services.user;
 
+import com.hackanet.exceptions.AlreadyExistsException;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.UserReviewCreateForm;
@@ -45,7 +46,7 @@ public class UserReviewServiceImpl implements UserReviewService {
     public UserReview createReview(User user, UserReviewCreateForm form) {
         boolean reviewExists = userReviewRepository.existsByUserIdAndReviewedUserIdAndTeamId(user.getId(), form.getReviewedUserId(), form.getTeamId());
         if (reviewExists) {
-            throw new BadRequestException("You have left a review about this user");
+            throw new AlreadyExistsException("Current user has already left a review about this user");
         }
         Team team = teamService.get(form.getTeamId());
         User reviewedUser = userService.get(form.getReviewedUserId());
@@ -83,6 +84,7 @@ public class UserReviewServiceImpl implements UserReviewService {
     }
 
     @Override
+    @Transactional
     public void delete(User user, Long reviewId) {
         UserReview userReview = get(reviewId);
         checkUserReviewAccess(userReview, user);

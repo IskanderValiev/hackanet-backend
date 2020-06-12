@@ -1,6 +1,6 @@
 package com.hackanet.services.user;
 
-import com.hackanet.exceptions.AlreadyExistException;
+import com.hackanet.exceptions.AlreadyExistsException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.models.user.Position;
 import com.hackanet.repositories.user.PositionRepository;
@@ -67,7 +67,7 @@ public class PositionServiceImpl implements PositionService {
 
     private void checkIfExists(String name) {
         getByName(name)
-                .ifPresent((position) -> AlreadyExistException.throwException(position.getClass(), "name", name));
+                .ifPresent((position) -> AlreadyExistsException.throwException(position.getClass(), "name", name));
     }
 
     private Optional<Position> getByName(String name) {

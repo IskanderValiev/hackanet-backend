@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.hackanet.application.AppConstants;
-import com.hackanet.exceptions.AlreadyExistException;
+import com.hackanet.exceptions.AlreadyExistsException;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.dto.TokenDto;
@@ -24,9 +24,7 @@ import com.hackanet.security.utils.SecurityUtils;
 import com.hackanet.services.EmailService;
 import com.hackanet.services.FileInfoService;
 import com.hackanet.services.PortfolioService;
-import com.hackanet.services.skill.SkillCombinationService;
 import com.hackanet.services.skill.SkillService;
-import com.hackanet.services.team.TeamMemberService;
 import com.hackanet.utils.RandomString;
 import com.hackanet.utils.validators.UserUpdateFormValidator;
 import lombok.extern.slf4j.Slf4j;
@@ -290,7 +288,7 @@ public class UserServiceImpl implements UserService {
         userRepository.findByNickname(nickname)
                 .ifPresent((user) -> {
                     if (!currentUser.equals(user)) {
-                        AlreadyExistException.throwException(user.getClass(), "nickname", nickname);
+                        AlreadyExistsException.throwException(user.getClass(), "nickname", nickname);
                     }
                 });
     }

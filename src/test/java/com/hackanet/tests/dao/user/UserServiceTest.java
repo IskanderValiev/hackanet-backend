@@ -1,5 +1,6 @@
-package com.hackanet.tests;
+package com.hackanet.tests.dao.user;
 
+import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.json.dto.TokenDto;
 import com.hackanet.json.forms.UserLoginForm;
 import com.hackanet.json.forms.UserRegistrationForm;
@@ -9,10 +10,13 @@ import com.hackanet.models.user.UserToken;
 import com.hackanet.repositories.user.UserRepository;
 import com.hackanet.repositories.user.UserTokenRepository;
 import com.hackanet.security.enums.Role;
+import com.hackanet.security.utils.PasswordUtil;
 import com.hackanet.services.PortfolioService;
 import com.hackanet.services.user.UserNotificationSettingsService;
 import com.hackanet.services.user.UserServiceImpl;
 import com.hackanet.services.user.UserTokenService;
+import com.hackanet.tests.dao.AbstractDaoTest;
+import com.hackanet.tests.dao.TestEntityCreator;
 import com.hackanet.utils.DateTimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -37,6 +41,9 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 /**
  * @author Iskander Valiev
  * created by isko
@@ -46,8 +53,6 @@ import java.util.stream.Stream;
 @Slf4j
 public class UserServiceTest extends AbstractDaoTest {
 
-    @MockBean
-    private UserRepository userRepository;
 
     @MockBean
     private UserTokenService userTokenService;
@@ -65,24 +70,35 @@ public class UserServiceTest extends AbstractDaoTest {
     @MockBean
     private PortfolioService portfolioService;
 
+    @MockBean
+    private PasswordUtil passwordUtil;
+
+    @Autowired
+    private UserRepository userRepository;
+
     @Autowired
     private EntityManager entityManager;
 
     @Autowired
     private UserServiceImpl userService;
 
-    private JdbcTemplate jdbcTemplate;
-
     private static boolean dbInitialized = false;
 
+    @Override
     @Before
     public void init() {
         if (!dbInitialized) {
             jdbcTemplate = new JdbcTemplate(dataSource);
-            executeScripts(applicationContext.getResource("classpath:/file_info_data.sql"));
+            executeScripts("file_info_data");
             log.info("database initializing");
         }
         dbInitialized = true;
+    }
+
+    @Override
+    protected void prepareDatabase() {
+        jdbcTemplate.update("delete from users");
+        executeScripts("user_data");
     }
 
     @Test
@@ -94,66 +110,64 @@ public class UserServiceTest extends AbstractDaoTest {
         //based on the form above, a user is created
         final User user = getUser(registrationForm);
         final TokenDto tokenDto = getToken(user);
-        //imitating the proper work of user repository
-        BDDMockito.given(userRepository.save(user)).willReturn(user);
+        //imitating the proper work of password utils and user token service
+        BDDMockito.given(passwordUtil.hash(registrationForm.getPassword())).willReturn(registrationForm.getPassword());
         BDDMockito.given(userTokenService.getTokenByUser(user)).willReturn(tokenDto);
         //checking if the given userId equals the user's id that has been created above
-        Assertions.assertThat(userService.register(registrationForm).getUserId().equals(user.getId()));
+        assertEquals(userService.register(registrationForm).getUserId(), user.getId());
+        //querying for the user with specific email
+        final List<Long> result = jdbcTemplate.queryForList("select users.id from users where email = '" + registrationForm.getEmail() + "';", Long.class);
+        //assert if the user exists
+        assertEquals(1, result.size());
+        //assert if the user id equals to result's user id
+        assertEquals(user.getId(), result.get(0));
+        //assert if the method of registration is thrown when inserting user with the email that already exists in database
+        org.junit.jupiter.api.Assertions.assertThrows(BadRequestException.class, () -> userService.register(registrationForm));
     }
 
     @Test
     public void loginTest() {
-        executeScripts(applicationContext.getResource("classpath:/user_data.sql"));
+        prepareDatabase();
         final UserLoginForm userLoginForm = new UserLoginForm();
         userLoginForm.setEmail("test1@gmail.com");
-        userLoginForm.setPassword("qwerty123");
+        userLoginForm.setPassword("test_password1");
         User user = getUser(userLoginForm);
         TokenDto tokenDto = getToken(user);
         UserToken userToken = getUserToken(user);
-        BDDMockito.given(userRepository.findByEmail(userLoginForm.getEmail())).willReturn(Optional.of(user));
-        BDDMockito.given(encoder.matches(userLoginForm.getPassword(), user.getHashedPassword())).willReturn(true);
+        BDDMockito.given(passwordUtil.matches(userLoginForm.getPassword(), user.getHashedPassword())).willReturn(true);
         BDDMockito.given(userTokenRepository.findByUserId(user.getId())).willReturn(userToken);
         BDDMockito.given(userTokenService.buildTokenDtoByUser(user, userToken)).willReturn(tokenDto);
         TokenDto actualResult = userService.login(userLoginForm);
-        Assertions.assertThat(actualResult.getUserId().equals(tokenDto.getUserId()));
+        assertEquals(actualResult.getUserId(), tokenDto.getUserId());
     }
 
     @Test
     public void getByIdsTest() {
-        final Set<User> users = LongStream.range(1, 4)
-                .mapToObj(id -> {
-                    final User user = User.builder().name("test" + id).email("email" + id + "@gmail.com").build();
-                    user.setId(id);
-                    return user;
-                })
-                .collect(Collectors.toSet());
-        final List<Long> ids = Stream.of(1L, 2L, 3L).collect(Collectors.toList());
-        BDDMockito.given(userRepository.findAllByIdIn(ids)).willReturn(users);
-        final Set<User> actual = userService.getByIds(ids);
-        Assertions.assertThat(actual.size() == users.size());
-        List<User> usersList = new ArrayList<>(users);
-        final List<User> orderedActual = actual.stream()
+        prepareDatabase();
+        final List<User> users = LongStream.range(1, 4)
+                .mapToObj(TestEntityCreator::getUser)
                 .sorted(Comparator.comparing(User::getId))
                 .collect(Collectors.toList());
-        LongStream.range(1, 4)
-                .forEach(id -> {
-                    final User user = usersList.get((int) (id - 1));
-                    final User actualUser = orderedActual.get((int) (id - 1));
-                    Assertions.assertThat(user.getEmail().equals(actualUser.getEmail()));
-                    Assertions.assertThat(user.getName().equals(actualUser.getName()));
-                    Assertions.assertThat(user.getId().equals(actualUser.getId()));
-                });
+        final List<Long> ids = Stream.of(1L, 2L, 3L).collect(Collectors.toList());
+        final List<User> actual = userService.getByIds(ids).stream()
+                .sorted(Comparator.comparing(User::getId))
+                .collect(Collectors.toList());
+        Assertions.assertThat(actual.size() == users.size());
+        users.forEach(u -> {
+            final User user = actual.get(u.getId().intValue() - 1);
+            assertEquals(u.getEmail(), user.getEmail());
+            assertEquals(u.getName(), user.getName());
+            assertEquals(u.getId(), user.getId());
+        });
     }
 
     @Test
     public void userListTest() {
+        prepareDatabase();
         UserSearchForm form = new UserSearchForm();
-        form.setEmail("test1@gmail.com");
         form.setName("test1");
-        final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        final CriteriaQuery<User> criteriaQuery = ReflectionTestUtils.invokeMethod(userService, "getUsersListQuery", criteriaBuilder, form);
-        final TypedQuery<User> query = entityManager.createQuery(criteriaQuery);
-        Assertions.assertThat(query.getResultList().size() == 1);
+        final List<User> actual = userService.userList(form);
+        assertEquals(actual.size(), 1);
     }
 
     @After

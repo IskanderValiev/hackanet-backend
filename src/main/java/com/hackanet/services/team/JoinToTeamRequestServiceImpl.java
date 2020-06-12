@@ -1,6 +1,6 @@
 package com.hackanet.services.team;
 
-import com.hackanet.exceptions.AlreadyExistException;
+import com.hackanet.exceptions.AlreadyExistsException;
 import com.hackanet.exceptions.BadRequestException;
 import com.hackanet.exceptions.NotFoundException;
 import com.hackanet.json.forms.JoinToTeamRequestCreateForm;
@@ -98,7 +98,7 @@ public class JoinToTeamRequestServiceImpl implements JoinToTeamRequestService {
         if (JoinToTeamRequestStatus.APPROVED.equals(status)) {
             final boolean containsUser = teamService.teamContainsUser(team, userFromRequest.getId());
             if (containsUser) {
-                throw new AlreadyExistException("The user is already in team");
+                throw new AlreadyExistsException("The user is already in team");
             }
             teamMemberService.addTeamMember(userFromRequest, team);
             chatService.addOrRemoveUser(team.getChat().getId(), userFromRequest.getId(), null, true);

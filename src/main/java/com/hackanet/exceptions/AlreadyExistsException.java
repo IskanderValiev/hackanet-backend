@@ -8,18 +8,18 @@ import lombok.extern.slf4j.Slf4j;
  * on 4/7/20
  */
 @Slf4j
-public class AlreadyExistException extends RuntimeException {
+public class AlreadyExistsException extends RuntimeException {
 
-    public AlreadyExistException() {
+    public AlreadyExistsException() {
         log.error(this.getClass().getName() + " has been thrown.");
     }
 
-    public AlreadyExistException(String message) {
+    public AlreadyExistsException(String message) {
         super(message);
         log.error(this.getClass().getName() + ": " + message);
     }
 
     public static void throwException(Class<?> aClass, String paramName, String value) {
-        throw new AlreadyExistException(aClass.getName() + " with " + paramName + " = " + value + " already exists");
+        throw new AlreadyExistsException(aClass.getName() + " with " + paramName + " = " + value + " already exists");
     }
 }
