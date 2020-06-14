@@ -22,6 +22,9 @@ public class BlockedUserServiceImpl implements BlockedUserService {
     @Override
     public boolean isBlocked(User user) {
         final Optional<BlockedUser> blockedUser = blockedUserRepository.findByUserId(user.getId());
+        if (!blockedUser.isPresent()) {
+            return false;
+        }
         return blockedUser
                 .filter(value -> Boolean.FALSE.equals(value.getCanceled()))
                 .isPresent();

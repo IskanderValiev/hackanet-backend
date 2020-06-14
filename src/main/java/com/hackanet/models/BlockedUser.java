@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
  * created by isko
  * on 4/13/20
  */
+@EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
 @AllArgsConstructor
@@ -34,6 +35,7 @@ public class BlockedUser extends AbstractEntity {
     private LocalDateTime blockTime = LocalDateTime.now();
 
     @Column(name = "block_initiator", nullable = false)
+    @Enumerated(EnumType.STRING)
     private BlockInitiator blockInitiator = BlockInitiator.SYSTEM;
 
     @Column(name = "message")

@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface BlockedUserRepository extends JpaRepository<BlockedUser, Long> {
     Optional<BlockedUser> findByUserId(Long id);
+    Optional<BlockedUser> findByUserIdAndCanceled(long userId, boolean canceled);
 }

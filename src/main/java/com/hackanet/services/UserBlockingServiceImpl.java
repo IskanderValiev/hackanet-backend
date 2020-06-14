@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
  * on 4/14/20
  */
 @Service
-public class UserBlockingBlockingServiceImpl implements UserBlockingService {
+public class UserBlockingServiceImpl implements UserBlockingService {
 
     @Autowired
     private BlockedUserRepository blockedUserRepository;
@@ -28,13 +28,16 @@ public class UserBlockingBlockingServiceImpl implements UserBlockingService {
 
     @Override
     public BlockedUser block(@NotNull Long userId, BlockInitiator initiator, @NotNull BlockReason reason) {
-        BlockedUser blockedUser = BlockedUser.builder()
-                .blockInitiator(initiator == null ? BlockInitiator.SYSTEM : initiator)
-                .blockReason(reason)
-                .user(userService.get(userId))
-                .blockTime(LocalDateTime.now())
-                .canceled(false)
-                .build();
+        final BlockedUser blockedUser = blockedUserRepository.findByUserIdAndCanceled(userId, false)
+                .orElse(
+                        BlockedUser.builder()
+                                .blockInitiator(initiator == null ? BlockInitiator.SYSTEM : initiator)
+                                .blockReason(reason)
+                                .user(userService.get(userId))
+                                .blockTime(LocalDateTime.now())
+                                .canceled(false)
+                                .build()
+                );
         return blockedUserRepository.save(blockedUser);
     }
 

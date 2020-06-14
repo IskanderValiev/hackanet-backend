@@ -2,6 +2,9 @@ package com.hackanet.tests.dao;
 
 import com.hackanet.json.forms.UserNotificationSettingsUpdateForm;
 import com.hackanet.json.forms.UserPhoneTokenAddForm;
+import com.hackanet.models.BlockedUser;
+import com.hackanet.models.enums.BlockInitiator;
+import com.hackanet.models.enums.BlockReason;
 import com.hackanet.models.enums.Currency;
 import com.hackanet.models.enums.TeamType;
 import com.hackanet.models.hackathon.Hackathon;
@@ -12,6 +15,7 @@ import com.hackanet.security.enums.Role;
 import org.apache.commons.lang.StringUtils;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -136,5 +140,17 @@ public class TestEntityCreator {
                 .build();
         token.setId(id);
         return token;
+    }
+
+    public static BlockedUser getBlockedUser(Long id, Long userId, BlockInitiator initiator, BlockReason reason) {
+        BlockedUser blockedUser = BlockedUser.builder()
+                .user(getUser(userId))
+                .blockInitiator(initiator)
+                .blockReason(reason)
+                .blockTime(LocalDateTime.now())
+                .canceled(false)
+                .build();
+        blockedUser.setId(id);
+        return blockedUser;
     }
 }
