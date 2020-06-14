@@ -18,6 +18,7 @@ public class UserPhoneTokenServiceImpl implements UserPhoneTokenService {
 
     @Autowired
     private UserPhoneTokenRepository userPhoneTokenRepository;
+
     @Autowired
     private UserService userService;
 

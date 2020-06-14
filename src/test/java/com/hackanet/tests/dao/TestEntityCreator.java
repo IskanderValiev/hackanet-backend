@@ -1,15 +1,13 @@
 package com.hackanet.tests.dao;
 
 import com.hackanet.json.forms.UserNotificationSettingsUpdateForm;
+import com.hackanet.json.forms.UserPhoneTokenAddForm;
 import com.hackanet.models.enums.Currency;
 import com.hackanet.models.enums.TeamType;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.team.Team;
 import com.hackanet.models.team.TeamMember;
-import com.hackanet.models.user.Position;
-import com.hackanet.models.user.User;
-import com.hackanet.models.user.UserNotificationSettings;
-import com.hackanet.models.user.UserReview;
+import com.hackanet.models.user.*;
 import com.hackanet.security.enums.Role;
 import org.apache.commons.lang.StringUtils;
 
@@ -127,5 +125,16 @@ public class TestEntityCreator {
                 .build();
         settings.setId(id);
         return settings;
+    }
+
+    public static UserPhoneToken getUserPhoneToken(Long id, UserPhoneTokenAddForm form) {
+        UserPhoneToken token = UserPhoneToken.builder()
+                .deviceId(form.getDeviceId())
+                .token(form.getToken())
+                .deviceType(form.getClientType())
+                .user(getUser(form.getUserId()))
+                .build();
+        token.setId(id);
+        return token;
     }
 }

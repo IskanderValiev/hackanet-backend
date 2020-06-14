@@ -11,6 +11,7 @@ import javax.persistence.*;
  * created by isko
  * on 10/30/19
  */
+@EqualsAndHashCode
 @Builder
 @Getter
 @Setter
@@ -23,13 +24,17 @@ import javax.persistence.*;
                         + "deviceType" + ", "
                         + "deviceId", unique = true)})
 public class UserPhoneToken extends AbstractEntity {
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
     @Enumerated(EnumType.STRING)
     private ClientType deviceType;
+
     @Column(nullable = false, length = 500)
     private String token;
+
     @Column(nullable = false, length = 500)
     private String deviceId;
 }
