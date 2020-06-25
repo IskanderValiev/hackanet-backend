@@ -102,7 +102,7 @@ public class User extends AbstractEntity {
             inverseJoinColumns = @JoinColumn(name = "blocked_user_id"))
     private List<User> blockedUsers;
 
-    @Column(name = "last_request_time", nullable = false)
+    @Column(name = "last_request_time", nullable = false, columnDefinition = "TIMESTAMP DEFAULT current_timestamp()")
     private LocalDateTime lastRequestTime;
 
     @Column(name = "email_confirmed", nullable = false, columnDefinition = "boolean DEFAULT false")

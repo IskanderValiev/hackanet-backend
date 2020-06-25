@@ -86,6 +86,7 @@ public class ConnectionServiceImpl implements ConnectionService {
 
     @Override
     @Cacheable(key = "#user.id", value = "connections-suggestions")
+    @SuppressWarnings("unchecked")
     public Set<User> getConnectionsSuggestions(User user) {
         String query = "select us.* from users us where us.id in (select cn.connection_id from connections cn where cn.user_id in (select c.connection_id from connections c where c.user_id = :id))";
         Query nativeQuery = entityManager

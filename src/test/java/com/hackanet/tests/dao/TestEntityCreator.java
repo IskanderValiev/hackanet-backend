@@ -3,10 +3,8 @@ package com.hackanet.tests.dao;
 import com.hackanet.json.forms.UserNotificationSettingsUpdateForm;
 import com.hackanet.json.forms.UserPhoneTokenAddForm;
 import com.hackanet.models.BlockedUser;
-import com.hackanet.models.enums.BlockInitiator;
-import com.hackanet.models.enums.BlockReason;
-import com.hackanet.models.enums.Currency;
-import com.hackanet.models.enums.TeamType;
+import com.hackanet.models.ConnectionInvitation;
+import com.hackanet.models.enums.*;
 import com.hackanet.models.hackathon.Hackathon;
 import com.hackanet.models.team.Team;
 import com.hackanet.models.team.TeamMember;
@@ -37,6 +35,7 @@ public class TestEntityCreator {
                 .emailConfirmed(true)
                 .hashedPassword("test_password" + id)
                 .role(Role.USER)
+                .lastRequestTime(LocalDateTime.now())
                 .build();
         user.setId(id);
         return user;
@@ -152,5 +151,15 @@ public class TestEntityCreator {
                 .build();
         blockedUser.setId(id);
         return blockedUser;
+    }
+
+    public static ConnectionInvitation getConnectionInvitation(Long id, User user, User userToInvite) {
+        ConnectionInvitation connectionInvitation = ConnectionInvitation.builder()
+                .user(user)
+                .invitedUser(userToInvite)
+                .status(ConnectionInvitationStatus.NEW)
+                .build();
+        connectionInvitation.setId(id);
+        return connectionInvitation;
     }
 }
